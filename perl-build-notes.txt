@@ -1,0 +1,122 @@
+Notes on building my own perl on OS X 10.6 capella:
+
+Source distributions can be found off of:
+http://www.cpan.org/src/README.html
+
+capella-> ./Configure -des -Dprefix=/usr/local/perls/perl-5.12.4
+
+set the prefix; let all other defaults go through.
+This builds a 64bit perl by default.
+
+build 
+
+What is new in perl 5.10?
+  from 5.8.8 to 5.10.0
+capella-> perldoc /System/Library/Perl/5.10.0/pods/perl5100delta.pod 
+
+The "feature" pragma
+
+the feature pragma is used to enable new syntax that would break backward compatibility.
+It is a lexical pragma, like "strict" and "warnings".
+
+New features available:
+switch:   adds a switch statement
+say:      adds a say builtin function
+state:    adds a state keyword for declaring "static" variables
+
+new -E command line
+-E is equivalent to -e, but it implicitly enables all optional features
+  (just like 'use feature ":5.10"')
+
+Defined-or operator
+The new defined-or operator "//" makes the expression
+  $a // $b
+equivalent to the expression
+  defined $a ? $a : b
+and thus the statement
+  $c //= $d;
+is equivalent to
+  $c = defined $c ? $c : $d;
+or
+  $c = $d unless defined $c;
+// has the same precedence and associativity as ||.
+
+The switch and smart match operator
+
+When "use feature 'switch'" is in effect, three new keywords are available:
+
+given
+when
+default
+
+  given ($foo) {
+    when (/^abc/) { $abc = 1; }
+    when (/^def/) { $def = 1; }
+    when (/^xyz/) { $xyz = 1; }
+    default { $none_of_above = 1; }
+  }
+For more details on how perl matches the switch variable against the when conditions,
+see "Switch statements" in perlsyn.
+
+This matching is called "Smart Matching" and can be used outside of switch statements
+with the new ~~ operator.  See "Smart matching in detail" in perlsyn.
+
+There are a number of changes to regexps.
+
+say
+Just like print, but adds a newline to the end of its args.
+
+Lexical $_
+$_ can now be lexicalized by declaring it so:
+  my $_;
+
+       The operations that default on $_ will use the lexically‐scoped version
+       of $_ when it exists, instead of the global $_.
+
+       In a "map" or a "grep" block, if $_ was previously my’ed, then the $_
+       inside the block is lexical as well (and scoped to the block).
+
+       In a scope where $_ has been lexicalized, you can still have access to
+       the global version of $_ by using $::_, or, more simply, by overriding
+       the lexical declaration with "our $_". (Rafael Garcia‐Suarez)
+
+The "_" prototype
+
+       A new prototype character has been added. "_" is equivalent to "$" but
+       defaults to $_ if the corresponding argument isn’t supplied. (both "$"
+       and "_" denote a scalar).
+
+UNITCHECK blocks
+
+       "CHECK" and "INIT" blocks, while useful for some specialized purposes,
+       are always executed at the transition between the compilation and the
+       execution of the main program, and thus are useless whenever code is
+       loaded at runtime. On the other hand, "UNITCHECK" blocks are executed
+       just after the unit which defined them has been compiled. See perlmod
+       for more info.
+
+state variables
+
+       A new class of variables has been introduced. State variables are
+       similar to "my" variables, but are declared with the "state" keyword in
+       place of "my". They’re visible only in their lexical scope, but their
+       value is persistent: unlike "my" variables, they’re not undefined at
+       scope entry, but retain their previous value. (Rafael Garcia‐Suarez,
+       Nicholas Clark)
+
+       To use state variables, one needs to enable them by using
+
+           use feature 'state';
+
+       or by using the "−E" command‐line switch in one‐liners.  See
+       "Persistent variables via state()" in perlsub.
+
+stacked filetest operators
+
+       As a new form of syntactic sugar, it’s now possible to stack up
+       filetest operators. You can now write "−f −w −x $file" in a row to mean
+       "−x $file && −w _ && −f _". See "−X" in perlfunc.
+
+
+
+What is in perl 5.12?

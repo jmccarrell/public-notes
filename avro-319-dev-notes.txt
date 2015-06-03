@@ -1,0 +1,230 @@
+
+/j/proj/avro-319
+
+svn checkout http://svn.apache.org/repos/asf/avro/ .
+
+make a copy of the site stylesheet from httpd-site:
+cp /j/proj/httpd-site/trunk/xdocs/stylesheets/site.vsl /j/proj/avro-319/trunk/xdocs/stylesheets/avro.vsl
+cp /j/proj/httpd-site/trunk/xdocs/stylesheets/project.xml /j/proj/avro-319/trunk/xdocs/stylesheets
+refer to these stylesheet here
+
+add a dependency to mkdir build/docs
+  in case docs get built before code does
+make a target to remove build/docs
+
+
+----------------
+
+Thu Jul 29 18:45:21 PDT 2010
+
+proteus-> ant docs
+Buildfile: build.xml
+
+prepare:
+
+prepare-error:
+
+docs:
+   [anakia] Transforming into: /j/proj/avro-319/trunk/build/docs
+     [copy] Copied 1 empty directory to 1 empty directory under /j/proj/avro-319/trunk/build/docs
+
+BUILD SUCCESSFUL
+Total time: 0 seconds
+
+----------------
+
+Sat Aug  7 18:17:50 PDT 2010
+
+next step is to get the top level framework of the site rendering via anakia.
+
+how should the site be separated from the technical docs?
+from the source code generated docs?
+
+what did propose in the jira? {
+
+# to build the top level site docs requires:
+# a modern jvm and ant installed
+# svn checkout trunk
+# cd xdocs && ant docs
+# source: xdocs; target: build/docs
+  * anakia/velocity jar(s) checked into svn
+
+so that means these sets of files:
+
+proteus-> find site/author/content/xdocs -type f | grep -v .svn
+site/author/content/xdocs/credits.xml
+site/author/content/xdocs/index.xml
+site/author/content/xdocs/irc.xml
+site/author/content/xdocs/issue_tracking.xml
+site/author/content/xdocs/mailing_lists.xml
+site/author/content/xdocs/releases.xml
+site/author/content/xdocs/site.xml
+site/author/content/xdocs/tabs.xml
+site/author/content/xdocs/version_control.xml
+
+proteus-> find trunk/doc -type f | grep -v .svn
+trunk/doc/build.xml
+trunk/doc/src/content/xdocs/idl.xml
+trunk/doc/src/content/xdocs/index.xml
+trunk/doc/src/content/xdocs/site.xml
+trunk/doc/src/content/xdocs/spec.xml
+trunk/doc/src/content/xdocs/tabs.xml
+trunk/doc/src/resources/images/avro-logo.png
+trunk/doc/src/resources/images/favicon.ico
+trunk/doc/src/resources/images/hadoop-logo.jpg
+trunk/doc/src/skinconf.xml
+}
+
+What does anakia use for the top level file? projects.xml?
+                projectFile="stylesheets/project.xml"
+
+What is the analog in avro?
+  site/author/content/xdocs/site.xml
+
+What httpd-site file contains the top level page?
+  trunk/xdocs/index.xml
+
+What are the formatting choices I have inside an anakia xml file?
+  See examples from the anakia site.
+  looks like lists are done using plain ole html <ol><li> ...
+
+I want to get the avro and hadoop images banner into the web site
+  so I need to change the template
+  where is
+    images/httpd_logo_wide
+  referenced from in httpd-site?
+
+----------------------------------------------------------------
+
+break down the sub project support in the httpd site vsl file
+  we don't need it
+  Welcome! - The Apache HTTPD Server Project
+  vs
+  Apache HTTPD Request Library - The Apache HTTPD Server Project
+  but I suppose avro could be considered a sub project of Hadoop.
+
+ask in the jira if people want the sub project aspect of Hadoop -> Avro
+
+Make it so: Hadoop / Avro
+
+----------------
+
+figure out what the velocity.log errors are all about:
+  look at httpd-site's velocity.log to see what it says when building the site
+  
+build libapreq's top level site to follow the pattern
+
+----------------------------------------------------------------
+
+Read more avro docs to get more context:
+start with the wiki:
+https://cwiki.apache.org/confluence/display/AVRO/Index
+
+User Documentation:
+DONE # Quick Start Guide
+DONE # FAQ
+DONE # Glossary
+DONE # Presentations
+ # Articles
+    DONE * Apache Avro in practice
+    * Using Avro with Eventlet
+    DONE * Data Serialization + RPC with Avro & Ruby
+    * The Quote Based Guide to Hadoop Avro
+
+----------------------------------------------------------------
+
+Wed Aug 25 21:34:43 PDT 2010
+
+- fix the velocity errors
+Sat Aug 07 21:25:36 PDT 2010  [debug] AvalonLogChute initialized using file 'velocity.log'
+Sat Aug 07 21:25:36 PDT 2010  [trace] *******************************************************************
+Sat Aug 07 21:25:36 PDT 2010  [debug] Starting Apache Velocity v1.5 (compiled: 2007-02-22 08:52:29)
+Sat Aug 07 21:25:36 PDT 2010  [trace] RuntimeInstance initializing.
+Sat Aug 07 21:25:36 PDT 2010  [debug] Default Properties File: org/apache/velocity/runtime/defaults/velocity.properties
+Sat Aug 07 21:25:36 PDT 2010  [debug] Trying to use logger class org.apache.velocity.runtime.log.AvalonLogChute
+Sat Aug 07 21:25:36 PDT 2010  [debug] Using logger class org.apache.velocity.runtime.log.AvalonLogChute
+Sat Aug 07 21:25:36 PDT 2010  [debug] Default ResourceManager initializing. (class org.apache.velocity.runtime.resource.ResourceManagerImpl)
+Sat Aug 07 21:25:36 PDT 2010  [debug] ResourceLoader instantiated: org.apache.velocity.runtime.resource.loader.FileResourceLoader
+Sat Aug 07 21:25:36 PDT 2010  [trace] FileResourceLoader : initialization starting.
+Sat Aug 07 21:25:36 PDT 2010  [debug] Do unicode file recognition:  false
+Sat Aug 07 21:25:36 PDT 2010   [info] FileResourceLoader : adding path '/j/proj/avro-319/trunk/xdocs/stylesheets'
+Sat Aug 07 21:25:36 PDT 2010  [trace] FileResourceLoader : initialization complete.
+Sat Aug 07 21:25:36 PDT 2010  [debug] ResourceCache: initialized (class org.apache.velocity.runtime.resource.ResourceCacheImpl)
+Sat Aug 07 21:25:36 PDT 2010  [trace] Default ResourceManager initialization complete.
+Sat Aug 07 21:25:36 PDT 2010  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Literal
+Sat Aug 07 21:25:36 PDT 2010  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Macro
+Sat Aug 07 21:25:36 PDT 2010  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Parse
+Sat Aug 07 21:25:36 PDT 2010  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Include
+Sat Aug 07 21:25:36 PDT 2010  [debug] Loaded System Directive: org.apache.velocity.runtime.directive.Foreach
+Sat Aug 07 21:25:36 PDT 2010  [debug] Created '20' parsers.
+Sat Aug 07 21:25:36 PDT 2010  [trace] Velocimacro : initialization starting.
+Sat Aug 07 21:25:36 PDT 2010  [debug] Velocimacro : "velocimacro.library" is not set.  Trying default library: VM_global_library.vm
+Sat Aug 07 21:25:36 PDT 2010  [debug] Velocimacro : Default library not found.
+Sat Aug 07 21:25:36 PDT 2010  [debug] Velocimacro : allowInline = true : VMs can be defined inline in templates
+Sat Aug 07 21:25:36 PDT 2010  [debug] Velocimacro : allowInlineToOverride = false : VMs defined inline may NOT replace previous VM definitions
+Sat Aug 07 21:25:36 PDT 2010  [debug] Velocimacro : allowInlineLocal = false : VMs defined inline will be global in scope if allowed.
+Sat Aug 07 21:25:36 PDT 2010  [debug] Velocimacro : autoload off : VM system will not automatically reload global library macros
+Sat Aug 07 21:25:36 PDT 2010  [trace] Velocimacro : Velocimacro : initialization complete.
+Sat Aug 07 21:25:36 PDT 2010  [trace] RuntimeInstance successfully initialized.
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #relativise(  elem ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #color_cell(  elem color ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #color_table(  table ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #make_note(  note ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #metaauthor(  author email ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #source(  value ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #section(  section level ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #makeProject(  ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [info] Velocimacro : added #getProjectImage(  ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010  [debug] ResourceManager : found ./avro.vsl with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : relativise : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #relativise(  elem ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : color_cell : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #color_cell(  elem color ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : color_table : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #color_table(  table ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : make_note : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #make_note(  note ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : metaauthor : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #metaauthor(  author email ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : source : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #source(  value ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : section : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #section(  section level ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : makeProject : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #makeProject(  ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010   [warn] Velocimacro : VM addition rejected : getProjectImage : inline not allowed to replace existing VM
+Sat Aug 07 21:25:36 PDT 2010   [warn] Failed to add macro: #getProjectImage(  ) : source = ./avro.vsl
+Sat Aug 07 21:25:36 PDT 2010  [debug] ResourceManager : found ./avro.vsl with loader org.apache.velocity.runtime.resource.loader.FileResourceLoader
+Sat Aug 07 21:25:36 PDT 2010   [info] RHS of #set statement is null. Context will not be modified. ./avro.vsl [line 239, column 3]
+Sat Aug 07 21:25:36 PDT 2010   [info] Null reference [template './avro.vsl', line 243, column 10] : $root.getChild("properties").getChild("title").getText() cannot be resolved.
+Sat Aug 07 21:25:36 PDT 2010   [info] RHS of #set statement is null. Context will not be modified. ./avro.vsl [line 255, column 6]
+
+What does the httpd-site log file look like?
+it does not multiply-include the .vsl file, so the redefinitions dont occur
+
+
+- get the project / sub project working
+- get the css including.
+
+What do the # and ## chars mean in the macro definitions?
+# starts macro definitions?
+## is a comment
+
+Go get the anakia source code from svn to be able to read the examples:
+
+  "The example in the examples/anakia directory provides a good introduction to
+  Anakia. You should find it quite simple to use. "
+
+there are no ## in the anakia site.xml
+
+----------------
+
+I think I should switch to the anakia template; it is simpler.
+
+before making this decision, look at the underlying pages that I want to include.
+make a map of them (like a site map);
+see what the mapping from today to tomorrow looks like.
+
+----------------
+
+The jira about creating an alternative search site is: AVRO-626.

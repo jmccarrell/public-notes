@@ -1,0 +1,128 @@
+A project can contain multiple targets.
+
+A target defines a single product, or an intermediate object like a library
+
+For each target, xcode adds a product reference; which appears to be a name for the target.
+
+Executables require an 'executable environment' which may include command line args,
+env variables, or even an executable to debug a plug-in.
+
+A project may contain multiple executables.
+You may have multiple executables per target.
+
+Build configurations are different ways to build the code: debug and release are examples.
+A build configuration is a set of build settings, which may be based on a common base set.
+The project defines the list of build configurations;
+each target contains its own definition of the build settings used with that configuration.
+
+A target mainly identifies the product's source and the operations to perform on them.
+It also specifies the SDK (the set of header files, libs and frameworks) against which
+the sources are compiled and linked.
+
+Active target: there is only ever 1 active target, build configuration, executable and
+architecture.  This means that if you want to debug 2 executables in the graphical
+debugger at the same time, you have to build them in 2 projects.
+
+The Project Directory
+
+The project package holds the metadata, and has the extension xcodeproj
+
+Project Roots
+
+    A project root is a directory containing a project package (see “The Project
+    Directory”), source files, and other project files. Simple projects have a single
+    project root. Complex projects, made up of two or more projects that share products or
+    resources, can contain multiple project roots. Each project root has its own SCM
+    configuration, which allows you to work on projects made up of multiple projects with
+    subprojects stored in different SCM repositories.
+
+An xcode file
+  has at least properties:
+    name
+    file type
+    path
+    path type: absolute or relative
+    scm info
+
+A project can contain:
+  source files
+  folders
+    this abstraction lets one deal with a group of files as whole, e.g. help files.
+  frameworks
+    a framework is linked against
+
+
+  Xcode also provides build settings for specifying general search paths for various
+  items, such as headers and libraries. These include the Header Search Paths, Library
+  Search Paths, and Framework Search Paths build settings.
+
+Adding groups of files
+  there are 2 options:
+  Group: each file is named individually
+    Files added later will not be considered part of the group.
+  Folder Reference: only the folder is stored.
+    Files added later to this container will be processed.
+    The example is for help files that get copied en masse to the resources bundle.
+    It is hard to imagine another use of this mechanism, since any file that gets compiled
+    must be known individually.
+
+File References:
+  Relative to Enclosing Group
+    the path is relative to the folder associated with the file's group.
+    if there is no such group, it is relative to the project folder.
+    this is the default setting
+  Relative to Project
+    relative to the project, regardless of any group
+  Relative to Build Product
+    relative to the folder that contains the build products
+    the default for items created by one of the project's targets
+  Relative to <source file>
+    relative to a user-defined source path.
+    Source path can be defined in the Source Trees pane of Xcode preferences
+    this type is not available until at least 1 source tree has been defined.
+  Absolute Path
+
+Source Trees
+
+  A source tree is a root path that can be used to define a common location for target
+  outputs. A source tree defines a name and a location on the local file system. When you
+  add files and folders to your project, you can specify their location relative to any
+  source tree defined for your computer. Xcode stores the file reference relative to this
+  source tree. Any users who have the same source tree defined are able to work on the
+  same project seamlessly, provided that the file also exists at the source tree location
+  on their computers.
+
+  Source trees let you keep common resources in locations other than the project folder of
+  an individual project and still transfer projects back and forth between team members
+  and their various computers without breaking the project’s file references. This is
+  particularly useful if you have a set of common files or resources that are used in a
+  number of projects and therefore cannot live in the project folder. Everyone working on
+  a common project should have the same source trees defined; even though the locations
+  assigned to those source trees may differ, the names must be the same in order for Xcode
+  to locate the necessary files and materials on the developer’s computer.
+
+
+source trees are a naming mechanism to group common functionality into multiple projects by name.
+
+Referencing Other Projects
+
+  In addition to file, framework, and folder references, Xcode projects can contain a
+  cross-project reference; that is, they can refer to another project outside of the
+  current one.
+
+  You can relate targets in the current project to targets in the referenced project by
+  creating a target dependency. You can add a dependency on a target in the referenced
+  project in the same way that you would add a dependency to a target within the same
+  project. See “Adding Target Dependencies” in Xcode Build System Guide to learn more
+  about target dependencies.
+
+  For projects that use cross-project references, you should use a common build location;
+  doing so ensures that Xcode can automatically locate products created by targets in
+  those projects. For more on build locations, see “Build Locations.”
+
+The XCode Cache
+
+  Xcode places its persistent caches in a secure location in your file system. You can get
+  to this location using the getconf command:
+
+  cd `getconf DARWIN_USER_CACHE_DIR`

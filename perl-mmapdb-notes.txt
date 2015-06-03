@@ -1,0 +1,225 @@
+How is the switching between versions of the DB done?
+A: looks like in the start method.
+   I.e., if the file underlying the in memory copy is updated, then
+   simply calling start() at some interval will apparently detect and then remap
+   the updated data.
+
+DONE read File::Map docs
+  MMapDB imports map_handle protect
+consider studying File::Map
+
+
+the memory is mapped into core from the file only as needed.
+As such, MMapDB::start() appears to only map in the roots of the tree.
+
+DONE read mmap(2)
+
+DONE From the top of MMapDB.pm:  what is this about?
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# keep this in mind
+use integer;
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+according to perlmodlib, the integer pragma:
+       integer     Use integer arithmetic instead of floating point
+so that must mean that MMapDB prefers integer math to floating point.
+
+Where are the originals for the documentation?
+  mostly in MMapDB.pm at the end of the module.
+
+from delete_by_id: what does this do?
+  my $pos;
+
+  return unless defined($pos=delete $idmap->{$id});
+
+Testing this construct out with an existing key:
+#! /usr/bin/env perl
+use strict;
+use warnings;
+
+my $idmap = { foo => 'bar' };
+my $id = 'foo';
+my $pos;
+
+unless (defined($pos=delete $idmap->{$id})) {
+    print "$pos: $id: not defined\n";
+} else {
+    print "$pos: $id: defined\n";
+}
+
+gives:
+capella-> perl ~/tmp/defined-query.pl 
+bar: foo: defined
+
+This is calling the delete function on $idmap->{$id},
+then storing the result of that call in $pos, 
+then testing if that return value is defined.
+
+       delete EXPR
+               Given an expression that specifies an element or slice of a
+               hash, "delete" deletes the specified elements from that hash so
+               that exists() on that element no longer returns true.  Setting
+               a hash element to the undefined value does not remove its key,
+               but deleting it does; see "exists".
+
+               In list context, returns the value or values deleted, or the
+               last such element in scalar context.  The return list’s length
+               always matches that of the argument list: deleting non‐existent
+               elements returns the undefined value in their corresponding
+               positions.
+
+so the answer to the Q: what does this do is:
+  my $map=$I->_tmpmap;
+  my $idmap=$I->_idmap;
+  my $pos;
+
+  return unless defined($pos=delete $idmap->{$id});
+
+  # read VALID, ID, NKEYS
+  my ($valid, $elid, $nkeys)=unpack 'x'.$pos.$I->intfmt.'3', $$map;
+
+is to set $pos to the value found via the $id key, then use it in the unpack call.
+
+read how unpack x works
+read perlfunc pack
+              unpack
+
+DONE read perlpacktut
+
+x in a un/pack template means 'skip forward'.
+well, it really means a separator, eg, a null byte:
+       we? Shouldn’t it skip forward? Let’s look at what "pack" in perlfunc
+       says:
+
+           x   A null byte.
+
+perldoc -f pack says this about j/J formats:
+        j   A Perl internal signed integer value (IV).
+        J   A Perl internal unsigned integer value (UV).
+
+What are the supported choices for pack formats given by MMapDB?
+This is defined by the function:
+sub set_intfmt {
+  my ($I, $fmt)=@_;
+
+  $fmt='N' unless $fmt;
+
+  my %allowed; undef @allowed{qw/L N J Q/};
+  return unless exists $allowed{$fmt};
+
+  $I->intfmt=$fmt;
+  $I->_intsize=length pack($fmt, 0);
+
+  if( $I->dbformat_in>DBFMT0 ) {
+    # new format with utf8 support
+    $I->_stringfmt=$I->intfmt.'/a*C x!'.$I->_intsize;
+  } else {
+    $I->_stringfmt=$I->intfmt.'/a* x!'.$I->_intsize;
+  }
+
+  if( $I->dbformat_out>DBFMT0 ) {
+    # new format with utf8 support
+    $I->_stringfmt_out=$I->intfmt.'/a*C x!'.$I->_intsize;
+  } else {
+    $I->_stringfmt_out=$I->intfmt.'/a* x!'.$I->_intsize;
+  }
+
+  return 1;
+}
+
+
+this construct:
+  my %allowed; undef @allowed{qw/L N J Q/};
+gives:
+$VAR1 = {
+          'Q' => undef,
+          'J' => undef,
+          'N' => undef,
+          'L' => undef
+        };
+
+so the supported formats are: L N J Q, which are defined as:
+   L  An unsigned long value.
+   J   A Perl internal unsigned integer value (UV).
+   N  An unsigned long (32−bit) in "network" (big−endian) order.
+   Q  An unsigned quad value.
+      (Quads are available only if your system supports 64−bit
+      integer values _and_ if Perl has been compiled to support those.
+      Raises an exception otherwise.)
+
+with the default being 32 bit network (big-endian) ints.
+
+on capella, those sizes evaluate to:
+print join(' ', $_, length pack($_, 0)) . "\n" for qw/L N J Q/;
+L 4
+N 4
+J 8
+Q 8
+
+So, given N, the input string format is either:
+   N/a*C x!4          unicode supported
+   N/a* x!4           no unicode
+   
+and the output string format is the same.
+
+Ok, come back top down and look at: What do the docs say about data records?
+
+DONE read: Concepts: the data record
+
+    A data record consists of 3-4 fields:
+
+     [[KEY1, KEY2, ..., KEYn], ORDER, DATA, ID]   # ID is optional
+
+    All of the C<KEY1>, ..., C<KEYn>, C<SORT> and C<DATA> are arbitrary length octet
+    strings. The key itself is an array of strings showing the way to the data item. The
+    word I<key> in the rest of this text refers to such an array of strings.
+
+DONE read: Concepts: the index record
+DONE read: Concepts: the index
+
+Having read the concepts, I would love to see a small example right there in the doc
+to make the concepts concrete instead of starting into how to open the DB.
+
+continue reading at: =head2 The Index
+
+write some perl that figures out if quad formatted packing is supported.
+  see ~/tmp/perl-Q-supported.pl
+
+use Config;
+print "64bit\n" if defined($Config{use64bitint});
+
+----------------
+
+build an mmap db file.
+Looks like the first time the MMapDB file is opened for write, one must not call
+db->start:
+this code:
+## create the MMapDB file
+my $db_fname = 'bball-teams.mmapdb';
+unlink $db_fname;
+eval {
+    my $db = MMapDB->new(filename => $db_fname);
+    my $n = $db->start;
+    unless (defined $n) {
+        die \qq{could not start db: "$db_fname": $!\n};
+    }
+
+    # does begin throw exceptions or return an error code?
+    $db->begin(-1);
+    $db->commit(0);
+};
+if ($@) {
+    warn ${$@};
+}
+
+gives:
+could not start db: "bball-teams.mmapdb": No such file or directory
+
+and it is easy to see why in the MMapDB call to open:
+	  open $fh, '+<', $I->filename or return;
+
+AI: improve the documentation on how to do this sucsessfully.
+
+----------------
+
+How does MMapDB traverse the indices to find key/value pairs?
+

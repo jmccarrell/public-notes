@@ -1,0 +1,50 @@
+#!/bin/sh
+
+# Daily Perforce Backup Script
+#    -- lwood, 28 Aug 2008
+
+# Zeroth, rsync against yesterday's fetch to catch any differences that
+# this day hath wrought:
+
+rsync -aq perforce@p4.imiclk.local:/home/perforce/p4root /home/backup/archives/perforce/
+
+# First, according to Perforce, database files should be excluded
+# from the backup, as they are trivially reconstructable from the
+# checkpoint files. Let's make a file to collect all their names:
+
+ssh perforce@p4.imiclk.local ls /home/perforce/p4root/db.* |awk -F/ '{print $5}'>/home/backup/archives/tmp/exclude-from-perforce-backup
+
+# Second, we verify the metadata--the -q flag only reports on errors,
+# which will be e-mailed. The crazy hex thing is a Perforce ticket
+# identifier, used to authenticate this (super)user:
+
+ssh perforce@p4.imiclk.local '/usr/local/bin/p4 -p 49559 -u perforce -P 0FECFA28D1AE45D553687714A98155CD verify -q //...'
+
+# Next, run a checkpoint in Perforce:
+
+ssh perforce@p4.imiclk.local '/usr/local/bin/p4 -p 49559 -u perforce -P 0FECFA28D1AE45D553687714A98155CD admin checkpoint'
+
+# Rsync again to make /very/ sure that no changes have occurred while
+# the foregoing was going on--as this is unlikely, this shouldn't
+# appreciably increase anything but our peace of mind:
+
+rsync -aq perforce@p4.imiclk.local:/home/perforce/p4root /home/backup/archives/perforce/
+
+# Now, make a dated tarball, excluding the database files we didn't want
+# anyway:
+
+cd /home/backup/archives/perforce
+tar cpzf perforce-`date -I`.tgz p4root/ --exclude-from ../tmp/exclude-from-perforce-backup
+
+
+----------------------------------------------------------------
+In /etc/init.d/perforce, the command to start the daemon is now:
+
+p4d -p 49559 -r /home/perforce/p4root -J /var/log/perforce/journal -L /var/log/perforce/p4err -d
+
+Setting these variables in the init script did not achieve the desired effect. wearl's suggestion of setting them in /etc/profile instead did not seem appropriate to me--so I set them in the command line.
+
+As a side benefit, instead of having P4PORT set in /etc/profile as a global environment variable or a per-user one, I dropped a line to this same effect into netops2:/etc/services, as if P4PORT does not exist, p4 attempts to use the "perforce" port--so I gave it one. This makes the -p flag redundant, but I'm okay with that, preferring belts as well as suspenders when not inconvenient to have both.
+
+The command to stop the daemon is now:
+p4 -p 49559 -u perforce -P 0FECFA28D1AE45D553687714A98155CD admin stop

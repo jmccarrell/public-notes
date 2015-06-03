@@ -1,0 +1,144 @@
+HTTP authentication notes from
+http://www.php.net/manual/en/features.http-auth.php
+
+there is a complete Digest auth example on that page.
+
+this page mentions using the HTTP 401 response code to effectively log out using Basic auth.
+
+Cookies:
+http://www.php.net/manual/en/features.cookies.php
+
+set cookies via functions: setcookie() or setrawcookie().
+cookie functions must be called before any output is sent to the browser
+as they go in the Set-Cookie: header.
+There are output buffering functions to help this if needed.
+
+All client cookies are added to the $_COOKIE auto-global array.
+
+http://www.php.net/manual/en/function.setcookie.php
+http://www.php.net/manual/en/function.setrawcookie.php
+
+PHP Session interface
+http://www.php.net/manual/en/book.session.php
+
+php session id can be either stored in a cookie, or written in a url
+
+a session is begun with either session_start() or implicitly via session_register().
+an arbitrary number of variables can be stored with sessions.
+no session will be created if no variables are registered for that session.
+
+all session data is stored in the file system: session.save_path INI option
+http://www.php.net/manual/en/session.configuration.php#ini.session.save-path
+file system session data can be spread around multiple directories
+  these files should not be world readable
+  If I use this mechanism, create the dirs ahead of time and make them readable by
+  the webuser only.
+
+storage back-ends possible:
+memory-based file system: tmpfs via /dev/shm
+shared memory: mm extension
+dbs: the usual suspects
+
+session run time configs:  http://www.php.net/manual/en/session.configuration.php
+
+the session name (also the cookie name) is set with session.name
+
+entropy_file and entropy_length give additional random bits for the sess id.
+
+session.hash_bits_per_character
+  controls the output character set of the hash encoding:
+  4: 0-9, a-f                  16
+  5: 0-9, a-v                  32
+  6: 0-9, a-z, A-Z, '-', ','   64
+
+enable session.use_only_cookies in most cases
+
+The track_vars and register_globals configuration settings influence how session
+variables are stored and restored.
+
+
+Looks like my flow will be:
+
+session_name('UWWSESSID');
+session_start();
+
+to end the session, session_destory() is not sufficient.
+The variables referenced and the cookie must be explicitly destroyed.
+
+this looks like a reasonable example: {
+<?php
+// Initialize the session.
+// If you are using session_name("something"), don't forget it now!
+session_start();
+
+// Unset all of the session variables.
+$_SESSION = array();
+
+// If it's desired to kill the session, also delete the session cookie.
+// Note: This will destroy the session, and not just the session data!
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// Finally, destroy the session.
+session_destroy();
+?>
+}
+
+
+----------------------------------------------------------------
+
+comment styles for doxygen generate documents: {
+
+Doxygen directives - general notes
+
+/**
+ * Summary here; one sentence on one line (should not, but can exceed 80 chars).
+ *
+ * A more detailed description goes here.
+ *
+ * A blank line forms a paragraph. There should be no trailing white-space
+ * anywhere.
+ *
+ * @param $first
+ *   "@param" is a Doxygen directive to describe a function parameter. Like some
+ *   other directives, it takes a term/summary on the same line and a
+ *   description (this text) indented by 2 spaces on the next line. All
+ *   descriptive text should wrap at 80 chars, without going over.
+ *   Newlines are NOT supported within directives; if a newline would be before
+ *   this text, it would be appended to the general description above.
+ * @param $second
+ *   There should be no newline between multiple directives (of the same type).
+ * @param $third
+ *   (optional) TRUE if Third should be done. Defaults to FALSE.
+ *   Only optional parameters are explicitly stated as such. The description
+ *   should clarify the default value if omitted.
+ *
+ * @return
+ *   "@return" is a different Doxygen directive to describe the return value of
+ *   a function, if there is any.
+ */
+function mymodule_foo($first, $second, $third = FALSE) {
+}
+Lists
+
+ * @param $variables
+ *   An associative array containing:
+ *   - tags: An array of labels for the controls in the pager:
+ *     - first: A string to use for the first pager element.
+ *     - last: A string to use for the last pager element.
+ *   - element: (optional) Integer to distinguish between multiple pagers on one
+ *     page. Defaults to 0 (zero).
+ *   - style: Integer for the style, one of the following constants:
+ *     - PAGER_FULL: (default) Full pager.
+ *     - PAGER_MINI: Mini pager.
+ *   Any further description - still belonging to the same param, but not part
+ *   of the list.
+ *
+ * This no longer belongs to the param.
+
+}

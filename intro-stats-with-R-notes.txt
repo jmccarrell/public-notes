@@ -1,0 +1,243 @@
+Variable names can be composed of letters, digits and period
+Case is significant.
+
+Variable names with an expected value:
+
+c, q, t
+C, D, I
+T, F  TRUE, FALSE
+diff, df, pt
+
+weight <- c(60, 72, 57, 90, 95, 72)
+height <- c(1.75, 1.80, 1.65, 1.90, 1.74, 1.91)
+bmi <- weight/height^2
+
+# compute standard deviation by hand
+sum(weight)
+sum(weight)/length(weight)
+xbar <- sum(weight)/length(weight)
+sum((weight-xbar)^2)
+sqrt(sum((weight-xbar)^2)/(length(weight)-1))
+
+which can also be computed with the sd function:
+sd(weight)
+mean(weight)
+
+hh <- c(1.65, 1.70, 1.75, 1.80, 1.85, 1.90)
+lines(hh,  22.5 * hh^2)
+
+Missing Values
+Vectors are allowed to contain NA
+any expression using NA gives NA as the value {
+  > NA * 4
+  [1] NA
+  > c(bmi, NA) > 25
+  [1] FALSE FALSE FALSE FALSE  TRUE FALSE    NA
+}
+
+Functions that create vectors:
+
+c     concatentate
+seq   sequence
+rep   replicate     generate repeated values
+
+we can assign names to elements in a vector with c:
+
+foo <- c(Huey=35, Dewey=54, Louie=76)
+
+All elements of a vector have the same type.
+Mixed types are coerced to the least restrictive type.
+
+seq gives a sequence of numbers
+seq(5,100,10)
+
+the syntax n:m is a sequence with step 1.
+
+So this will generate the odd yard markers on a football field:
+> (c(0:4, 4:0)*10)+5
+ [1]  5 15 25 35 45 45 35 25 15  5
+
+rep changes depending on the 2nd argument: scalar or vector
+
+Tue Jun 15 08:48:55 PDT 2010
+
+TODO  TODO  TODO  TODO  
+
+experiment with the space of the R console, 
+reading and writing out the namespace to different named directories
+using the text area box in the R gui
+
+ask Jamie about how to convert result_ids to enums in SQL
+
+DONE figure out how to drop things from the global namespace shown by ls()
+  A: use rm
+    > bb <- c(1:8)
+    > bb
+    [1] 1 2 3 4 5 6 7 8
+    > rm(bb)
+    > bb
+    Error: object 'bb' not found
+
+DONE see if I can make the console window font larger
+  yes, command T works as expected.
+
+
+Factors (1.2.8)
+
+factors are often used to identify some categorical nature of the data, e.g.:
+  social class, primary diagnosis, operation result type, etc.
+In classical stats, these are often coded as integers.
+
+Factors are:
+  "a data structure that (among other things) makes it possible to assign meaningful names
+  to the categories"
+
+In the terminology, factors have levels, say, 1-4
+Internally to R, a factor contains 2 vectors:
+  a vector of integers, say, 1:4
+  a vector of strings describing the levels
+
+In effect, a factor is like an enum.
+Internally, factors are always numbered starting from 1.
+
+There are also ordered factors, created with the 'ordered' function.
+ISwR recommends avoiding ordered factors at this point. pg 19
+
+For the adopt result types:
+
+mysql> select * from ad_result;
++-----------+---------------------+
+| result_id | name                |
++-----------+---------------------+
+| NLID      | No LINEITEM_ID      |
+| NIMI      | No IMI_ID           |
+| NCMP      | No CAMPAIGN_ID      |
+| NCSZ      | No CREATIVE_SIZE_ID |
+| NOAD      | No Ad Available     |
+| RMKT      | Remarketing         |
+| ACQZ      | Acquisition         |
++-----------+---------------------+
+7 rows in set (0.00 sec)
+
+One could imagine a factor like this:
+1   NLID
+2   NIMI
+3   NCMP
+4   NCSZ
+5   NOAD
+6   RMKT
+7   ACQZ
+
+then the issue that arises immediately is how to translate, eg,
+NOAD to 5 when reading the result data.
+
+The example is:
+
+# create a numeric vector pain, recording some results
+pain <- c(0,3,2,2,1)
+# we want to treat this as a categorical variable, so create a factor fpain
+fpain = factor(pain, levels=0:3)
+# now define the levels of fpain
+levels(fpain) = c("none", "mild", "medium", "severe")
+
+> fpain
+[1] none   severe medium medium mild  
+Levels: none mild medium severe
+
+
+# back to numeric values
+> as.numeric(fpain)
+[1] 1 4 3 3 2
+
+# report the levels
+levels(fpain)
+[1] "none"   "mild"   "medium" "severe"
+
+----------------
+
+lists
+
+a list is a composite structure, created with the 'list' function
+substructure is syntactically dereferenced with '$':
+
+mylist = list(before=c(5260,5470,5640), after=c(3910,4220,3885))
+> mylist$after
+[1] 3910 4220 3885
+
+----------------
+
+data frames
+
+a gathering of data
+vectors or factors of the same length
+such that each 'row' represents a characteristic of a single observation
+
+a set of data about calorie consumption of women pre-and post menopausally:
+
+intake.pre  = c(5260,5470,5640,6180,6390,6515,6805,7515,7515,8230,8770)
+intake.post = c(3910,4220,3885,5160,5645,4680,5265,5975,6790,6900,7335)
+
+data frames can be constructed from pre-existing variables
+d <- data.frame(intake.pre, intake.post)
+
+----------------
+
+indexing
+
+index into vectors with the bracket notation:
+
+> d$intake.pre[4]
+[1] 6180
+
+or get a range by indexing with a vector
+> d$intake.pre[c(2,4,6)]
+[1] 5470 6180 6515
+
+N.B. the c() to create the vector is essential.
+d$intake.pre(2,4,6) means something completely different:
+to index into a 3-dimensional array:
+> d$intake.pre[2,4,6]
+Error in d$intake.pre[2, 4, 6] : incorrect number of dimensions
+
+One can use the 'negative' notation of the vector to get all of the elements
+except those listed in the vector, so this gets all but the second, fourth and sixth:
+
+> d$intake.pre[-c(2,4,6)]
+[1] 5260 5640 6390 6805 7515 7515 8230 8770
+
+----------------
+
+conditional selection
+
+one can extract values from 2 same-length vectors by applying conditions:
+
+intake.post[intake.pre > 7000]
+[1] 5975 6790 6900 7335
+
+which gives the post menopausal intake for the 4 women with pre intake > 7k.
+
+logical and: &
+        or:  |
+
+&& and || are used in 'flow control in R'.
+
+----------------
+
+Ch 2: R environment
+
+clear the entire workspace:
+
+rm(list=ls())
+
+save.image()
+  write current env to ./.RData
+
+check out 'Emacs Speaks Statistics'
+  a means to use emacs to talk to R
+  should be available from CRAN
+
+use
+getwd()
+and 
+setwd("tmp")
+to change working directory

@@ -1,0 +1,48 @@
+HDFS
+
+HDFS is optimized for streaming interface over very large data files:
+  write once, read many times.
+
+HDFS is not well suited to:
+  low-latency data access
+  lots of small files
+  multiple writers; arbitrary file modifications
+
+Every HDFS write is an append.
+There is no support for multiple writers.
+                        writing at an arbitrary byte offset in the file.
+
+The 'name node' contains a typically memory-resident copy of the
+files -> blocks and directories -> blocks mappings.
+This image is stored persistently on local disk as
+  - the namespace image
+  - the edit log
+Often the backup of these files is to multiple filesystems:
+  - one local
+  - NFS
+A 'secondary name node' provides backup to this SPOF.
+
+Typical HDFS block size is 64Meg; 128Meg is often seen in practice as well.
+
+'pseudo-distributed' is the minimum configuration level that HDFS will run under.
+'stand alone' does not include HDFS I believe.
+
+pseudo-distributed configuration:
+
+fs.default.name   hdfs://localhost/
+  this tells hadoop to use hdfs, on the default port 8020.
+  the namenode can be found there
+  hdfs clients will also use this URI to find the name node.
+
+dfs.replication    1
+  this tells HDFS to replicate blocks only once, which it must as there is only a single
+  datanode.
+
+command line:
+hadoop fs -help
+
+copy a local file to hdfs:
+  hadoop fs -copyFromLocal input/docs/foo.txt hdfs://localhost/user/jwm/foo.txt
+
+same, using default hdfs://localhost from core-site.xml
+  hadoop fs -copyFromLocal input/docs/foo.txt /user/jwm/foo.txt

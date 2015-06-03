@@ -1,0 +1,98 @@
+to discover what threading model is used on the platform one is on:
+perl -V | grep threads
+
+So-called ithreads means perl interpreter threads, the 5.8 and on model.
+
+The user-level interface for ithreads uses the threads class.
+
+The same threading model is implemented in my darwin perl 5.8.8 and production RHEL 4
+perl 5.8.5
+
+In this model, each thread runs in its own perl interpreter, and any data
+sharing between threads must be explicit.
+
+the main weird thing about perl threads in the ithreads model is that
+by default, no data are shared.   perlthrtut says:
+
+       The biggest difference between Perl ithreads and the old 5.005 style
+       threading, or for that matter, to most other threading systems out
+       there, is that by default, no data is shared. When a new perl thread is
+       created, all the data associated with the current thread is copied to
+       the new thread, and is subsequently private to that new thread!  This
+       is similar in feel to what happens when a UNIX process forks, except
+       that in this case, the data is just copied to a different part of
+       memory within the same process rather than a real fork taking place.
+
+the threads and threads::shared modules are included in the core perl dist.
+
+The 3 common threaded program models:
+Boss / Worker:  boss gathers or generates tasks for workers.  GUI and server code
+Work Crew: all threads to the same thing.  mirrors classical parallel processing
+Pipeline: divide the task into a series of steps; each step gets a thread
+
+
+perl thread model allocates a separate interpreter per thread
+
+thread creation
+
+use threads;
+$thr = threads->new(\&sub1);
+
+threads::new() takes a reference to a subroutine and creates a new thread,
+which starts executing in the referenced subroutine.
+Control then passes to the caller and the subroutine.
+
+Since threads are also subroutines, they can return values. To wait for
+a thread to exit and extract any values it might return, you can use the
+join() method
+
+
+lock() implements mutual exclusion? among threads cooperating in lock calls.
+the lock is releases when the enclosing scope exits
+e.g.
+    {
+        lock($total);
+        $total += result;
+    }
+nothing prevents other threads from reading $total while it is in a lock() section;
+only mutual calls to lock($total) are prevented.
+
+lock() can be called on arrays and hashes as well.
+lock() of an array does not prevent lock()ing an array element.
+
+a lock() can be applied to the same variable multiple times without negative consequence
+
+When lock() is applied to a guard variable that is used just to lock a critcal section,
+it acts like a traditional mutex or semaphore.
+
+Queues
+
+a queue is a thread-safe object to put data in one end, and get it out of the other
+without worrying about synchronization issues.
+
+
+Semaphores are supported objects
+
+yield() will give up the processor to another thread on platforms that support it.
+On some platforms, yield() is a no-op.
+
+
+Performance Considerations:
+
+since perl ithreading creates a complete clone of the perl interpreter for every thread
+created, this is an expensive operations in time and space.
+So the preferred model is a relatively small number of long-lived threads.
+
+Mixing fork() and threads is not recommended.  perlthrtut says:
+
+    Thinking of mixing fork() and threads? Please lie down and wait until
+    the feeling passes. Be aware that the semantics of fork() vary between
+    platforms. For example, some UNIX systems copy all the current threads
+    into the child process, while others only copy the thread that called
+    fork(). You have been warned!
+
+    Similarly, mixing signals and threads should not be attempted.
+    Implementations are platform-dependent, and even the POSIX semantics may
+    not be what you expect (and Perl doesn't even give you the full POSIX
+    API).
+

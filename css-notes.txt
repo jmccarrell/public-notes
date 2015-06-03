@@ -1,0 +1,203 @@
+Floats
+(derived from http://css.maxdesign.com.au/floatutorial/index.htm)
+
+selector tutorial:
+http://css.maxdesign.com.au/selectutorial/index.htm
+
+don't put a trailing comma on selectors:
+.highlight p, .highlight ul, { margin-left: .5em; }
+                           ^ not good
+
+comments: /* C style */
+
+Type selectors: apply to HTML elements:
+em { color: blue; }
+
+
+Class selectors apply to all elements on the page with the class tag.
+
+<p class="big">Ipsum lorem</p>
+ ...
+<li class="big">do thing 1</li>
+
+p.big { color: red; }
+.big { color: green; }
+
+
+Id selectors: apply to at most one element on the page
+
+
+Descendant selectors:
+ul em { color: red; }
+
+will apply to all ems contained with any ul -- no need to specify the intervening li
+
+
+Child selectors: target precisely the child and no other
+div > em { color: green; }
+
+
+Universal Selector:  apply to everything
+* { color: blue; }
+
+
+Adjacent Sibling Selector: will select the sibling immediately following the element.
+target h3s that immediately follow h2s:
+h2 + h3 { margin: -1em; }
+
+
+Attribute Selectors: select based on html attribute, or attribute value
+img[src="small.gif"] { border: 1px solid #000; }
+
+there are 4 types of attribute selectors:
+attribute name: 
+img[title] { border: 1px solid #000; }
+
+attribute value: as above
+
+space separated list of attribute values:
+i.e., any img with small in the alt attribute:
+img[alt~="small"] { border: 1px solid #000; }
+
+hyphen separated list of attribute values:
+same as space separated, except for hyphen separated
+img[alt|="small"] { border: 1px solid #000; }
+
+
+Pseudo Classes
+
+To style things that are not represented in the document tree,
+we have pseudo classes.
+
+:first-child
+:link
+:visited
+:hover
+:active
+:focus
+:lang(n)
+
+Styling Links:
+there are 4 link states:
+  a:link is the selector for normal links
+  a:visited is the selector for visited links
+  a:hover is the selector for hover state
+  a:active is the selector for active links
+
+due to specificity, the later selector will be used if there are conflicts.
+Thus, links should be styled after the main tag:
+  a {} 
+  a:link {} 
+  a:visited {} 
+  a:hover {} 
+  a:active {}
+
+
+Pseudo Elements
+Another way to style things that are not in the document tree.
+
+  :first-line
+  :first-letter
+
+p:first-line { font-weight: bold; }
+P:first-letter { font-size: 200%; font-weight: bold; }
+
+  :before
+  :after
+
+used to insert generated content {before,after} an element on the page.
+
+
+Choosing between ID and class
+
+criteria to help choose:
+
+1. repeated use within a document
+   favors class
+
+2. Combining class selectors
+   You can use multiple classes to style an element, but only one ID.
+
+<p class="highlight indent">
+.highlight { font-weight: bold; }
+.indent { padding-left: 2em; }
+
+3. IDs have higher specificity than classes
+   in the cascade.
+
+
+Inheritance
+
+certain properties are not inherited including: margins, padding, borders, and backgrounds
+
+the w3c property index lists all the properties and their inheritance:
+http://www.w3.org/TR/REC-CSS2/propidx.html
+
+Font-size and inheritance
+The font-size inheritance is treated specially.
+Only a calculated value is inherited.
+A setting of 14px is not obviously a calculated value, while 80% or .8em is.
+Relative values are calculated before being passed onto any child elts, not to all descendants.
+
+E.g. if we set a relative font-size on a <div>, and have this tree:
+<div>
+  <em> </em>
+  <p>  <strong> </strong> </p>
+</div>
+
+then the em and p will have the smaller font, while the strong will not.
+
+
+Cascade
+
+Cascade means that styles can fall from one style sheet to another.
+
+Browser style sheet: apply to all web docs.  aka the default browser style sheet.
+User style sheet: users can create their own style sheets, which apply to that user only.
+Author style sheet: the websites style sheet
+
+Generally speaking, author styles override user styles override browser styles.
+
+
+Conflicts
+
+Conflicts are resolved by weight.
+When a document is loaded in the browser, all declarations are sorted and given a weight.
+The sort has 4 steps:
+
+1. Find all declarations whose selectors match a particular element
+2. Sort these declarations by weight and origin
+3. Sort the selectors by specificity
+   (Simplified) specificity rules
+   a. count the number of ids in the overall selector
+   b. count the number of other selectors in the overall selector
+   c. count the number of elements within the overall selector
+   then group as a-b-c
+
+h2 { font-size: 1.5em; margin: .83em 0; color: black; }
+0-0-1  -> specificity = 1
+
+h2 { color: brown !important; }
+0-0-1  -> specificity = 1
+
+h2#main { color: red; }
+1-0-1  -> specificity = 101
+
+h2.navigation { color: blue; }
+0-1-1  -> specificity = 11
+
+4. Sort by order specified
+If 2 rules have the same weight, origin, and specificity, last one in the style sheet wins.
+Rules in any imported stylesheet are considered to be before any rule in the style sheet itself.
+
+----------------
+
+to use ul/li as navigation, it is best to remove margin and padding for the <ul>:
+http://css.maxdesign.com.au/selectutorial/tutorial_step10.htm
+div#navigation ul 
+{
+list-style-type: none; 
+padding: 0; 
+margin: 0; 
+}
+

@@ -1,0 +1,103 @@
+Make jeff-dev a puppet master
+Make proteus a puppet slave
+
+Install puppet on jeff-dev
+
+jeff-dev-> sudo yum install ruby ruby-libs
+  ...
+Installed: ruby.x86_64 0:1.8.1-7.el4_6.1 ruby-libs.x86_64 0:1.8.1-7.el4_6.1
+Complete!
+
+Ensure the openssl and xmlrpc packages are installed as well:
+
+jeff-dev-> ruby -ropenssl -e "puts :installed"
+installed
+jeff-dev-> ruby -rxmlrpc/client -e "puts :installed"
+installed
+
+they are.
+However, this installs ruby 1.8.1 from 2003.
+So we probably want something more recent, like the current stable release: 1.8.7
+
+This link: HOWTO Install Fedora Ruby on RHEL
+http://blogs.csuchico.edu/ik/2007/01/03/howto-install-fedora-ruby-on-rhel/
+gives a recipe to compile and build ruby 1.8.5 from sources.
+Should be easy to follow to build 1.8.7
+
+Ensure RDoc is installed
+
+jeff-dev-> ruby -rrdoc/usage -e "puts :installed"
+ruby: No such file to load -- rdoc/usage (LoadError)
+
+It is not.
+Apparently ruby-rdoc is not in our yum repository either.
+
+jeff-dev-> sudo yum install ruby-rdoc
+  ...
+No Match for argument: ruby-rdoc
+Nothing to do
+
+So I searched for docs; found ruby-docs and installed this, but the rdoc test still fails.
+Giving up on this part.
+My ruby book (more recent than the puppet book I was following) says ri is the doc tool.
+
+
+Ensure facter is installed on jeff-dev.
+There are rpms from reductive-labs.
+facter is not in yum.
+There are gems it can be installed from as well.
+
+So how do I install a gem?
+
+In ruby 1.9, gem is packaged with ruby.
+For ruby 1.8, gem must be separately installed from http://rubygems.org
+
+rubygems.org has a big list of files, but nothing that tells me which version
+of gems goes with which version of ruby.
+So that seems like a dead end.
+
+However, the main puppet page contains a link to a separate yum repository
+that contains a RHEL4 tree:
+
+http://people.redhat.com/dlutter/yum/rhel4/
+
+which contains the most recent stable puppet (0.24.4) and a facter 1.5.0,
+which is apparently ahead of the stable facter (1.3.8)
+
+It also contains augeas builds, which apparently is a redhat emerging techology:
+http://augeas.net/
+Augeas - a configuration API
+
+Augeas is a configuration editing tool. It parses configuration files in their native formats and transforms them into a tree. Configuration changes are made by manipulating this tree and saving it back into native config files.
+Augeas is:
+
+    * An API provided by a C library
+    * A command line tool to manipulate configuration from the shell (and shell scripts)
+    * Language bindings to do the same from your favorite scripting language
+    * Canonical tree representations of common configuration files
+    * A domain-specific language to describe configuration file formats
+
+Augeas goals:
+
+    * Manipulate configuration files safely, safer than the ad-hoc techniques generally used with grep, sed, awk and similar mechanisms in scripting languages
+    * Provide a local configuration API for Linux
+    * Make it easy to integrate new config files into the Augeas tree
+
+Ok, the other source for puppet for RHEL4 is EPEL:
+http://download.fedora.redhat.com/pub/epel/4/x86_64/repoview/puppet.html
+
+Facter is here:
+http://download.fedora.redhat.com/pub/epel/4/x86_64/repoview/facter.html
+
+Created ticket XXX for Wayne to take this further.
+
+According to ruby-lang.org, the latest stable ruby version is 1.8.7
+
+Following the ruby-lang.org links for OS X leads to
+http://www.macruby.org/trac/wiki/MacRuby
+which is an Apple-sponsored page.
+
+http://www.macruby.org/trac/wiki/WhyMacRuby
+tells what it is about; which is performance.
+Looks like this is what we want to use on OS X.
+

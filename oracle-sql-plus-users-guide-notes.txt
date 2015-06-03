@@ -1,0 +1,286 @@
+SQL Plus Overview
+
+  SQL*Plus is an interactive and batch query tool that is installed with every Oracle
+  Database installation. It has a command-line user interface.
+
+  There is also the SQL*Plus Instant Client which is a stand-alone command-line interface
+  available on platforms that support the OCI Instant Client. SQL*Plus Instant Client
+  connects to any available Oracle database, but does not require its own Oracle database
+  installation. See the Oracle Call Interface Programmer's Guide for more information on
+  the OCI Instant Client.
+
+SQL*Plus Date Format
+
+  The default date format in SQL*Plus is determined by the database NLS_DATE_ FORMAT
+  parameter and may use a date format displaying two digit years. You can use the SQL
+  TO_CHAR function, or the SQL*Plus COLUMN FORMAT command in your SELECT statements to
+  control the way dates are displayed in your report.
+
+Starting SQL Plus
+
+  The SQL*Plus executable is usually installed in $ORACLE_HOME/bin, which is usually
+  included in your operating system PATH environment variable. You may need to change
+  directory to the $ORACLE_HOME/bin directory to start SQL*Plus.
+
+  In the following examples, you are prompted to enter the database account password.  An
+  example using an Easy Connection identifier to connect to the HR schema in the MYDB
+  database running on mymachine is:
+
+    sqlplus hr@\"//mymachine.mydomain:port/MYDB\"
+
+  An example using a Net Service Name is:
+
+    sqlplus hr@MYDB
+
+  Net Service Names can be stored in a number of places, including Oracle Names. See the
+  Net Services Reference Guide for more information.
+
+  If you want to use Net Service Names configured in a local Oracle Net tnsnames.ora file,
+  then set the environment variable TNS_ADMIN to the directory containing the tnsnames.ora
+  file. For example, on UNIX, if your tnsnames.ora file is in /home/user1 and it defines
+  the Net Service Name MYDB2:
+
+    TNS_ADMIN=/home/user1 export TNS_ADMIN sqlplus hr@MYDB2
+
+  This example assumes the ORACLE_HOME environment variable is set, and the
+  $ORACLE_HOME/network/admin/tnsnames.ora or ORACLE_ HOME\network\admin\tnsnames.ora file
+  defines the Net Service Name MYDB3:
+
+    sqlplus hr@MYDB3
+
+  The TWO_TASK (on UNIX) or LOCAL (on Windows) environment variable can be set to a
+  connection identifier. This removes the need to explicitly enter the connection
+  identifier whenever a connection is made in SQL*Plus or SQL*Plus Instant Client. This
+  UNIX example connects to the database known as MYDB4:
+
+    TNS_ADMIN=/home/user1 export TNS_ADMIN TWO_TASK=MYDB4 export TWO_TASK sqlplus hr
+
+Starting SQL*Plus Instant Client
+
+  Because SQL*Plus Instant Client does not include a database, it is always 'remote' from
+  any database server. To connect to a database you must specify the database using an
+  Oracle Net connection identifier.
+
+  If TNS_ADMIN is not set, then an operating system dependent set of directories is
+  examined to find tnsnames.ora. This search path includes looking in the directory
+  specified by the ORACLE_HOME environment variable for network/admin/tnsnames.ora. This
+  is the only reason to set the ORACLE_HOME environment variable for SQL*Plus Instant
+  Client. If ORACLE_HOME is set when running Instant Client applications, it must be set
+  to a directory that exists.
+
+SQL*Plus Configuration
+
+  You can set up your SQL*Plus environment to use the same settings with each
+  session. There are two operating system files to do this:
+
+    - The Site Profile file, glogin.sql, for site wide settings.
+    - Additionally, the User Profile, login.sql, sets user specific settings.
+
+  The exact names of these files is system dependent.
+
+User Profile
+
+  For SQL*Plus command-line connections, SQL*Plus also supports a User Profile script. The
+  User Profile is executed after the Site Profile and is intended to allow users to
+  specifically customize their session. The User Profile script is generally named
+  login.sql. SQL*Plus searches for the User Profile in your current directory, and then
+  the directories you specify with the SQLPATH environment variable. SQL*Plus searches
+  this colon-separated list of directories and their subdirectories in the order they are
+  listed.
+
+  You can add any SQL commands, PL/SQL blocks, or SQL*Plus commands to your user
+  profile. When you start SQL*Plus, it automatically searches for your user profile and
+  runs the commands it contains.
+
+----
+
+Chap 4: SQL Plus Basics
+
+Case sensitivity is operating system specific.  For clarity, all table names,
+column names and commands in this guide appear in capitals.
+
+SQL Plus can process 3 kinds of commands:
+
+- SQL commands
+
+- PL/SQL blocks
+
+- SQLPlus commands for formatting query results, setting options and editing and storing
+  SQL and PL/SQL
+
+Command terminating and continutation characters depend on the mode
+
+The SQL Buffer
+
+The SQL buffer stores the most recent SQL or PL/SQL block, but not SQLPlus commands.
+
+View the buffer with the LIST command
+
+Execute the buffer using RUN or / command.
+RUN displays before execution.
+/ executes without display.
+
+DESCRIBE shows table defns, as well as PL/SQL functions:
+
+  create a function
+
+  create or replace function afunc (f1 varchar2, f2 number) return number as
+  begin
+    if (length(f1) > f2) then
+      return 1;
+    else
+      return 0;
+    end if;
+  end;
+  /
+
+SQL> DESC afunc
+FUNCTION afunc RETURNS NUMBER
+ Argument Name			Type			In/Out Default?
+ ------------------------------ ----------------------- ------ --------
+ F1				VARCHAR2		IN
+ F2				NUMBER			IN
+
+
+  The headings may be repeated in your output, depending on the setting of a system
+  variable called PAGESIZE. Sometimes, the result from a query will not fit the available
+  page width. You can use the system variable, LINESIZE, to set the width of the output in
+  characters. See Setting Page Dimensions on page 6-24. Typically, LINESIZE is set to 80
+  in command-line. Whether you see the message stating the number of records retrieved
+  depends on the setting of the system variable, FEEDBACK. See System Variables that
+  Affect How Commands Run on page 4-8 for more information.
+
+examples of setting page settings:
+
+    SET PAGESIZE 66
+    SET NEWPAGE 0
+    SET LINESIZE 70
+
+NEWPAGE setting:
+
+  If you set NEWPAGE to zero, SQL*Plus skips zero lines and displays and prints a formfeed
+  character to begin a new page. On most types of computer screens, the formfeed character
+  clears the screen and moves the cursor to the beginning of the first line. When you
+  print a report, the formfeed character makes the printer move to the top of a new sheet
+  of paper, even if the overall page length is less than that of the paper. If you set
+  NEWPAGE to NONE, SQL*Plus does not print a blank line or formfeed between report pages.
+
+So try these settings for my standard 48 row, 100 column windows:
+
+SET PAGESIZE 48
+SET LINESIZE 100
+SET NEWPAGE 0
+
+And store these settings so they are read every time I open SQLPlus.
+Thus I want to create my login.sql put that directory in SQLPATH.
+
+It would be good to know up front what is already configured in SQLPATH.
+How can I display the contents of SQLPATH?
+
+According to Table 2-1 of this guide, there is no default value of the SQLPATH environment
+variable in *nix installations.
+
+This looks like a good thing to read for sqlplus:
+http://www.orafaq.com/wiki/SQL*Plus_FAQ
+
+sho user
+displays the current user
+
+sho all
+will display all settings.
+The sqlplus faq shows a recipe to put the username in the prompt.
+
+select '&&_USER' username, '&&_CONNECT_IDENTIFIER' connected from dual
+SQL> /
+old   1: select '&&_USER' username, '&&_CONNECT_IDENTIFIER' connected from dual
+new   1: select 'EXTAPI' username, 'devportalsm' connected from dual
+
+USERNA CONNECTED
+------ -----------
+EXTAPI devportalsm
+
+----------------
+Tue Dec 27 14:19:49 PST 2011
+
+Notes from   Ch 6: Formatting SQLPlus Reports
+
+As an example, with these column settings:
+PORTAL3@qaportal> column
+COLUMN	 day ON
+FORMAT	 a7
+
+COLUMN	 timestamp ON
+FORMAT	 a30
+
+COLUMN	 host ON
+FORMAT	 a8
+
+and this query:
+-- show the cron status by day
+-- formatting
+-- column host format a8
+-- column timestamp format a30
+-- column day format a7
+-- XXX: write numeric column formats for count, exit_status
+select to_char(start_time, 'DD-Mon') as day, count(*) count,
+exit_status as exit,
+substr(hostname, 11, 5) as host 
+from cron_history
+where cron_id = 872
+  and start_time > '18-DEC-2011'
+group by to_char(start_time, 'DD-Mon'), exit_status, hostname
+order by 1, 2, 3, 4
+/
+
+I get:
+
+DAY	     COUNT	 EXIT HOST
+------- ---------- ---------- --------
+18-Dec	       468	    1 g4r02
+18-Dec	       473	    1 g4r01
+  ...
+25 rows selected.
+
+----
+
+The heading name need not be quoted in a column declaration, unless it contains special chars,
+ like whitespace, etc.
+To display a heading on more than 1 line, use the pipe char: |
+
+  column last_name heading 'LAST|NAME'
+
+This variable is named HEADSEP and can be changed with a SET command.
+
+The UNDERLINE variable gives the character used to underline headings; so to change it to % use:
+
+SET UNDERLINE %
+column host format a8      
+column timestamp format a30
+column day format a7       
+/
+gives:
+DAY          COUNT       EXIT HOST
+%%%%%%% %%%%%%%%%% %%%%%%%%%% %%%%%%%%
+18-Dec         468          1 g4r02
+18-Dec         473          1 g4r01
+  ...
+
+reset it to dash:
+PORTAL3@qaportal> set UNDERLINE '-'
+
+Formatting Number Columns
+
+  A NUMBER column's width equals the width of the heading or the width of the FORMAT plus
+  one space for the sign, whichever is greater. If you do not explicitly use FORMAT, then
+  the column's width will always be at least the value of SET NUMWIDTH.
+
+  ...
+
+  To use more than one format model for a single column, combine the desired models in one
+  COLUMN command (see Example 6–4).
+
+column host format a8      
+column timestamp format a30
+column day format a7       
+column exit format 9999
+column count format 99999

@@ -1,0 +1,27 @@
+
+proteus-> perl -V:make
+make='make';
+
+the typemap file is stored in $PERLLIB/ExtUtils/typemap
+this file is split into 3 parts:
+
+1. maps various C data types to a name, which somewhat correpsonds to a perl data type.
+2. contains C code called by xsubpp for input parameters
+3.                                      output
+
+----------------
+
+In EXAMPLE 4, the link step fails for me on OS X because it invokes ar directly;
+OS X uses Mach-O, which doesn't support ar. 
+Instead, libtool is the desired interface.
+
+So I need to change the recipe in one of the files to call libtool instead
+of calling ar and ranlib directly.
+
+Try:
+  DONE reading the libtool manpage on OS X.
+  see if I can get the linking flags out of perl -V
+
+  read the gnu linker docs
+    file:///Developer/Documentation/DocSets/com.apple.ADC_Reference_Library.DeveloperTools.docset/Contents/Resources/Documents/documentation/DeveloperTools/glibtool/index.html  
+

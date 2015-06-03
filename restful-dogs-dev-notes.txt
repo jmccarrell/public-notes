@@ -1,0 +1,620 @@
+Mon Feb 20 12:21:55 PST 2012
+jwm
+
+Project goal:
+Model and build an implementation using RESTful design
+of an API that models dogs and bones.
+
+----------------
+Find an example of moving an object between states:
+ e.g. a dog 1234 Fifi burys a bone 6767 t-bone, another dog 9876 Fido finds it and re-buries it
+
+model a dog:
+states: idle sleeping eating hunting running digging expired
+
+model a bone:
+states:  juicy buried eaten
+
+Assume the 2 dogs and the bone exist.
+
+
+# Fifi buries the bone
+PUT  /dogs/1234?state=digging
+PUT  /bones/6767?state=buried;dog=1234;location=main+st
+PUT  /dogs/1234?state=sleeping
+
+or possible to infer the digging state?
+POST /dogs/1234/bones/6767?state=buried
+  stores dog Fifi association with bone
+
+To model that Fido is searching
+PUT  /dogs/9876?state=hunting
+
+# dog Fido searches for bones
+GET  /dogs/9876/bones/search?q=buried
+how is Fido involved here?  In some sense, dog Fido, while we are modelling
+that this is the dog doing the searching, that fact is irrelevant.
+And while searching for the bones buried by Fifi makes sense
+GET  /dogs/1234/bones/search?q=buried
+(find all bones buried by Fifi)
+
+How to model searching by key / value pair?
+The google search example doesn't model key/value pairs;
+everything is a search term over natural language.
+We want to say something like:
+GET  /bones/search?location=main+street&state=buried
+
+How does Fifi find her buried bones?
+GET /bones/search?dog=1234&state=buried
+or
+GET /dogs/1234/bones/search?state=buried
+
+All of these searches return: list of /bones/{id}, including /bones/6767
+
+So our search done by Fido has found bone 6767;
+its state (the bones) contains the reference to Fifi, which a GET would reveal if desired.
+
+Model Fido burying the bone
+
+PUT /dogs/9876?state=digging
+PUT /bones/6767?state=juicy&dog=9876                             # Fido has the bone
+PUT /dogs/9876/?state=running
+PUT /bones/6767?state=buried&dog=9876&location=maple+ave         #      re-buries the bone
+
+This is an example of passing an object (bone) between other objects (Fifi and Fido).
+The idea here is that bones are exposed as top-level objects.
+There may well be cases when the object is not globally scoped.
+
+How do we model passing collections around?
+We want to model Fifi and Fido having a litter of 6 puppies.
+
+to create the puppies
+POST /dogs
+  post what?  we don't have an ID yet.
+  attributes of the dog:
+    height, weight, color
+  get back an id
+
+----------------
+
+start building it
+Create the mysql user:
+mysql user: restdogs: password: Ek1Kzn5XdvWuWuSQgH
+mysql> select password('Ek1Kzn5XdvWuWuSQgH');
++-------------------------------------------+
+| password('Ek1Kzn5XdvWuWuSQgH')            |
++-------------------------------------------+
+| *85A72C2B78A3B0DF9BAEC09BDEFD29F1FD11E67F |
++-------------------------------------------+
+
+----------------
+
+Now start to build a small HTML interface via a REST calls;
+first show all of the dogs in the collection:
+
+To get there, install tornado web on capella:
+I got tornado-2.2.tar.gz, and expanded it in ~/tmp:
+
+the README file gives the installation instructions:
+
+install dependency pycurl: {
+
+capella-> sudo easy_install pycurl
+Searching for pycurl
+Reading http://pypi.python.org/simple/pycurl/
+Reading http://pycurl.sourceforge.net/
+Reading http://pycurl.sourceforge.net/download/
+Best match: pycurl 7.19.0
+Downloading http://pycurl.sourceforge.net/download/pycurl-7.19.0.tar.gz
+Processing pycurl-7.19.0.tar.gz
+Running pycurl-7.19.0/setup.py -q bdist_egg --dist-dir /tmp/easy_install-JGS1_Q/pycurl-7.19.0/egg-dist-tmp-npo7hZ
+Using curl-config (libcurl 7.19.7)
+src/pycurl.c:85:4: warning: #warning "libcurl was compiled with SSL support, but configure could not determine which " "library was used; thus no SSL crypto locking callbacks will be set, which may " "cause random crashes on SSL requests"
+src/pycurl.c:85:4: warning: #warning "libcurl was compiled with SSL support, but configure could not determine which " "library was used; thus no SSL crypto locking callbacks will be set, which may " "cause random crashes on SSL requests"
+src/pycurl.c:85:4: warning: #warning "libcurl was compiled with SSL support, but configure could not determine which " "library was used; thus no SSL crypto locking callbacks will be set, which may " "cause random crashes on SSL requests"
+zip_safe flag not set; analyzing archive contents...
+Adding pycurl 7.19.0 to easy-install.pth file
+
+Installed /Library/Python/2.6/site-packages/pycurl-7.19.0-py2.6-macosx-10.6-universal.egg
+Processing dependencies for pycurl
+Finished processing dependencies for pycurl
+}
+
+build, then install tornadoweb itself: build first {
+
+capella-> cd tornado-2.2
+capella-> python setup.py build
+running build
+running build_py
+creating build
+creating build/lib
+creating build/lib/tornado
+copying tornado/__init__.py -> build/lib/tornado
+copying tornado/auth.py -> build/lib/tornado
+copying tornado/autoreload.py -> build/lib/tornado
+copying tornado/curl_httpclient.py -> build/lib/tornado
+copying tornado/database.py -> build/lib/tornado
+copying tornado/escape.py -> build/lib/tornado
+copying tornado/gen.py -> build/lib/tornado
+copying tornado/httpclient.py -> build/lib/tornado
+copying tornado/httpserver.py -> build/lib/tornado
+copying tornado/httputil.py -> build/lib/tornado
+copying tornado/ioloop.py -> build/lib/tornado
+copying tornado/iostream.py -> build/lib/tornado
+copying tornado/locale.py -> build/lib/tornado
+copying tornado/netutil.py -> build/lib/tornado
+copying tornado/options.py -> build/lib/tornado
+copying tornado/process.py -> build/lib/tornado
+copying tornado/simple_httpclient.py -> build/lib/tornado
+copying tornado/stack_context.py -> build/lib/tornado
+copying tornado/template.py -> build/lib/tornado
+copying tornado/testing.py -> build/lib/tornado
+copying tornado/util.py -> build/lib/tornado
+copying tornado/web.py -> build/lib/tornado
+copying tornado/websocket.py -> build/lib/tornado
+copying tornado/wsgi.py -> build/lib/tornado
+creating build/lib/tornado/test
+copying tornado/test/__init__.py -> build/lib/tornado/test
+copying tornado/test/auth_test.py -> build/lib/tornado/test
+copying tornado/test/curl_httpclient_test.py -> build/lib/tornado/test
+copying tornado/test/escape_test.py -> build/lib/tornado/test
+copying tornado/test/gen_test.py -> build/lib/tornado/test
+copying tornado/test/httpclient_test.py -> build/lib/tornado/test
+copying tornado/test/httpserver_test.py -> build/lib/tornado/test
+copying tornado/test/httputil_test.py -> build/lib/tornado/test
+copying tornado/test/import_test.py -> build/lib/tornado/test
+copying tornado/test/ioloop_test.py -> build/lib/tornado/test
+copying tornado/test/iostream_test.py -> build/lib/tornado/test
+copying tornado/test/process_test.py -> build/lib/tornado/test
+copying tornado/test/run_pyversion_tests.py -> build/lib/tornado/test
+copying tornado/test/runtests.py -> build/lib/tornado/test
+copying tornado/test/simple_httpclient_test.py -> build/lib/tornado/test
+copying tornado/test/stack_context_test.py -> build/lib/tornado/test
+copying tornado/test/template_test.py -> build/lib/tornado/test
+copying tornado/test/testing_test.py -> build/lib/tornado/test
+copying tornado/test/twisted_test.py -> build/lib/tornado/test
+copying tornado/test/web_test.py -> build/lib/tornado/test
+copying tornado/test/wsgi_test.py -> build/lib/tornado/test
+creating build/lib/tornado/platform
+copying tornado/platform/__init__.py -> build/lib/tornado/platform
+copying tornado/platform/auto.py -> build/lib/tornado/platform
+copying tornado/platform/interface.py -> build/lib/tornado/platform
+copying tornado/platform/posix.py -> build/lib/tornado/platform
+copying tornado/platform/twisted.py -> build/lib/tornado/platform
+copying tornado/platform/windows.py -> build/lib/tornado/platform
+copying tornado/ca-certificates.crt -> build/lib/tornado
+copying tornado/test/README -> build/lib/tornado/test
+copying tornado/test/test.crt -> build/lib/tornado/test
+copying tornado/test/test.key -> build/lib/tornado/test
+creating build/lib/tornado/test/static
+copying tornado/test/static/robots.txt -> build/lib/tornado/test/static
+}
+
+install: {
+capella-> sudo python setup.py install
+running install
+running bdist_egg
+running egg_info
+writing tornado.egg-info/PKG-INFO
+writing top-level names to tornado.egg-info/top_level.txt
+writing dependency_links to tornado.egg-info/dependency_links.txt
+reading manifest file 'tornado.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+warning: no previously-included files matching '_auto2to3*' found anywhere in distribution
+writing manifest file 'tornado.egg-info/SOURCES.txt'
+installing library code to build/bdist.macosx-10.6-universal/egg
+running install_lib
+running build_py
+creating build/bdist.macosx-10.6-universal
+creating build/bdist.macosx-10.6-universal/egg
+creating build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/__init__.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/auth.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/autoreload.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/ca-certificates.crt -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/curl_httpclient.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/database.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/escape.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/gen.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/httpclient.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/httpserver.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/httputil.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/ioloop.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/iostream.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/locale.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/netutil.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/options.py -> build/bdist.macosx-10.6-universal/egg/tornado
+creating build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/platform/__init__.py -> build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/platform/auto.py -> build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/platform/interface.py -> build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/platform/posix.py -> build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/platform/twisted.py -> build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/platform/windows.py -> build/bdist.macosx-10.6-universal/egg/tornado/platform
+copying build/lib/tornado/process.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/simple_httpclient.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/stack_context.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/template.py -> build/bdist.macosx-10.6-universal/egg/tornado
+creating build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/__init__.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/auth_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/curl_httpclient_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/escape_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/gen_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/httpclient_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/httpserver_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/httputil_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/import_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/ioloop_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/iostream_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/process_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/README -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/run_pyversion_tests.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/runtests.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/simple_httpclient_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/stack_context_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+creating build/bdist.macosx-10.6-universal/egg/tornado/test/static
+copying build/lib/tornado/test/static/robots.txt -> build/bdist.macosx-10.6-universal/egg/tornado/test/static
+copying build/lib/tornado/test/template_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/test.crt -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/test.key -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/testing_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/twisted_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/web_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/test/wsgi_test.py -> build/bdist.macosx-10.6-universal/egg/tornado/test
+copying build/lib/tornado/testing.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/util.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/web.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/websocket.py -> build/bdist.macosx-10.6-universal/egg/tornado
+copying build/lib/tornado/wsgi.py -> build/bdist.macosx-10.6-universal/egg/tornado
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/__init__.py to __init__.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/auth.py to auth.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/autoreload.py to autoreload.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/curl_httpclient.py to curl_httpclient.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/database.py to database.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/escape.py to escape.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/gen.py to gen.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/httpclient.py to httpclient.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/httpserver.py to httpserver.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/httputil.py to httputil.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/ioloop.py to ioloop.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/iostream.py to iostream.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/locale.py to locale.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/netutil.py to netutil.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/options.py to options.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/platform/__init__.py to __init__.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/platform/auto.py to auto.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/platform/interface.py to interface.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/platform/posix.py to posix.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/platform/twisted.py to twisted.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/platform/windows.py to windows.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/process.py to process.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/simple_httpclient.py to simple_httpclient.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/stack_context.py to stack_context.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/template.py to template.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/__init__.py to __init__.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/auth_test.py to auth_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/curl_httpclient_test.py to curl_httpclient_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/escape_test.py to escape_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/gen_test.py to gen_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/httpclient_test.py to httpclient_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/httpserver_test.py to httpserver_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/httputil_test.py to httputil_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/import_test.py to import_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/ioloop_test.py to ioloop_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/iostream_test.py to iostream_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/process_test.py to process_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/run_pyversion_tests.py to run_pyversion_tests.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/runtests.py to runtests.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/simple_httpclient_test.py to simple_httpclient_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/stack_context_test.py to stack_context_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/template_test.py to template_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/testing_test.py to testing_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/twisted_test.py to twisted_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/web_test.py to web_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/test/wsgi_test.py to wsgi_test.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/testing.py to testing.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/util.py to util.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/web.py to web.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/websocket.py to websocket.pyc
+byte-compiling build/bdist.macosx-10.6-universal/egg/tornado/wsgi.py to wsgi.pyc
+creating build/bdist.macosx-10.6-universal/egg/EGG-INFO
+copying tornado.egg-info/PKG-INFO -> build/bdist.macosx-10.6-universal/egg/EGG-INFO
+copying tornado.egg-info/SOURCES.txt -> build/bdist.macosx-10.6-universal/egg/EGG-INFO
+copying tornado.egg-info/dependency_links.txt -> build/bdist.macosx-10.6-universal/egg/EGG-INFO
+copying tornado.egg-info/top_level.txt -> build/bdist.macosx-10.6-universal/egg/EGG-INFO
+zip_safe flag not set; analyzing archive contents...
+tornado.autoreload: module references __file__
+tornado.simple_httpclient: module references __file__
+/System/Library/Frameworks/Python.framework/Versions/2.6/Extras/lib/python/setuptools/command/bdist_egg.py:422: UnicodeWarning: Unicode equal comparison failed to convert both arguments to Unicode - interpreting them as being unequal
+  symbols = dict.fromkeys(iter_symbols(code))
+tornado.test.httpserver_test: module references __file__
+tornado.test.web_test: module references __file__
+creating dist
+creating 'dist/tornado-2.2-py2.6.egg' and adding 'build/bdist.macosx-10.6-universal/egg' to it
+removing 'build/bdist.macosx-10.6-universal/egg' (and everything under it)
+Processing tornado-2.2-py2.6.egg
+creating /Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg
+Extracting tornado-2.2-py2.6.egg to /Library/Python/2.6/site-packages
+Adding tornado 2.2 to easy-install.pth file
+
+Installed /Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg
+Processing dependencies for tornado==2.2
+Finished processing dependencies for tornado==2.2
+
+}
+
+then run helloworld:
+
+capella-> python demos/helloworld/helloworld.py 
+
+and connect from a web browser:
+GET localhost:8888/
+and sure enough, I get 
+'Hello World'
+
+----
+So now I need to build a front-end UI and start the back-end REST implementation.
+                         8888:/dog-ui
+                         8777: backend
+
+How do I do unit testing?
+what does tornado do?
+How can I run the tornado unit tests?
+
+tornado uses pycurl as the test HTTP client.
+NO: TOO COMPLEX So will I.
+
+capella-> pwd && ack -l pycurl
+/Users/jwm/tmp/tornado-2.2/tornado
+curl_httpclient.py
+httpclient.py
+test/curl_httpclient_test.py
+test/import_test.py
+
+capella-> wc -l $(ack -l pycurl)
+     435 curl_httpclient.py
+     417 httpclient.py
+      23 test/curl_httpclient_test.py
+      57 test/import_test.py
+     932 total
+
+read curl_httpclient.py
+
+----------------
+Wed Feb 22 21:15:18 PST 2012
+
+I happened on requests and its testing counter part httpbin
+  http://docs.python-requests.org/en/latest/
+  http://httpbin.org/
+
+Use this for my python client side code.
+
+Follow 
+  http://docs.python-requests.org/en/latest/user/install/#install
+for installation
+
+clone the git repository:
+capella-> p /j/proj/
+/j/proj ~
+capella-> git clone git://github.com/kennethreitz/requests.git
+Cloning into requests...
+  ...
+
+How does requests do unit tests?
+unittest
+
+I will use unittest for this module.
+
+----
+DONE Goal: run 1 unit test against /dogs
+
+goal: wire in the mysql DB
+DONE create the dogs schema
+            bones schema
+  capella-> mysql -u root -pjavaone restdogs < create-db.sql 
+query the dogs table from the /dogs handler
+
+current issue:
+capella-> python restful-dogs/server.py 
+Traceback (most recent call last):
+  File "restful-dogs/server.py", line 6, in <module>
+    import tornado.database
+  File "/Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg/tornado/database.py", line 20, in <module>
+    import MySQLdb.constants
+ImportError: No module named MySQLdb.constants
+
+I guess I need to find and install MySQLdb.
+I downloaded it from sourceforge
+then
+python setup.py build
+                install
+
+----
+next issue: {
+capella-> python restful-dogs/server.py 
+ERROR:root:Uncaught exception GET /dogs (127.0.0.1)
+HTTPRequest(protocol='http', host='localhost:8787', method='GET', uri='/dogs', version='HTTP/1.1', remote_ip='127.0.0.1', body='', headers={'Host': 'localhost:8787', 'Accept-Encoding': 'identity, deflate, compress, gzip', 'Accept': '*/*', 'User-Agent': 'python-requests/0.10.3'})
+Traceback (most recent call last):
+  File "/Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg/tornado/web.py", line 988, in _execute
+    getattr(self, self.request.method.lower())(*args, **kwargs)
+  File "restful-dogs/server.py", line 14, in get
+    db = database.Connection("localhost", "restdogs", "restdogs", "Ek1Kzn5XdvWuWuSQgH")
+NameError: global name 'database' is not defined
+ERROR:root:500 GET /dogs (127.0.0.1) 56.48ms
+}
+I suppose I need to re-read the DB-API doc for the convention here.
+Ok, I fixed that one.
+
+Now I have: {
+capella-> python restful-dogs/server.py 
+ERROR:root:Uncaught exception GET /dogs (127.0.0.1)
+HTTPRequest(protocol='http', host='localhost:8787', method='GET', uri='/dogs', version='HTTP/1.1', remote_ip='127.0.0.1', body='', headers={'Host': 'localhost:8787', 'Accept-Encoding': 'identity, deflate, compress, gzip', 'Accept': '*/*', 'User-Agent': 'python-requests/0.10.3'})
+Traceback (most recent call last):
+  File "/Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg/tornado/web.py", line 988, in _execute
+    getattr(self, self.request.method.lower())(*args, **kwargs)
+  File "restful-dogs/server.py", line 15, in get
+    self.write(db.query("SELECT CURDATE() FROM dogs"))
+  File "/Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg/tornado/web.py", line 469, in write
+    chunk = utf8(chunk)
+  File "/Library/Python/2.6/site-packages/tornado-2.2-py2.6.egg/tornado/escape.py", line 161, in utf8
+    assert isinstance(value, unicode)
+AssertionError
+ERROR:root:500 GET /dogs (127.0.0.1) 549.33ms
+}
+I guess I need to ensure that the DB is using UTF-8 encoding?
+
+NB: how to pass in a database to the application URL handlers: {
+from: http://www.tornadoweb.org/documentation/web.html#entry-points
+
+RequestHandler.initialize()[source]
+Hook for subclass initialization.
+
+A dictionary passed as the third argument of a url spec will be supplied as keyword arguments to initialize().
+
+Example:
+
+class ProfileHandler(RequestHandler):
+    def initialize(self, database):
+        self.database = database
+
+    def get(self, username):
+        ...
+
+app = Application([
+    (r'/user/(.*)', ProfileHandler, dict(database=database)),
+    ])
+}
+
+Most output is generated with the write method: {
+RequestHandler.write(chunk)[source]
+Writes the given chunk to the output buffer.
+
+To write the output to the network, use the flush() method below.
+
+If the given chunk is a dictionary, we write it as JSON and set the Content-Type of the response to be application/json. (if you want to send JSON as a different Content-Type, call set_header after calling write()).
+
+Note that lists are not converted to JSON because of a potential cross-site security vulnerability. All JSON output should be wrapped in a dictionary. More details at http://haacked.com/archive/2008/11/20/anatomy-of-a-subtle-json-vulnerability.aspx
+
+
+}
+
+----------------
+Maybe the DB connectors are not all installed.
+Looks like it:
+>>> import MySQLdb.constants
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ImportError: No module named MySQLdb.constants
+
+DONE So go get it and install it:
+
+What is the python word for a thing in []?  A: List
+() is a tuple (sort of a read only list)
+The result from the DB query is a list, which cannot be passed through request.write()
+for security reasons.
+So encode it as dictiionary; now things work just fine.
+
+Now my first unit test works.  I can query /dogs:
+    def test_get_all_dogs(self):
+        dogs = requests.get(base_url('dogs'))
+        self.assertEquals(200, dogs.status_code)
+
+----
+DONE Store my project in my p4 server.
+
+----
+DONE Add logging to server.
+DONE open the mysql connection in application initialization and pass it to the handlers.
+DONE fetch bones in the test program
+
+decode the json in the client
+
+----
+reasonable article describing python testing:
+http://www.voidspace.org.uk/python/articles/introduction-to-unittest.shtml
+
+the 'mock' test mocking library appears to be one candidate for use in creating
+mock objects for unit tests.
+
+the order tests are run in is given by:
+
+    Note that the order in which the various test cases will be run is determined by
+    sorting the test function names with respect to the built-in ordering for strings.
+
+This is a good article describing some subtlties of checking for list-like objects;
+ther is more to it: iterables, etc.
+
+http://stackoverflow.com/questions/1835018/python-check-if-an-object-is-a-list-or-tuple-but-not-string
+
+DONE figure out how to make the tests show me each individual test case running.
+  I used this:
+
+def runTestsVerbose():
+    suite = unittest2.TestLoader().loadTestsFromTestCase(DogBoneTest)
+    unittest2.TextTestRunner(verbosity=2).run(suite)
+
+to get this:
+
+cd /j/proj/restful-dogs/test && python dog-catcher.py
+test_get_all_bones (__main__.DogBoneTest) ... ok
+test_get_all_dogs (__main__.DogBoneTest) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.015s
+
+OK
+
+DONE control the ordering of the tests by naming the methods
+  they are sorted lexicographically, so introduce numbering to specify the sort order.
+
+----
+Now figure out how to post to create a new dog.
+
+this means understanding how to pass state through the POST method of requests.
+which is here:
+http://docs.python-requests.org/en/latest/user/quickstart/#make-a-post-request
+
+and means understanding how to implement POST inside tornado
+
+I am inserting data via POST into the DB.
+Now I need to return the value of the id via the POST to the caller over HTTP.
+
+http://stackoverflow.com/questions/1829875/is-it-ok-by-rest-to-return-content-after-post
+
+The HTTP spec pretty much says it all:
+http://www.ietf.org/rfc/rfc2616.txt
+search for POST
+
+An example Location header is:
+
+  Location: http://www.w3.org/pub/WWW/People.html
+
+A good python regex overview:
+http://code.google.com/edu/languages/google-python-class/regular-expressions.html
+
+----
+Wed Mar  7 16:43:09 PST 2012
+
+DONE create a bone associated with Fifi
+
+DONE post to /bones creates a bone
+DONE delete via /bones/n
+
+DONE test if a bone can be created associated with a dog
+
+----
+Mon Mar 19 21:40:35 PDT 2012
+
+Ben Darnell said he runs this is a shell window so the tests get executed on every file save:
+
+  python -m tornado.autoreload -m tornado.test.runtests
+
+so try this for restful dogs:
+
+  python -m restful-dogs.kennel -m restful-dogs.test.runtests
+
+I need to refactor the code to match this style.
+
+So do that.  Done.
+

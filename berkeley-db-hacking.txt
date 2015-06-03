@@ -1,0 +1,143 @@
+Hacking on the perl BerkeleyDB module
+
+Paul Marquess (pmqs@cpan.org) is the author of the module.
+
+----------------------------------------------------------------
+
+building and running BerkeleyDB 0.36 on proteus
+
+The stock OS X perl comes with BerkeleyDB 0.29:
+proteus-> perl -MBerkeleyDB -e 'print qq{BerkeleyDB ver $BerkeleyDB::VERSION\n}'
+BerkeleyDB ver 0.29
+
+I got BerkeleyDB 4.7.25 from the Oracle download site.
+
+From the README, I just need to edit config.in to name where this version
+is installed.
+
+Once done, the usual testing mantra worked just fine.
+
+perl Makefile.PL
+make
+make test
+
+
+----------------------------------------------------------------
+
+possible todo list
+
+From BerkeleyDB.pod:
+
+  Elaborate on Concurrent Data Store, as referred to here:
+
+  =head1 CDS Mode
+
+  The Berkeley Db Concurrent Data Store is a lightweight locking mechanism
+  that is useful in scenarios where transactions are overkill. See the
+  accompanying document .. for details of using this module in CDS mode.
+
+From db-4.7.t
+
+# test -Verbose
+# test -Flags
+# db_value_set
+
+
+----------------------------------------------------------------
+
+db_value_set
+
+following up on the hint, what does db_value_set do?
+
+file:///Users/jmccarre/tmp/db-4.7.25.NC/docs/ref/changelog/3.0.55.html
+notes that db_value_set has been changed from a standalone function
+to a method on DBENV:
+
+  # The db_jump_set and db_value_set functions have been replaced by methods on the DBENV handle. 
+
+and from further down:
+
+  # A new flag has been added to the DBENV->open method, DB_SYSTEM_MEM. This flag causes Berkeley DB to attempt to allocate memory for its shared regions from system shared memory. This flag supports functionality similar to that previously provided by the DB_REGION_ANON and DB_REGION_NAME flags to the db_value_set interface. 
+
+This document:
+
+file:///Users/jmccarre/tmp/db-4.7.25.NC/docs/ref/upgrade.3.0/value_set.html
+
+gives the full mapping.
+
+There is an interesting example in:
+examples_c/csv/
+I should probably study that example a bit more.
+
+----------------------------------------------------------------
+
+There is no documentation for the BerkeleyDB::Env module per se.
+It is embedded in the BerkeleyDB document page.
+
+----------------------------------------------------------------
+
+there is no mention of DB_PRIVATE nor DB_SYSTEM_MEM in the documentation.
+
+
+There are many ... in the Flags section of the BDB::Env
+as well as flags that have no definition.
+
+env->set_flags is under documented.
+
+$env->status should say what the format of the returned value is.
+and the status documentation is repeated twice.
+
+where does $env->lock_stat_print print its statistics to?
+STDOUT?
+
+$env->set_timeout has no description.
+
+Examples
+There is no example of using a transaction.
+
+Under the title 'Global Classes' are what appears to be 
+3 class static methods:
+db_remove
+db_rename
+db_verify
+
+None of these methods have documentation
+
+The top level description of the 4 DB types:
+
+hash
+btree
+recno
+queue
+
+could use some exposition to describe when one is better
+than the other.
+
+BDB::Hash
+
+describe what to do if one doesn't use the tie interface,
+instead of just saying:
+  In addition to the high-level tied hash interface,
+  it is possible to make use of the underlying methods provided by Berkeley DB
+
+provide some description of -Ffactor and -Nelem instead of:
+  See the Berkeley DB documentation for details of these options.
+
+-Hash
+
+define / describe the default hash function
+  when is it good?
+  on what kinds of inputs is it not so good?
+
+fill in the ""
+  See "" for an example.
+
+In
+A Simple Tied Hash Example
+why is this needed:
+use vars qw(%h $k $v);
+
+In
+Custom Sorting Duplicate Keys
+
+write an example, like reverse sorting the same fruit db.

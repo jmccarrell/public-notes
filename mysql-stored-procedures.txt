@@ -1,0 +1,59 @@
+MySQL Stored Procedure Notes
+
+MySQL multi-row functions that aggregate over rows are accepted syntactically, but return NULL. Eg COUNT, SUM, MIN, AVG etc.  Page 65
+
+Statements in a block BEGIN/END must occur in order:
+1. Variable declarations
+2. Cursor declarations
+3. Handler declarations
+4. Program statements
+
+Block labels may occur before or after BEGIN/END:
+[label:] BEGIN
+  ...
+END [label]
+
+With tri-valued logic, it is important to remember that the trailing else clause will execute if none of the exprs are are true: which means false or NULL.
+Thus fully qualify range checks and throw an error in the final else to catch the NULL case
+
+A case stmt will raise an exception if none of the clauses match. So always write an else.
+Page 89
+
+Searched case page 90
+
+Iterate [label]
+Is equivalent to perl next
+
+Copy down the summary rules for SQL stored programs on page 99
+
+Limitations of iterating with cursors pg 101
+
+Example 5-12 is canonical processor of every row in a result set.
+
+Unbounded selects can return result sets to the calling program, but not to another stored program.
+Pg 112
+However, temp tables provide an answer. Ex 5-24
+
+Consider the use of multi-return set stored procs to return the master / detail detail of many reports. Pg 116
+
+Check to see if MySQL 5.5 implemented any missing SQL 2003 features. Pg 139
+
+Examine my user add function in light of my reading. Likely it would benefit from error handlers.
+
+Try writing an error handler that names the data value triggering the error. Extend example 6-24.
+
+----
+To see the stored procs/funcs defined, use this:
+
+select routine_type, routine_name
+  from information_schema.routines
+ where routine_schema = 'invino';
++--------------+----------------------------------+
+| routine_type | routine_name                     |
++--------------+----------------------------------+
+| PROCEDURE    | sp_inclub_shipping_by_zip5       |
+| PROCEDURE    | sp_state_sales_tax_by_zip5       |
+| PROCEDURE    | _sp_refrigerated_shipping_lookup |
++--------------+----------------------------------+
+3 rows in set (0.05 sec)
+

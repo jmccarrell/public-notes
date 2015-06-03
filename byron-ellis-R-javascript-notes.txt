@@ -1,0 +1,156 @@
+re: Byron Ellis' presentation of the BayArea R Users Group
+  slides at ~/jdocs/R/Byron Ellis - A few of my favorite things - BARUG Mar 2011.pdf
+
+email: {
+From: byronellis <reply+m-4800004-09a89041fb7a04a3e0b01a2662f0e0d5a81f0d16@reply.github.com>
+Date: March 15, 2011 4:47:04 PM PDT
+To: jeff@mccarrell.org
+Subject: Re: [GitHub] followup from barug meeting at PAW last night
+
+I was using the RGraphicsDevice package by Duncan Temple Lang. His site is http://omegahat.org
+
+Lots of fun stuff there.
+}
+
+Q's to answer:
+what role does MongoDB play?
+  search the javascript code for references to mongo
+
+what role does R play in this whole thing?
+
+where is the demographic data loaded from?
+  looks like the data are in R/votes.txt
+    ./R/election_map.R:3:votes = read.delim("votes.txt")
+    ./R/electionLoad.R:1:votes = read.delim("votes.txt")
+
+follow that thread: 
+votes.txt file format: {
+proteus-> wc -l R/votes.txt 
+    6135 R/votes.txt
+proteus-> sed 5q !$
+sed 5q R/votes.txt
+"county"	"party"	"votes"	"p"
+"alabama,autauga"	"Republican"	17403	0.000134464644351794
+"alabama,baldwin"	"Republican"	61271	0.000473411666039119
+"alabama,barbour"	"Republican"	5866	4.53237719799819e-05
+"alabama,bibb"	"Republican"	6262	4.83834742820741e-05
+
+looks like total votes
+
+I would expect Orange county, CA to be largely republican:
+proteus-> grep -i orange R/votes.txt | grep -i califor
+"california,orange"	"Republican"	579064	0.00447415013600686
+"california,orange"	"Democrat"	549558	0.00424617140841713
+
+San Francisco:
+proteus-> grep -i francisco R/votes.txt | grep -i califor
+"california,san francisco"	"Republican"	52292	0.000404035234295468
+"california,san francisco"	"Democrat"	322220	0.0024896395853034
+
+Marin:
+proteus-> grep -i marin R/votes.txt | grep -i califor
+"california,marin"	"Republican"	28384	0.000219309571067134
+"california,marin"	"Democrat"	109320	0.000844663271880603
+
+}
+
+
+MongoDb:
+
+read some docs:
+  http://www.mongodb.org/display/DOCS/Quickstart
+
+node.js
+  read some docs
+    DONE http://nodejs.org/
+    ~/jdocs/node/jsconf.pdf
+    ~/jdocs/node/jsconf2010.pdf
+
+
+build and configure node on proteus: {
+proteus-> brew install node
+Warning: It appears you have Macports or Fink installed
+Software installed with other package managers causes known problems for
+Homebrew. If formula fail to build uninstall Macports/Fink and reinstall any
+affected formula.
+==> Downloading http://nodejs.org/dist/node-v0.4.2.tar.gz
+######################################################################## 100.0%
+==> ./configure --prefix=/usr/local/Cellar/node/0.4.2
+==> make install
+==> Caveats
+Please add /usr/local/lib/node to your NODE_PATH environment variable to have node libraries picked up.
+==> Summary
+/usr/local/Cellar/node/0.4.2: 72 files, 7.4M, built in 3.7 minutes
+
+}
+
+get a simple node server to run on localhost:
+
+2 second delayed hello world: {
+proteus-> node ~/tmp/node.js/delayed-hello-world.js 
+hello
+world
+}
+
+Write a program which:
+starts a TCP server on port 8000 send the peer a message close the connection: {
+
+var tcp = require("tcp");
+var s = tcp.createServer();
+s.addListener("connection",
+        function (c) {
+        c.send("hello!");
+        c.close();
+});
+s.listen(8000);
+
+
+first attempt failed to find the tcp lib: {
+proteus-> node ~/tmp/node.js/hello-server.js 
+
+node.js:116
+        throw e; // process.nextTick error, or 'error' event on first tick
+        ^
+Error: Cannot find module 'tcp'
+    at Function._resolveFilename (module.js:299:11)
+    at Function._load (module.js:245:25)
+    at require (module.js:327:19)
+    at Object.<anonymous> (/Users/jmccarre/tmp/node.js/hello-server.js:1:73)
+    at Module._compile (module.js:383:26)
+    at Object..js (module.js:389:10)
+    at Module.load (module.js:315:31)
+    at Function._load (module.js:276:12)
+    at Array.<anonymous> (module.js:402:10)
+    at EventEmitter._tickCallback (node.js:108:26)
+}
+
+node modules:
+  https://github.com/joyent/node/wiki/modules
+
+which appears to have been supplanted by the net lib
+
+Node also makes an excellent TCP server, and here is an example that responds to all TCP
+connections with the message "Hello World" and then closes the connection.
+
+hello-tcp.js
+
+// Load the net module to create a tcp server.
+var net = require('net');
+var sys = require('util');
+
+// Setup a tcp server
+var server = net.createServer(function (socket) {
+
+  // Every time someone connects, tell them hello and then close the connection.
+  socket.addListener("connect", function () {
+    sys.puts("Connection from " + socket.remoteAddress);
+    socket.end("Hello World\n");
+  });
+
+});
+
+// Fire up the server bound to port 7000 on localhost
+server.listen(7000, "localhost");
+
+// Put a friendly message on the terminal
+console.log("TCP server listening on port 7000 at localhost.");

@@ -1,0 +1,99 @@
+set up my aws instance
+
+EC2 access key id: 1VCGZS8T9HK8A33M2GG2
+secret access key: CqyIjRmKvxLwC7F5iuOnuyiycv5ONJWL94JFknzW
+
+Build a new keypair to use just for this event:
+~/Downloads/pk-APKAICDC32LJ5UJD6A6A.pem
+
+----------------
+
+Parallel Programming with Spark
+
+intro to scala
+google 'scala seq' for list of sequence methods: map, filter, ...
+
+set up scala on capella/proteus: {
+capella-> brew info scala
+scala: stable 2.9.2
+http://www.scala-lang.org/
+Not installed
+https://github.com/mxcl/homebrew/commits/master/Library/Formula/scala.rb
+
+==> Caveats
+Bash completion has been installed to:
+  /usr/local/etc/bash_completion.d
+capella-> brew install scala
+==> Downloading http://www.scala-lang.org/downloads/distrib/files/scala-2.9.2.tgz
+######################################################################## 100.0%
+==> Downloading https://raw.github.com/scala/scala-dist/27bc0c25145a83691e3678c7dda602e765e13413/com
+######################################################################## 100.0%
+==> Caveats
+Bash completion has been installed to:
+  /usr/local/etc/bash_completion.d
+==> Summary
+/usr/local/Cellar/scala/2.9.2: 38 files, 26M, built in 36 seconds
+}
+
+
+----
+spark programming
+Here is word count in spark:
+
+val lines = sc.textFile("hamlet.txt")
+
+val counts = lines.flatMap(line => line.split(" "))
+                  .map(word => (word, 1))
+                  .reduceByKey(_ + _)
+
+
+www.spark-project.org/documentation.html
+
+How to Get Started (in spark-shell)
+
+git clone git://github.com/mesos/spark
+cd spark
+sbt/sct compile
+
+./spark-shell
+
+The google doc that describes the online exercises is:
+https://docs.google.com/document/pub?id=1hnZvopYb9dBEkad6dPVBRKnPSTCrWfdqQkc4NKr_SCw
+
+----------------
+spark streaming paper:
+http://tinyurl.com/dstreamsb
+
+mesos origins paper:
+incubator.apache.org/mesos/research.html
+
+what is diffstat?
+a git command?
+
+they use monit to actually manage processes
+all twitter's development on mesos is done in the public
+pretty much all development on mesos is deployed on production twitter clusters.
+
+the twitter cluster of mesos has been continuously running for ~1.5 years
+
+conviva's analytics machines:
+reporting cluster: 4 nodes; 16 cores each; 96G of ram
+xx cluster: 10 nodes; 16? cores; 200G of ram
+
+conviva has its own internal workflow system
+
+http://www.conviva.com/blog/engineering/using-spark-and-hive-to-process-bigdata-at-conviva
+
+there are spark meetups monthly;
+consider attending these
+
+----------------
+quantifind
+Erich Nachbar
+
+this is the talk where comcast dropped out, so I only saw a portion of this talk.
+
+has a recommended UI for large scale analytics
+
+----
+egml?no  as a java library that provides fast vector etc. math

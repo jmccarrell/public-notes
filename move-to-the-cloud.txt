@@ -1,0 +1,809 @@
+http://www.slicehost.com/ {
+  root access
+  $20 / month  == 256 RAM / 10GB disk / 150GB bandwidth
+  
+  so the model is I do it on my own;
+  I put up my own ubuntu out there on slice host
+    I run there:
+      git repository
+      mediawiki
+    and whatever else I want.
+
+  Open Issues
+    -- what domain name is this known as?
+    -- does this replace emptech.com at westhost?
+}
+
+dreamhost {
+  Peter's choice
+}
+
+MAYBE; WORTH IT? make a private public code repository on github somewhere {
+  find out if I can make code access private on github: yes
+  micro account for my stuff is $7/month
+  what problems does this solve?
+    backups of my src code repository from negheb
+    removes the last production need I have for a server at home
+    I get experience with git; move closer to open source development model
+  what problems does this create?
+    $7 / month
+  how many projects and disk blocks do I need right now?
+    on proteus, I have p4 clients
+  are there other revision control choices out there that are better?
+  git hosting wiki:
+    https://git.wiki.kernel.org/index.php/GitHosting
+  github
+    ++ hosted at rackspace, I think here in silicon valley
+    $7 / month for smallest possible account
+    then up to $12 etc.
+  codebasehq:
+    review of it here: http://drewblas.com/2009/03/07/my-new-love-codebase-hq/
+    git++
+    -- hosted in britain
+    ++ they have a 20MB limited free account; would handle some of my stuff, but not all
+  a2hosting
+    ++ move emptech.com from westhost to a2hosting and get git support as part of the pkg
+    or create mccarrell.org hosted from a2hosting;
+    git support requires $5 / month account
+    then move over there, including my personal email address: jeff@mccarrell.org
+    move mccarrell.org domain there
+    drop my need to access services at my house.
+    michigan based
+  indefero
+    -- hosted in europe
+    49 euros per year
+  unfuddle: maybe, probably not
+    -- doesn't seem to have any ssh support
+    -- looks svn oriented
+  sshcontrol: maybe
+    ++ hosted in SF at servepath
+    ++ all 3: git, subversion, mercurial
+    ++ cheapest real capacity: 1G of storage for $9.75 / month
+    -- small:  324 projects and 577 accounts; could go out of biz
+    -- latest news is from Dec 08; looks inactive
+  rejected choices
+    sourceforge.net: no, no private support, just open source stuff
+    savannah: no, this is GNU stuff
+    codesion, nee cvsdude: focused at enterprise; too expensive
+    gitfarm: low-end, doesn't look for real
+    repoz.org: web interface took 10s of seconds to respond; appears dead
+    thechaw: last update from 2009, not enough traction to be real
+}
+
+----------------
+
+rackspace
+http://www.rackspacecloud.com/cloud_hosting_products/servers/technology
+any linux distro I want: lucid lynx
+running on top of xen
+free backups of my size of slice
+all 64-bit hosts
+
+entry level is ~$12 / month for me
+
+seems like a complete slam dunk
+
+----------------
+
+clean up old p4 clients;
+narrow down the disk blocks used: {
+starting point: Wed Jul 28 11:24:12 PDT 2010 {
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot
+946M	.
+627568	software
+319784	jwm
+6852	homes
+5324	remedy
+3432	unix
+3352	proj
+1088	IMPORT
+436	snapgear
+164	desana
+160	cdrive
+144	notes
+112	www
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/software
+613M	.
+601252	win32
+18152	osx
+6180	xml
+1936	macos
+32	perforce
+12	snapgear
+}
+}
+
+
+narrow down the client space: {
+
+DONE clients that can be simply deleted: {
+  DONE not managing win32 any more
+    DONE jwm-cdrive-atacama
+    DONE jwm-cdrive-sahara
+  no more perlcritic project
+    DONE jwm-home-perlcritic
+  sahara NT machine is gone
+    DONE jwm-jwm-sahara 2006/02/12 root d:\ 'jwm's files on home NT machine: sahara '
+}
+
+clients that maybe can be deleted: {
+  what value is this providing to the Leda machine, or Cate?
+    jwm-software-leda 2009/01/01 root /Users/Leda/p4sw 'osx software client for Leda '
+  ditto; the disk blocks for this client have been reclaimed
+    jwm-software-proteus 2009/01/01 root /p4sw/osx 'Created by jwm. '
+    No, this contains dvd2ipod4mac for Cate.
+    Does she still need this?
+  what software is being mananged this way on negheb?  pre packaged stuff?
+    jwm-software-negheb 2006/10/07 root /home/software 'Created by jwm. '
+}
+
+proteus-> p4 clients | wc -l
+      31
+proteus-> p4 clients
+Client jwm-cdrive-atacama 2004/04/22 root c:\ 'Program settings on atacama '
+Client jwm-cdrive-sahara 2001/09/30 root c:\ 'Program files on sahara '
+Client jwm-dotfiles-negheb 2006/09/10 root /home/jwm 'jwm's home directory dot files on negheb '
+Client jwm-home-MAIN 2010/02/21 root /Users/jmccarre 'Mainline for Jeffs unix home directory tree Shared across some of my *nix accounts. Really a merge point to share state between'
+Client jwm-home-atacama 2010/02/21 root /home/jwm 'Jeffs home directory on atacama; HP notebook '
+Client jwm-home-jeffdev 2008/08/01 root /home/imiuser 'Jeffs env on my aCerno development machine jeff-dev '
+Client jwm-home-perlcritic 2009/01/31 root /home/jmccarrell 'Jeff's home directory on perlcritic.com '
+Client jwm-home-proteus 2010/02/21 root /Users/jmccarre 'Jeff's home directory on proteus '
+Client jwm-home-proteus-ubu 2008/12/12 root /home/jwm 'Jeff's environment on my proteus hosted ubuntu '
+Client jwm-jwm-atacama 2007/01/17 root c:\ 'Jeff's environment on atacama: my laptop '
+Client jwm-jwm-negheb 2006/12/23 root /home 'Created by jwm. '
+Client jwm-jwm-proteus 2008/07/25 root /Users/jwmhome 'Jeff's jwmhome home environment on my aCerno MacOS X laptop. '
+Client jwm-jwm-sahara 2006/02/12 root d:\ 'jwm's files on home NT machine: sahara '
+Client jwm-jwmhome-atacama 2010/02/27 root /jwmhome 'Jeffs old home directory on atacama used for the transition to the new directory layout '
+Client jwm-notes-MAIN-proteus 2010/02/21 root /j/notes-MAIN 'Mainline for Jeffs notes directory tree '
+Client jwm-notes-jwm-atacama 2010/02/21 root /j/notes 'Jeffs notes directory on atacama; HP notebook '
+Client jwm-notes-proteus 2010/02/22 root /j/notes 'Jeffs notes on proteus '
+Client jwm-pdata-atacama 2010/05/16 root /j/personal 'Created by jwm. '
+Client jwm-peninsulamotorsport-proteus 2010/03/17 root /j/peninsulamotorsport 'Jeffs client for Peninsula Motorsport on proteus. '
+Client jwm-proj-books-atacama 2010/02/21 root /j/proj/books 'Jeffs notes directory on atacama; HP notebook '
+Client jwm-proj-books-proteus 2010/05/15 root /j/proj/books 'Work on my stroustrup on os x. '
+Client jwm-proj-pmsport-atacama 2010/03/17 root /j/proj/pmsport 'Created by jwm. '
+Client jwm-proj-pmsport-proteus 2010/04/04 root /j/proj/pmsport 'Created by jwm. '
+Client jwm-snapgear-negheb 2009/06/23 root /snapgear 'Snapgear backup client for negheb '
+Client jwm-snapgear-proteus 2010/05/12 root /j/snapgear 'Snapgear backup client for proteus '
+Client jwm-software-leda 2009/01/01 root /Users/Leda/p4sw 'osx software client for Leda '
+Client jwm-software-negheb 2006/10/07 root /home/software 'Created by jwm. '
+Client jwm-software-proteus 2009/01/01 root /p4sw/osx 'Created by jwm. '
+Client jwm-stick1301-pdata-proteus 2010/06/19 root /Volumes/stick1301/j/personal 'Created by jwm. '
+Client jwm-www-atacama 2010/02/21 root /j/www 'Jeffs notes directory on atacama; HP notebook '
+Client jwm-www-proteus 2010/02/21 root /j/www 'Jeffs www on proteus '
+}
+
+----------------
+
+I made a client referring to the entire depot on proteus: 
+proteus-> cat /jd/.p4config 
+P4PORT=p4.mccarrell.org:2333
+P4USER=jwm
+P4CLIENT=jwm-all-depot-proteus
+
+
+DONE Nuke //jwm-depot/desana:
+
+proteus-> p4 files //jwm-depot/desana/...
+//jwm-depot/desana/SMS/Project/Contractors/SQL_Star_Intl/Ramki.doc#2 - delete change 913 (binary)
+//jwm-depot/desana/SMS/Project/Contractors/Thuridion/Resume For Ted Nichols.doc#2 - delete change 913 (binary)
+//jwm-depot/desana/SMS/Project/Contractors/Thuridion/Technical_Services_Agreement_2000desana.doc#2 - delete change 913 (binary)
+//jwm-depot/desana/SMS/Project/Contractors/Thuridion/thuridion_contacts.html#2 - delete change 913 (text)
+//jwm-depot/desana/SMS/Project/Engineering_Reviews/2000_10_19/Saravan.ppt#2 - delete change 913 (binary)
+
+----------------
+
+start to clean up //jwm-depot/software/win32/installers: {
+
+proteus-> p4 dirs //jwm-depot/software/win32/installers/*
+//jwm-depot/software/win32/installers/7zip
+//jwm-depot/software/win32/installers/CopyTo2.6
+//jwm-depot/software/win32/installers/EudoraFinalCommercial
+//jwm-depot/software/win32/installers/FineCrypt-9.0
+//jwm-depot/software/win32/installers/FolderMatchClone
+//jwm-depot/software/win32/installers/HTML-Tidy
+//jwm-depot/software/win32/installers/KeePass-0.97b
+//jwm-depot/software/win32/installers/MobileMeter
+//jwm-depot/software/win32/installers/PGP
+//jwm-depot/software/win32/installers/SecureCRT
+//jwm-depot/software/win32/installers/TextPad
+//jwm-depot/software/win32/installers/UnixUtils
+//jwm-depot/software/win32/installers/WinZip8.0
+//jwm-depot/software/win32/installers/WinaXe_plus_8.3
+//jwm-depot/software/win32/installers/adaware
+//jwm-depot/software/win32/installers/araxis-6.5
+//jwm-depot/software/win32/installers/avast-anti-virus
+//jwm-depot/software/win32/installers/blackwidow-3-63
+//jwm-depot/software/win32/installers/csh
+//jwm-depot/software/win32/installers/ctrl2cap
+//jwm-depot/software/win32/installers/ftp
+//jwm-depot/software/win32/installers/games
+//jwm-depot/software/win32/installers/irfanview
+//jwm-depot/software/win32/installers/netterm
+//jwm-depot/software/win32/installers/office-2000
+//jwm-depot/software/win32/installers/plamOne
+//jwm-depot/software/win32/installers/rktools
+//jwm-depot/software/win32/installers/smartdraw
+//jwm-depot/software/win32/installers/snagit-7.2
+//jwm-depot/software/win32/installers/spybot
+//jwm-depot/software/win32/installers/swapcapslock
+//jwm-depot/software/win32/installers/trillian
+//jwm-depot/software/win32/installers/winzip9
+//jwm-depot/software/win32/installers/xdesk-3.93
+//jwm-depot/software/win32/installers/xdesk-4.30
+//jwm-depot/software/win32/installers/xmlspy-4.1
+//jwm-depot/software/win32/installers/yats32-8.1
+}
+
+Some of these software perhaps should be retained;
+Eudora?  No.  Not for win32; Cate uses it on her Mac.
+
+Partition the stuff into
+ can be deleted for sure:
+ maybe delete:
+ retain:
+
+Goal for Tue Aug  3 14:34:38 PDT 2010
+  get down to < 500Mb in disk blocks in p4 depot.
+
+
+Delete this:
+  D //jwm-depot/software/win32/installers/7zip/
+  D //jwm-depot/software/win32/installers/adaware/
+  D //jwm-depot/software/win32/installers/avast-anti-virus/
+  D //jwm-depot/software/win32/installers/blackwidow-3-63/
+  D //jwm-depot/software/win32/installers/ctrl2cap/
+  D //jwm-depot/software/win32/installers/CopyTo2.6/
+
+  D //jwm-depot/software/win32/installers/doxygen/
+  D //jwm-depot/software/win32/installers/Eudora-5.2/
+  D //jwm-depot/software/win32/installers/EudoraPro/
+  D //jwm-depot/software/win32/installers/FolderMatchClone/
+  D //jwm-depot/software/win32/installers/FineCrypt-9.0/
+
+  D //jwm-depot/software/win32/installers/HTML-Tidy/
+  D //jwm-depot/software/win32/installers/interix/
+  D //jwm-depot/software/win32/installers/irfanview/
+  D //jwm-depot/software/win32/installers/KeePass-0.97b/
+  D //jwm-depot/software/win32/installers/PGP/
+  D //jwm-depot/software/win32/installers/plamOne/
+  D //jwm-depot/software/win32/installers/rktools/
+
+  D //jwm-depot/software/win32/installers/SnagIt6.2/
+  D //jwm-depot/software/win32/installers/spybot/
+  D //jwm-depot/software/win32/installers/swapcapslock/
+  D //jwm-depot/software/win32/installers/TextPad/
+  D //jwm-depot/software/win32/installers/UnixUtils/
+  D //jwm-depot/software/win32/installers/VNC/
+  D //jwm-depot/software/win32/installers/WinaXe_plus_6.1/
+  D //jwm-depot/software/win32/installers/WinaXe_plus_8.0/
+  D //jwm-depot/software/win32/installers/WinZip8.0/
+  D //jwm-depot/software/win32/installers/xdesk-3.93/
+  D //jwm-depot/software/win32/installers/xdesk-4.30/
+  D //jwm-depot/software/win32/installers/xml_authority/
+  D //jwm-depot/software/win32/installers/xmlspy-3.0/
+  D //jwm-depot/software/win32/installers/xmlspy-4.1/
+  D //jwm-depot/software/win32/installers/yats32-8.1/
+  D //jwm-depot/software/win32/installers/ZipGenius-6.02/
+
+  D //jwm-depot/software/win32/installers/netswitcher_3.2.2/
+
+Maybe:
+
+  //jwm-depot/software/win32/installers/MobileMeter/
+    still seems to be available on the web;
+    I don't use atacama under win32 anymore...
+
+  //jwm-depot/software/win32/installers/netterm/
+    what did I use to do with this?
+
+  I spent real $$$ on these way back when
+
+  //jwm-depot/software/win32/installers/ftp/
+  //jwm-depot/software/win32/installers/trillian/
+  //jwm-depot/software/win32/installers/WinaXe_plus_8.3/
+  //jwm-depot/software/win32/installers/winzip9/
+
+
+Retain:
+  //jwm-depot/software/win32/installers/csh
+    but delete old 2.3
+
+  //jwm-depot/software/win32/installers/games/
+    hearts and Mahjonng for Mom
+
+  //jwm-depot/software/win32/installers/office-2000/
+    just the product key
+
+  //jwm-depot/software/win32/installers/EudoraFinalCommercial/
+    contains the os x installer as well.
+
+After purge of deleted list, disk usage is down to: {
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/software
+363M	.
+345144	win32
+18152	osx
+6180	xml
+1936	macos
+32	perforce
+12	snapgear
+
+We started at 613M, so that is < 300M deleted.
+
+What remains is stuff I have not decided (yet) to delete.
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/software/win32/installers
+338M	.
+119496	smartdraw
+105680	araxis-6.5
+29692	EudoraFinalCommercial
+18116	WinaXe_plus_8.3
+15076	SecureCRT
+12544	csh
+10992	ftp
+10628	games
+10456	snagit-7.2
+8700	trillian
+2276	winzip9
+1420	netterm
+52	MobileMeter
+8	office-2000
+
+}
+
+DONE smartdraw upgrade saves only $30, so delete it.
+DONE remove araxis binaries, leaving only the license file.
+DONE delete Eudora win32 binaries; leave OS X for Cate
+
+Now disk usage: {
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/software/win32/installers
+98M	.
+18116	WinaXe_plus_8.3
+15076	SecureCRT
+12544	csh
+10992	ftp
+10628	games
+10456	snagit-7.2
+9360	EudoraFinalCommercial
+8700	trillian
+2276	winzip9
+1420	netterm
+52	MobileMeter
+8	office-2000
+8	araxis-6.5
+}
+
+Go through and delete all of the binaries, leaving just the receipts
+  DONE hamilton c shell
+    has an update for vista; $89 vs $350.
+    so keep receipts; delete the binaries
+  DONE WinaXe_plus_8.3
+  DONE SecureCRT
+  DONE ftp/ws_ftp
+    the upgrade process just looks too painful; throw this out altogether.
+  DONE games
+    retain these for easy install on Mom's machine if needed.
+  DONE snag-it; is only $50. Upgrade saves $25. throw this out.
+  DONE trillian
+  DONE netterm
+
+
+Arggg!
+proteus-> p4 obliterate -y //jwm-depot/software/win32/installers/Eudo*/...
+//jwm-depot/software/win32/installers/EudoraFinalCommercial/Eudora_6.2.4_OSX.hqx#1 - purged
+//jwm-depot/software/win32/installers/EudoraFinalCommercial/registration-email.txt#1 - purged
+Deleted 3 client 2 revision record(s).
+
+I didn't want to obliterate this.
+
+But I have the registration file on negheb, and all of the binaries are available
+on the web at Eudora.com.  So good to go.
+
+negheb-> pwd
+/home/software/win32/installers/EudoraFinalCommercial
+negheb-> ls 
+registration-email.txt
+
+DONE So just get it, and add it back to the depot:
+proteus-> scp -p -P 59467 jwm@www.mccarrell.org:/home/software/win32/installers/EudoraFinalCommercial/registration-email.txt .
+
+
+final disk usage from this part of the depot: {
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/software/win32/installers
+11M	.
+10628	games
+72	WinaXe_plus_8.3
+28	csh
+16	trillian
+12	winzip9
+12	SecureCRT
+12	netterm
+8	office-2000
+8	araxis-6.5
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/software
+37M	.
+18152	osx
+10804	win32
+6180	xml
+1936	macos
+32	perforce
+12	snapgear
+
+which gives a total usage of:
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot
+371M	.
+320716	jwm
+37120	software
+6936	homes
+5324	remedy
+3432	unix
+3424	proj
+1088	IMPORT
+436	snapgear
+200	notes
+160	cdrive
+132	www
+
+}
+
+----------------
+
+DONE Throw out the XSL/XPath tutorial; I haven't used it in several years.
+DONE delete the macos (os 9) software
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot
+345M	.
+320716	jwm
+10868	software
+6936	homes
+5324	remedy
+3432	unix
+3424	proj
+1088	IMPORT
+436	snapgear
+200	notes
+160	cdrive
+132	www
+
+----------------
+
+Follow the disk blocks:
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/jwm/www/bikes
+271M	.
+255392	crf450
+7704	motionpro
+5796	images
+3984	lighting
+2784	ktm520
+488	xr650r
+112	handlebars
+56	index.html,v
+52	maintenance
+24	packing-list.html,v
+20	klx110
+16	trophy900
+12	xr400
+8	ttr125le
+8	ktm200
+8	fanny-pack-tools.html,v
+4	vin-list.html,v
+4	samanthas_checklist.html,v
+4	day-log.html,v
+4	baja-packing-list.html,v
+
+
+DONE Choose to store the CRF manual and parts fiche on CD-ROM, not in my depot.
+  move these.
+
+DONE throw out the motionpro catalog
+DONE wipe the sections:  xr650 xr400
+
+How can I get a list of the files stored in a client?
+
+----------------------------------------------------------------
+
+Thu Aug 26 11:24:40 PDT 2010
+
+next steps:
+
+write CRF shop manual to data drive / CDROM
+  DONE which data stick?  13014
+  CHANGELIST delete the crf shop manual from the p4 depot
+  sync to atacama www
+  follow the filelog {
+    proteus-> p4 filelog //jwm-depot/www/bikes/crf450/2002-2003_CRF450R_Service-Manual.pdf
+    //jwm-depot/www/bikes/crf450/2002-2003_CRF450R_Service-Manual.pdf
+    ... #1 change 1875 branch on 2010/02/21 by jwm@jwm-www-proteus (binary) 'transfer www tree to its own p4'
+    ... ... branch from //jwm-depot/jwm/www/bikes/crf450/2002-2003_CRF450R_Service-Manual.pdf#1
+    proteus-> p4 filelog //jwm-depot/jwm/www/bikes/crf450/2002-2003_CRF450R_Service-Manual.pdf
+    //jwm-depot/jwm/www/bikes/crf450/2002-2003_CRF450R_Service-Manual.pdf
+    ... #2 change 1876 delete on 2010/02/21 by jwm@jwm-jwm-negheb (binary) 'delete www tree out of home dir'
+    ... #1 change 1615 add on 2008/05/14 by jwm@jwm-jwm-proteus (binary) 'jwm: add CRF450 shop manual '
+    ... ... branch into //jwm-depot/www/bikes/crf450/2002-2003_CRF450R_Service-Manual.pdf#1
+  }
+  then p4 obliterate all copies of this pdf
+
+current p4 clients:  /jd/p4.clients.txt
+
+proteus-> pwd && !!
+pwd && wc -l p4.clients.txt
+/jd
+      28 p4.clients.txt
+DONE delete old clients:
+
+target does not exist any more on proteus
+    Client jwm-software-proteus 2009/01/01 root /p4sw/osx 'Created by jwm. '
+    Client jwm-peninsulamotorsport-proteus 2010/03/17 root /j/peninsulamotorsport 'Jeffs client for Peninsula Motorsport on proteus. '
+    Client jwm-home-proteus-ubu 2008/12/12 root /home/jwm 'Jeff's environment on my proteus hosted ubuntu '
+
+proteus-> wc -l  /jd/p4.clients.txt 
+      25 /jd/p4.clients.txt
+
+the client names:
+
+jwm-all-depot-proteus
+jwm-dotfiles-negheb
+jwm-home-MAIN
+jwm-home-atacama
+jwm-home-jeffdev
+jwm-home-proteus
+jwm-jwm-atacama
+jwm-jwm-negheb
+jwm-jwm-proteus
+jwm-jwmhome-atacama
+jwm-notes-MAIN-proteus
+jwm-notes-jwm-atacama
+jwm-notes-proteus
+jwm-pdata-atacama
+jwm-proj-books-atacama
+jwm-proj-books-proteus
+jwm-proj-pmsport-atacama
+jwm-proj-pmsport-proteus
+jwm-snapgear-negheb
+jwm-snapgear-proteus
+jwm-software-leda
+jwm-software-negheb
+jwm-stick1301-pdata-proteus
+jwm-www-atacama
+jwm-www-proteus
+
+jwm-all-depot-proteus jwm-dotfiles-negheb jwm-home-MAIN jwm-home-atacama jwm-home-jeffdev jwm-home-proteus jwm-jwm-atacama jwm-jwm-negheb jwm-jwm-proteus jwm-jwmhome-atacama jwm-notes-MAIN-proteus jwm-notes-jwm-atacama jwm-notes-proteus jwm-pdata-atacama jwm-proj-books-atacama jwm-proj-books-proteus jwm-proj-pmsport-atacama jwm-proj-pmsport-proteus jwm-snapgear-negheb jwm-snapgear-proteus jwm-software-leda jwm-software-negheb jwm-stick1301-pdata-proteus jwm-www-atacama jwm-www-proteus
+
+DONE delete the remedy stuff in the depot
+  DONE find which clients refer to it
+    jwm-jwm-atacama
+	//jwm-depot/remedy/proj/arapi/... //jwm-jwm-atacama/proj/remedy/proj/arapi/...
+	//jwm-depot/remedy/proj/arapi-python/... //jwm-jwm-atacama/proj/remedy/proj/arapi-python/...
+	//jwm-depot/remedy/proj/l10n/src/... //jwm-jwm-atacama/proj/dev/l10n/src/...
+	//jwm-depot/remedy/proj/l10n/dist/... //jwm-jwm-atacama/proj/dev/l10n/dist/...
+	//jwm-depot/remedy/proj/molecule/... //jwm-jwm-atacama/proj/remedy/proj/molecule/...
+
+  first p4 delete it
+    DONE or delete all of those clients, before or after syncing their disks
+
+  what is the depot path for the remedy stuff?
+  //jwm-depot/remedy
+
+DONE Choose to abandon my atacama win32 p4 bindings;
+DONE delete those clients: {
+
+Client jwm-home-atacama 2010/02/21 root /home/jwm 'Jeffs home directory on atacama; HP notebook '
+Client jwm-jwm-atacama 2007/01/17 root c:\ 'Jeff's environment on atacama: my laptop '
+Client jwm-jwmhome-atacama 2010/02/27 root /jwmhome 'Jeffs old home directory on atacama used for the transition to the new directory layout '
+Client jwm-notes-jwm-atacama 2010/02/21 root /j/notes 'Jeffs notes directory on atacama; HP notebook '
+Client jwm-pdata-atacama 2010/05/16 root /j/personal 'Created by jwm. '
+Client jwm-proj-books-atacama 2010/02/21 root /j/proj/books 'Jeffs notes directory on atacama; HP notebook '
+Client jwm-proj-pmsport-atacama 2010/03/17 root /j/proj/pmsport 'Created by jwm. '
+Client jwm-www-atacama 2010/02/21 root /j/www 'Jeffs notes directory on atacama; HP notebook '
+}
+
+so that is:
+
+jwm-jwm-atacama {
+
+Client:	jwm-jwm-atacama
+
+Update:	2007/01/17 10:31:39
+
+Access:	2008/08/02 23:20:04
+
+Owner:	jwm
+
+Host:	atacama
+
+Description:
+	Jeff's environment on atacama: my laptop
+
+Root:	c:\
+
+Options:	noallwrite noclobber nocompress unlocked nomodtime rmdir
+
+LineEnd:	local
+
+View:
+	//jwm-depot/jwm/... //jwm-jwm-atacama/jwm/...
+	//jwm-depot/remedy/proj/arapi/... //jwm-jwm-atacama/proj/remedy/proj/arapi/...
+	//jwm-depot/remedy/proj/arapi-python/... //jwm-jwm-atacama/proj/remedy/proj/arapi-python/...
+	//jwm-depot/remedy/proj/l10n/src/... //jwm-jwm-atacama/proj/dev/l10n/src/...
+	//jwm-depot/remedy/proj/l10n/dist/... //jwm-jwm-atacama/proj/dev/l10n/dist/...
+	//jwm-depot/remedy/proj/molecule/... //jwm-jwm-atacama/proj/remedy/proj/molecule/...
+	//jwm-depot/snapgear/backups/... //jwm-jwm-atacama/snapgear/backups/...
+	//jwm-depot/software/win32/... //jwm-jwm-atacama/tmp/win32sw/...
+}
+
+so on the atacama disk, the remedy stuff is rooted at:
+
+c:/proj/remedy
+
+DONE obliterate //jwm-depot/remedy/
+
+p4 sync changes to atacama, all other www locations
+  NOT NEEDED negheb?
+    ALREADY DONE choose to remove any /www view from negheb as it is not used now.
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot
+333M	.
+313012	jwm
+10880	software
+6960	homes
+3432	unix
+3424	proj
+1088	IMPORT
+436	snapgear
+340	remedy
+228	notes
+160	cdrive
+140	www
+
+Nuke the copy of perl-BerkeleyDB I have stored in //jwm-depot/IMPORT
+
+jwm-all-depot-proteus jwm-dotfiles-negheb jwm-home-MAIN jwm-home-atacama jwm-home-jeffdev jwm-home-proteus jwm-jwm-negheb jwm-jwm-proteus jwm-jwmhome-atacama jwm-notes-MAIN-proteus jwm-notes-jwm-atacama jwm-notes-proteus jwm-pdata-atacama jwm-proj-books-atacama jwm-proj-books-proteus jwm-proj-pmsport-atacama jwm-proj-pmsport-proteus jwm-snapgear-negheb jwm-snapgear-proteus jwm-software-leda jwm-software-negheb jwm-stick1301-pdata-proteus jwm-www-atacama jwm-www-proteus
+
+perl-BerkeleyDB is mapped (integrated) into my jwm src tree:
+
+Client jwm-jwm-negheb 2006/12/23 root /home 'Created by jwm. '
+Client jwm-jwmhome-atacama 2010/02/27 root /jwmhome 'Jeffs old home directory on atacama used for the transition to the new directory layout '
+
+perl-BerkeleyDB deleted from depot: Change 1987 submitted.
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot
+332M	.
+313012	jwm
+10880	software
+6960	homes
+3432	unix
+3424	proj
+1088	IMPORT
+436	snapgear
+228	notes
+160	cdrive
+140	www
+
+----------------------------------------------------------------
+
+Fri Sep 10 13:52:52 PDT 2010
+
+
+next steps on p4 -> ingwaz
+  DONE talk to Wayne about root access there
+    ssh perforce@localhost from my account should work now.
+  DONE set up a Terminal client for ingwaz
+  DONE write down the steps necessary for the transfer
+  DONE winnow down the data stored in my p4 instance
+    83 Meg total in the file system.
+  figure out what I am going to use for startup and shutdown scripts on CentOS/RHEL
+  for same architecture
+    http://kb.perforce.com/article/10/moving-the-perforce-server
+  for different architecture (x86_64 -> x86)
+    http://kb.perforce.com/article/75
+      DONE update the license file
+      DONE install p4d
+        the same release as the old installation
+        Server version: P4D/LINUX26X86_64/2006.1/102189 (2006/06/27)
+          [perforce@ingwaz depot]$ ls -l ~perforce/depot/p4d 
+          -rwxr-xr-x  1 perforce perforce 1530292 Oct 18  2007 /home/perforce/depot/p4d
+      DONE verify the archive files
+        p4 verify -q //... > ~/tmp/verify.errors
+      compute missing checksums
+        p4 verify -qu //... > ~/tmp/verify.update
+      stop the server; to prevent work from occurring during the migration
+        p4 admin stop
+      verify the DB
+        p4d -r P4ROOT -xv
+      take a check point
+        p4d -r P4ROOT -jc
+      backup the checkpoint and depot subdirectories
+      copy the server root directory and check point
+        do not copy the .db files
+      restore from checkpoint
+        p4d -r P4ROOT -jr checkpoint.n
+      start the new server privately and verify
+        p4d -r P4ROOT -p SOMEPORT
+          or
+        p4d -r P4ROOT -p localhost:2333
+      re-verify the archive files
+        p4 verify -q //... > verify.errors
+      restart the server per usual
+
+----------------------------------------------------------------
+
+Sat Sep 11 19:46:44 PDT 2010
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/jwm
+306M	.
+279460	www
+19700	etc
+13104	src
+168	notes
+168	bin
+104	lib
+84	emptech
+40	dot-files
+28	_emacs,v
+24	startup.csh,v
+16	diary,v
+8	tmp
+4	todo.html,v
+4	login.csh,v
+4	lib-copy
+4	cuthere,v
+4	box2-toc.html,v
+
+----------------
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot/jwm/www/bikes
+14M	.
+5796	images
+3984	lighting
+2784	ktm520
+488	xr650r
+112	handlebars
+56	index.html,v
+52	maintenance
+28	crf450
+24	packing-list.html,v
+20	klx110
+16	trophy900
+12	xr400
+8	ttr125le
+8	ktm200
+8	fanny-pack-tools.html,v
+4	vin-list.html,v
+4	samanthas_checklist.html,v
+4	day-log.html,v
+4	baja-packing-list.html,v
+
+----------------
+
+negheb-> pwd && du -sh . && du -s * | sort -rn
+/home/perforce/jwm-depot
+83M	.
+57648	jwm
+10880	software
+7024	homes
+3432	unix
+3424	proj
+1088	IMPORT
+436	snapgear
+284	notes
+160	cdrive
+152	www
+
+83 Megabytes to move to ingwaz.netgrove.net

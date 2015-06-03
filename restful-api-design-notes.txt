@@ -1,0 +1,199 @@
+Inspired by the talk at:
+http://blog.apigee.com/detail/slides_for_restful_api_design_second_edition_webinar/
+
+I stored the slides:
+~/jdocs/apigee/api-design-second-edition.pdf
+
+You only need 2 urls; one for the collection; one for an element of the collection:
+
+2 base urls
+1 for a collection
+1 for a element of the collection
+
+POST      CREATE
+GET       READ
+PUT       UPDATE
+DELETE    DELETE
+
+identify the resources the REST api should model for fulfillment
+
+target ending with a dozen or 2 dozen resources in the API
+
+Associations
+
+create a 2 level deep hierarchy at most
+because once you have the primary key, for an object, you know it.
+
+So:
+GET   /owners/5678/dogs         list all dogs owned by ...
+POST  /owners/5678/dogs         add a dog to the set owned by ...
+
+complex variations
+
+dogs have many states, attributes
+
+the key idea is to sweep the complexity into query parameters:
+  the complexity gets hidden in the query string parameters
+GET   /dogs?color=brown;owner=5678;location=park
+                                return all dogs with these attributes
+  the simple still works
+
+Errors:
+
+twilio does a good idea of bucketing their errors.
+
+http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+
+Dont release an API without a version, and make it mandatory
+move the version number as far to the left in the URI as possible
+
+Choosing subsets / attributes / columns within the information returned
+many times you don't want everything
+
+GET /dogs/1234                  could return hundreds of dog attributes
+
+Linked In's solution:
+/people:(id,first-name,last-name,industry)
+
+Facebook
+/joe.smith/friends?fields=id,name,picture
+
+Google called: (partial response)
+?fields=title,media:group(media:thumbnail)
+
+prefer the google style; linked in's style is hard to even search for
+
+Pagination
+limit & offset following the mysql convention
+
+What about formats
+Make the default format json
+
+Here are the examples of how other specify formats:
+
+Google Data
+?alt=json
+
+Foursquare
+/venue.json
+
+Digg*
+Accept: application/json
+?type=json
+* The type argument, if present, overrides the Accept header.
+
+/dogs.json
+/dogs/1234.json
+
+Attribute naming;
+First suggestion: be consistent whatever choice you make.
+Brian suggests following the javascript convention for casing in names,
+which is camel case, classes with initial caps, initial lower caps otherwise.
+The suggestion follows from the client is going to be interpreting the results
+in javascript code, so, it follows to use their conventions.
+
+JSON is for JavaScript Objects
+var myObject = JSON.parse(response);
+
+JavaScript Convention
+"createdAt": 1320296464
+timing = myObject.createdAt;
+Medial Capitalization aka CamelCase
+
+How about operations that do not naturally express themselves as a resource?
+think functional transformations:
+
+calculate
+translate
+convert
+
+The advice is to make the verbs explicit there:
+Use verbs not nouns
+/convert?from=EUR&to=CNY&amount=100
+
+That makes sense for things that stand alone;
+how about for mixing verbs into resource-y things?
+
+Search
+
+follow the google example:
+
+Global
+/search?q=fluffy+fur
+
+Scoped
+/owners/5678/dogs/search?q=fluffy+fur
+
+Formatted
+/search.xml?q=fluffy+fur
+
+Counts
+Brians thoughts; he is not firm on this one:
+/dogs/count
+
+think of 'count' as a reserved word; has to not conflict with the specific id,
+as in,
+/dogs/1234.json
+We have to be able to distinguish 1234 from count for all instances of /dogs
+
+Exceptional things:
+many clients of APIs can not handle all of these conventions:
+
+what about when the flash container intercepts the error and displays it to the user
+directly?
+
+Twitter
+/public_timelines.json?suppress_response_codes=true
+
+HTTP Status Code: 200
+{"error" : "Could not authenticate you." }
+
+So Brians recommndation:
+Always returns OK
+/dogs?suppress_response_codes=true
+
+Code for code ignoring
+200 - OK
+
+Message for people & code
+{“response_code” : “401”,
+  “message” : “Verbose, plain language description of the problem with hints about how to fix it.”
+  “more_info” : “http://dev.teachdogrest.com/ errors/12345”,
+  “code” : 12345
+  }
+
+How about when the client cannot generate the 4 HTTP verbs GET PUT POST DELETE?
+A: encode them in the query string as a 'method' parameter.  this is what ruby on rails folks do.
+
+Method Parameter
+create
+/dogs?method=post
+
+read
+/dogs
+
+update
+/dogs/1234?method=put&location=park
+
+delete
+/dogs/1234?method=delete
+
+Authentication
+Many ways to do it:
+PayPal
+Permissions Service API
+
+Facebook
+OAuth 2.0
+
+Twitter
+OAuth 1.0a
+
+What should we do?
+Use latest and greatest OAuth, now 2.0
+
+Make a buffer between the API implementation on top,
+and the implementation layer at the bottom.
+Insert a layer to separate the implementation from the REST interface.
+
+----------------

@@ -1,0 +1,237 @@
+Example partitioning scheme from the manual:
+
+￼CREATE TABLE ti (id INT, amount DECIMAL(7,2), tr_date DATE)
+    ENGINE=INNODB
+    PARTITION BY HASH( MONTH (tr_date))
+    PARTITIONS 6;
+
+an example of partitioning by date:
+
+CREATE TABLE members (
+    firstname VARCHAR(25) NOT NULL,
+    lastname VARCHAR(25) NOT NULL,
+    username VARCHAR(16) NOT NULL,
+    email VARCHAR(35),
+    joined DATE NOT NULL
+)
+PARTITION BY RANGE( YEAR(joined) ) (
+    PARTITION p0 VALUES LESS THAN (1960),
+    PARTITION p1 VALUES LESS THAN (1970),
+    PARTITION p2 VALUES LESS THAN (1980),
+    PARTITION p3 VALUES LESS THAN (1990),
+    PARTITION p4 VALUES LESS THAN MAXVALUE
+);
+
+    MySQL partitioning is optimized for use with the TO_DAYS(), YEAR(), and TO_SECONDS()
+    functions. However, you can use oth- er date and time functions that return an integer
+    or NULL, such as WEEKDAY(), DAYOFYEAR(), or MONTH(). See Section 11.7, “Date and Time
+    Functions”, for more information about such functions.
+
+partition names (the result post the modulus operator) must start from 0, and
+have no gaps.
+
+Here is an example partitioning by a timestamp column using UNIX_TIMESTAMP:
+
+￼CREATE TABLE quarterly_report_status (
+    report_id INT NOT NULL,
+    report_status VARCHAR(20) NOT NULL,
+    report_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
+PARTITION BY RANGE ( UNIX_TIMESTAMP(report_updated) ) (
+    PARTITION p0 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-01-01 00:00:00') ),
+    PARTITION p1 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-04-01 00:00:00') ),
+    PARTITION p2 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-07-01 00:00:00') ),
+    PARTITION p3 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-10-01 00:00:00') ),
+    PARTITION p4 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-01-01 00:00:00') ),
+    PARTITION p5 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-04-01 00:00:00') ),
+    PARTITION p6 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-07-01 00:00:00') ),
+    PARTITION p7 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-10-01 00:00:00') ),
+    PARTITION p8 VALUES LESS THAN ( UNIX_TIMESTAMP('2010-01-01 00:00:00') ),
+    PARTITION p9 VALUES LESS THAN (MAXVALUE)
+);
+
+However:
+
+    Any other expressions involving TIMESTAMP values are not permitted. (See Bug #42849.)
+
+    Partitioning schemes based on time intervals. If you wish to implement a partitioning
+    scheme based on ranges or intervals of time in MySQL 5.5, you have two options:
+    XXX: not completed
+
+    ALTER TABLE employees TRUNCATE PARTITION pWest;
+
+Here is how to see how many rows are stored per partition:
+
+given table defn:
+    CREATE TABLE r1 (
+        a INT,
+        b INT )
+    PARTITION BY RANGE (a)  (
+        PARTITION p0 VALUES LESS THAN (5),
+        PARTITION p1 VALUES LESS THAN (MAXVALUE)
+    );
+
+and 3 rows are inserted with a == 5, then:
+
+    mysql> INSERT INTO r1 VALUES (5,10), (5,11), (5,12);
+    Query OK, 3 rows affected (0.00 sec)
+    Records: 3 Duplicates: 0 Warnings: 0
+    mysql> SELECT PARTITION_NAME,TABLE_ROWS
+    -> FROM INFORMATION_SCHEMA.PARTITIONS
+    -> WHERE TABLE_NAME = 'r1';
+    +----------------+------------+
+    | PARTITION_NAME | TABLE_ROWS |
+    +----------------+------------+
+    |p0              |           0|
+    |p1              |           3|
+    +----------------+------------+
+     2 rows in set (0.00 sec)
+
+One can efficiently delete large amounts of data when using range partitioning,
+such as:
+
+    ALTER TABLE employees DROP PARTITION p0;
+
+given a RANGE partitioned table like this:
+
+CREATE TABLE quarterly_report_status (
+  report_id INT NOT NULL,
+  report_status VARCHAR(20) NOT NULL,
+  report_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+)
+PARTITION BY RANGE ( UNIX_TIMESTAMP(report_updated) ) (
+    PARTITION p0 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-01-01 00:00:00') ),
+    PARTITION p1 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-04-01 00:00:00') ),
+    PARTITION p2 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-07-01 00:00:00') ),
+    PARTITION p3 VALUES LESS THAN ( UNIX_TIMESTAMP('2008-10-01 00:00:00') ),
+    PARTITION p4 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-01-01 00:00:00') ),
+    PARTITION p5 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-04-01 00:00:00') ),
+    PARTITION p6 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-07-01 00:00:00') ),
+    PARTITION p7 VALUES LESS THAN ( UNIX_TIMESTAMP('2009-10-01 00:00:00') ),
+    PARTITION p8 VALUES LESS THAN ( UNIX_TIMESTAMP('2010-01-01 00:00:00') ),
+    PARTITION p9 VALUES LESS THAN (MAXVALUE)
+);
+
+Or one can TRUNCATE instead of DROP to leave the structure in place,
+as in a cyclical buffer.
+
+    ALTER TABLE employees TRUNCATE PARTITION p0;
+
+    Beginning with MySQL 5.5.0, it is possible to delete all rows from one or more
+    selected partitions using ALTER TABLE ... TRUNCATE PARTITION.
+
+
+----
+    The SELECT statement in the preceding example could also have been written using
+    explicit row constructors, like this:
+
+    SELECT ROW(5,10) < ROW(5,12), ROW(5,11) < ROW(5,12), ROW(5,12) < ROW(5,12);
+
+    For more information about the use of row constructors in MySQL, see Section
+    12.2.10.5, “Row Subqueries”.
+
+----
+
+More interesting queries to show the partitioning structure:
+
+mysql> SELECT TABLE_NAME, PARTITION_NAME, TABLE_ROWS, AVG_ROW_LENGTH, DATA_LENGTH
+> FROM INFORMATION_SCHEMA.PARTITIONS
+> WHERE TABLE_SCHEMA = 'p' AND TABLE_NAME LIKE 't_';
+
+    (For more information about this table, see Section 19.13, “The INFORMATION_SCHEMA
+    PARTITIONS Table”.)
+
+----
+
+    It is possible to determine which partitions of a partitioned table are involved in a
+    given SELECT query using EXPLAIN PARTI- TIONS. The PARTITIONS keyword adds a
+    partitions column to the output of EXPLAIN listing the partitions from which records
+    would be matched by the query.
+
+partition pruning
+
+    Pruning can also be applied for tables partitioned on a DATE or DATETIME column when
+    the partitioning expression uses the YEAR() or TO_DAYS() function. In addition, in
+    MySQL 5.5, pruning can be applied for such tables when the partitioning expression
+    uses the TO_SECONDS() function.
+
+----
+
+    For tables that are partitioned by HASH or KEY, partition pruning is also possible in
+    cases in which the WHERE clause uses a simple = relation against a column used in the
+    partitioning expression. Consider a table created like this:
+
+
+
+
+
+Restrictions on Partitioning
+
+    Use of the arithmetic operators +, -, and * is permitted in partitioning expressions.
+    However, the result must be an integer value or NULL
+
+    DIV is also supported
+
+
+Maximum number of partitions. The maximum possible number of partitions for a given table
+    (that does not use the NDB storage engine) is 1024. This includes subpartitions.
+
+Per-partition key caches. In MySQL5.5, key caches are supported for partitioned MyISAM
+    tables, using the CACHE INDEX and LOAD INDEX INTO CACHE statements. Key caches may be
+    defined for one, several, or all partitions, and indexes for one, several, or all
+    partitions may be preloaded into key caches.
+
+Data type of partitioning key: A partitioning key must be either an integer column or an
+    expression that resolves to an integer. The column or expression value may also be
+    NULL.
+
+    There are 2 exceptions to this rule:
+
+    1.  When partitioning by [LINEAR] KEY, it is possible to use columns of other types as
+        partitioning keys, because MySQL's internal key-hashing functions produce the
+        correct data type from these types. For example, the following CREATE TABLE
+        statement is valid:
+
+        CREATE TABLE tkc (c1 CHAR)
+        PARTITION BY KEY(c1)
+        PARTITIONS 4;
+
+
+    2.  When partitioning by RANGE COLUMNS or LIST COLUMNS, it is possible to use string,
+        DATE, and DATETIME columns. For example, each of the following CREATE TABLE
+        statements is valid:
+
+        CREATE TABLE rc (c1 INT, c2 DATE)
+        PARTITION BY RANGE COLUMNS(c2) (
+            PARTITION p0 VALUES LESS THAN('1990-01-01'),
+            PARTITION p1 VALUES LESS THAN('1995-01-01'),
+            PARTITION p2 VALUES LESS THAN('2000-01-01'),
+            PARTITION p3 VALUES LESS THAN('2005-01-01'),
+            PARTITION p4 VALUES LESS THAN(MAXVALUE)
+        );
+
+        CREATE TABLE lc (c1 INT, c2 CHAR(1))
+        PARTITION BY LIST COLUMNS(c2) (
+            PARTITION p0 VALUES IN('a', 'd', 'g', 'j', 'm', 'p', 's', 'v', 'y'),
+            PARTITION p1 VALUES IN('b', 'e', 'h', 'k', 'n', 'q', 't', 'w', 'z'),
+            PARTITION p2 VALUES IN('c', 'f', 'i', 'l', 'o', 'r', 'u', 'x', NULL)
+        );
+
+
+Use of INSERT DELAYED to insert rows into a partitioned table is not supported. Attempting
+    to do so fails with an error.
+
+Partitioning Keys, Primary Keys, and Unique Keys
+
+    This section discusses the relationship of partitioning keys with primary keys and
+    unique keys. The rule governing this relationship can be expressed as follows: All
+    columns used in the partitioning expression for a partitioned table must be part of
+    every unique key that the table may have.
+
+    In other words, every unique key on the table must use every column in the table's
+    partitioning expression.
+
+Storage Engine Restrictions
+
+The NDB storage engine, which is used in MySQL Cluster, only supports partitioning by
+[LINEAR] KEY.

@@ -1,0 +1,364 @@
+http://velocityconf.com/velocity2010/public/schedule/proceedings
+
+Scalable Internet Architectures {
+no video; only pdfs
+pdf saved to jdocs/Velocity-Conf-2010/Scalable Internet Architectures Presentation 2.pdf
+
+recommended stack for static content:
+  Setup a web server to host all your static content.
+  Setup a handful of servers running a reverse proxy-cache:
+    Squid or Varnish or Apache/mod_proxy
+  Make them redundant without a load balancer by using IP redundancy protocols: 
+    VRRP, UCARP or Wackamole
+  simple, easy, scalable.
+
+content distribution: location seamlessly:
+  Put a DNS server at each location behind the same uplink
+    each with the same IP address 
+    announce that network from all data centers (using BGP)
+
+use case of news articles
+  with url rewrite, caching and invalidation sections
+
+databases
+  sharding causes all kinds of problems by breaking the relational model
+  so do it consciously only when you have to
+
+networking: going past gigE
+  use routing:  ask Wayne/jad to help me understand this
+
+when / if computating load through servers, don't just compute reqs / second.
+  also compute the bandwidth, packets needed by sizing the requests.
+}
+
+I Made a Map of the Internet - And What It Can Teach Us About Speeding Up Websites {
+presentation only, and only online as a flash presentation thingee
+http://prezi.com/gks10schfggg/i-made-a-map-of-the-internet-and-other-lessons-about-speeding-up-web-sites/
+
+Hard to summarize points from this preso.
+Some value, but I think the talking over these slides would have been very helpful.
+}
+
+Speed Matters {
+Urs Holzle (google)
+jdocs/Velocity-Conf-2010/Speed Matters Presentation.pdf
+http://www.youtube.com/watch?v=MStKwEff_kY&feature=player_embedded#!
+
+Some stats google collected:
+
+Average load time of a web page is 4.9 seconds 
+Average size of a web page is 320 KB 
+Average bandwidth of a user is 1.8 Mbps 
+So, a typical page should load in 1.4 seconds
+
+An average web page: 
+is 320 KB in size 
+uses 44 resources 
+makes 7 DNS lookups 
+doesn't compress a third of its content
+
+Waterfall in preso collected via webpagetest
+webpagetest is a community hosted service, with some instanced hosted by Strangeloop
+http://www.webpagetest.org/
+
+Faster protocols {
+TCP improvements: 
+  Fast start (higher initial congestion window)
+  Quick loss recovery (lower retransmit timeouts)
+  Makes Google products 12% faster
+  No handshake delay (app payload in SYN packets)
+
+DNS improvements:
+  Propagate client IP in DNS requests (to allow servers to better map users to the closest servers)
+
+SSL improvements:
+  False Start (reduce 1 round trip from handshake)
+    10% faster (for Android implementation)
+  Snap Start (zero round trip handshakes, resumes)
+  OCSP stapling (avoid inline round trips to certificate authority)
+
+HTTP improvements (SPDY):
+  Header compression
+  Stream multiplexing and prioritization
+  Server push/hints
+  25% faster
+}
+
+Faster infrastructure {
+
+Public DNS:
+  Reduces recursive-resolve time by continuously refreshing cache
+  Increases availability through adequate provisioning
+
+  8.8.8.8 as the DNS server; highly available; very fast
+
+1 Gbps broadband:
+  Pilot project to fix “last mile” complaint
+  Leapfrog: Huge increase of 100x
+
+Hosting for popular files (jQuery, fonts, etc):
+  Frees up web site's server resources and provides load balancing, low latency
+  Improves caching on client (same URL across multiple sites)
+
+More developer tools
+  Page Speed
+  Closure Compiler
+  Speed Tracer
+  Auto Spriter
+}
+
+More Awareness
+  web search ranking
+  code.google.com/speed
+  browserscope
+  site performance data
+
+References
+  TCP Initial Congestion Window: datatracker.ietf.org/doc/draft-hkchu-tcpm-initcwnd/
+  TCP Retransmit Rate: tools.ietf.org/id/draft-paxson-tcpm-rfc2988bis-00.txt
+  DNS Client IP in Requests: tools.ietf.org/html/draft-vandergaast-edns-client-ip-00
+  SSL False Start: tools.ietf.org/html/draft-bmoeller-tls-falsestart-00
+  SSL Snap Start: tools.ietf.org/html/draft-agl-tls-snapstart-00
+
+  Impact of speed on business (revenue, usage):
+    radar.oreilly.com/2009/07/velocity-making-your-site- fast.html
+  YouTube bandwidth data (per user): www.youtube.com/my_speed
+  Webmaster Tools load time data (per site): 
+    www.google.com/webmasters/tools (go to Labs → Site Performance)
+  Web page statistics (aggregate): code.google.com/speed/articles/web-metrics.html
+}
+
+From Browsers to Mobile Devices: The End User Experience Still Matters {
+Vik Chaudhary, Keynote
+rating: 2.54
+
+Introduces MITE 2.0 'Mobile Interactive Testing Environment'
+MITE is a free product
+
+MITE scores are similiar to YSlow scores
+  compares actual results found against W3C's mobile best practices
+
+MITE keeps device profiles letting the user send requests that simulate what 
+  each device would send, essentially capturing and replaying the device-specific header values.
+}
+
+
+O'Reilly Radar {
+jdocs/Velocity-Conf-2010/O_Reilly Radar Presentation.pdf
+http://www.youtube.com/watch?v=MH9qxqPMYGk&feature=player_embedded
+rating: 3.64
+
+jeffjonas.typepad.com
+
+read 'web squared: web 2.0 five years on' paper: http://bit.ly/kEKgs
+}
+
+Don't Let Third Parties Slow You Down {
+Jain & Kleber: google
+jdocs/Velocity-Conf-2010/Don_t Let Third Parties Slow You Down Presentation.ppt
+http://www.youtube.com/watch?v=3NVpFj64MQU&feature=player_embedded
+
+
+Google measured in their 'Knockout Lab' these % impact (% of total page time)
+by instrumenting page load with and without:
+
+AdSense               12%
+Google Analytics      < 5%
+Doubleclick           11.5%
+
+Other packages have even larger impact.
+  (Digg, FriendConnect, FacebookConnect, TribalFusion stats were shown for 2 publishers each)
+
+The bulk of this talk is about makeing Google Ad Sense Fast by Default
+
+The problem is the blocking js call:
+  <script
+    src="http://.../pagead/show_ads.js">
+  </script>
+
+using the IFRAME construct, the time Ad Sense spent blocking the page load decreased
+from :
+                 median             90th percentile
+old show_ads.js   47 ms                  288 ms
+ASWIFT            11 ms                   32 ms
+
+
+there are browser specific issues with this approach.
+Jain implied not all of them were solved at the time.
+  e.g. Forward-back-reload issues
+
+}
+
+Stupid Web Caching Tricks {
+rating: 4.00
+Mark Nottingham: Yahoo!
+http://static.slidesharecdn.com/swf/ssplayer2.swf?doc=stupidwebcachingtricks-100623160237-phpapp01&stripped_title=stupid-web-caching-tricks|380|285
+
+slides are terse; kind of hard to infer the content from just the slides.
+
+collapsed forwarding is good:
+in squid2: collapsed_forwarding on
+in squid.HEAD: collapsed_forwarding_timeout
+
+run multiple squid caches
+with cache peering between them
+
+cache peering:
+RFC 2186:  ICP: Internet Cache Protocol
+           UDP-based
+           Just the URI
+           Query only
+           in Squid / Traffic Server
+RFC 2756:  HTCP: Hyper Text Caching Protocol
+           UDP-based (option for TCP in spec)
+           Includes URI + Headers
+           Query, CLR operations
+           in Squid
+
+       24 front-end servers  x
+         24 Apache children  x
+           5 pages / second  x
+  8 service requests / page  x
+     10k / service response  /
+            2 cache servers  =
+                                11,520 req/sec
+                                900 Mbits / sec
+                                per cache server
+
+Content becomes stale
+RFC 5861:
+  stale while revalidate
+  stale if error
+  implemented in Squid 2.7
+       coming    Squid 3.2
+                 Apache Traffic Server
+
+Dealing with aborted requests
+  Squid:             quick_abort
+  Traffic Server:    background_fill
+
+Getting an Immediate Answer
+  Cache-Control: only-if-cached
+  504 Gateway Error
+  Cache-Control: max-age=3600, max-stale
+  Squid (soon): fetch_only_if_cached_access
+
+Your API will be cached
+
+Non-canonical URLs == low cache hit rate
+
+Cache invalidation
+
+RFC 2616: Invalidations after updates or deletions
+  e.g. after a PUT/POST/DELETE
+  problem 1: Peered Caches
+    need to propogate PUT/POST/DELETE effect to peers
+    done with HTCP CLR
+  problem 2: Related responses
+    POST /articles/123/new_comment
+      what about cached:
+        /newest_comments
+        /articles/123/comments
+        /comment_feed
+      Link: rel=invalidated-by
+        /newest_comments  Link: </articles/123/new_comment>; rel="invalidated-by"
+  problem 3: Dynamic relations
+    what if /bob/comments should be related?
+    A: rel="invalidates"
+
+"side effect" invalidation + link relations == Linked Cache Invalidation
+
+Cache Channels: from cache to origin: "What has become stale"
+
+Cache Channels
+    Good for:  occasional tight control
+      Caveat:  ~10 - 30sec lag; not immediate
+  Bottleneck:  number of events in channel
+
+Linked Cache Invalidation
+    Good for:  user-generated content
+      Caveat:  not 100% reliable
+  Bottleneck:  complexity of relationships
+
+The whole point of using a cache is that you are not writing code
+
+http://www.squid-cache.org/
+http://trafficserver.apache.org
+http://www.mnot.net/cache_docs/
+http://redbot.org
+http://github.com/mnot/
+}
+
+Apache Traffic Server - HTTP Proxy Server on the Edge {
+  Leif Hedstrom (Akamai Technologies)
+  rating: 3.21
+  the slides
+  jdocs/Velocity-Conf-2010/Apache Traffic Server - HTTP Proxy Server on the Edge Presentation 1.ppt
+  the white paper referenced in the slides
+  jdocs/Velocity-Conf-2010/Apache Traffic Server - HTTP Proxy Server on the Edge Presentation.doc
+
+I read the white paper;
+it is an introduction to Apache Traffic Server;
+  its threaded, asynch event architecture
+  a bit of comparison to Squid and other open source proxies
+  a quick intro to using ATS as a CDN
+
+Some random perf numbers (from Y! CDN and Y! lab)
+  85,000 requests / sec with small content out of cache, for a single (lab)box
+  3.6Gbps out of a single box, with larger content (4x GigE NIC bonded)
+
+
+}
+
+
+Metrics 101: What to Measure on Your Website {
+  Sean Power
+  http://www.slideshare.net/bitcurrent/metrics-101
+
+  use well defined metrics to provision SLAs or they will be less meaningful
+  a good example:
+
+    the login                           function
+    will have a total latency           metric
+    of under 4 seconds                  target
+    with a cached browser copy          user situation
+    from any US branch office           testing point
+    95% of the time                     percentile
+    weekdays, 8AM ET to 6PM PT          time window
+    by synth test at 5m intervals       collection type
+    
+  apdex: categories: frustrated: over 8 seconds; tolerating: 2-8 secs; satisfied: < 2 secs
+  apdex score: (satisfied + tolerating/2) / all requests
+}
+
+
+A Day in the Life of Facebook Operations {
+  Tom Cook
+  http://www.youtube.com/watch?v=T-Xr_PJdNmQ
+  facebook
+    php + FB internal tool that compiles to C
+      C lowers CPU usage by 50% vs PHP
+    uses cfengine
+    merged engineering + qa into 1 function
+    engineers write, debug, test and deploy their own code
+      engineers can expose changes to a subset of real traffic
+      no 'commmit and quit'
+      deeply involved in moving services to production
+    operations folks 'embedded' into engineering teams
+      so ops folks help make architecture decisions
+                   get a better understanding of how the product works
+    change is frequent
+      but with good logging and auditing
+    ganglia
+      really fast data store, that is quick to drill into
+      data is updated every minute
+      fb stores RRDs in RAM
+    ods FB internal tool
+      ods is persistent and accurate, while ganglia is fast and rough
+    nagios
+      ping testing, ssh testing
+      distributed: all nagios tools feed FB internal tools to aggregate things
+}
+
+Always Ship Trunk: Managing Change In Complex Websites
+  http://assets.en.oreilly.com/1/event/44/Always%20Ship%20Trunk_%20Managing%20Change%20In%20Complex%20Websites%20Presentation.pdf

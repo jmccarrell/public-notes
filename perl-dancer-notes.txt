@@ -1,0 +1,93 @@
+Notes while working with the simple web application framework Dancer
+http://perldancer.org/
+
+DONE Initial foray
+  install dancer on proteus
+    I just followed the std recipe, and it seemed to work just fine:
+      sudo cpan Dancer
+  get hello world working
+    again the std recipe worked great:
+      cd ~/tmp
+      dancer -a mywebapp
+      cd mywebapp
+      perl mywebapp.pl
+      http://localhost:3000/
+
+  better choice to run the webserver:
+    perl mywebapp.pl --port=3267 --daemon
+
+
+read docs:
+  DONE               ::Introduction
+                ::Cookbook
+  perldoc Dancer
+
+my app dev tasks
+  pick a name for it: nutkeeper
+  build the user / authentication / authorization model it early
+
+Docs notes
+::Introduction
+
+Q: how is HEAD support derived from GET?  It needs some notion of whether the content
+  is current or not -- how could this work correctly?  C.f.:
+
+    (when defining a route handler for the GET method, Dancer automatically defines a
+    route handler for the HEAD method, in order to honour HEAD requests for each of
+    your GET route handlers)
+
+----
+
+Route Handlers
+
+parameters passed are made available via the params keyword inside a handler.
+params returns a hashref.
+
+Q: are both & and ; styles of parameter parsing handled?
+  Maybe this Q is answered in Dancer::Request
+
+A route pattern may contain declarations of the parameters it is expecting, eg:
+           get '/hello/:name' => sub {
+               "Hey ".params−>{name}.", welcome here!";
+           };
+
+Wildcard matching
+Doc is confusing; what is being matched against?
+The example makes it seem like matching is being done against the file system,
+but that doesn't make any sense.
+This section is a candidate for a re write.
+
+A global prefix can be defined once, from that parse moment on, all subsequent
+route handlers act as suffixes.
+           prefix '/home';
+
+An invoked route handler signal its decision not to serve the request with the 'pass' keyword.
+
+Looks like before filters are commonly used to provide login support.
+There are before filters
+          after  filters
+          before template filters
+
+Before template filters are:
+  This is a good way to setup some global vars you like to have in all your templates,
+  like the name of the user logged in or a section name.
+
+N.B.  The Dancer::Introduction doc could certainly benefit from an introduction to
+environments before using the concept in CONFIGURATION AND ENVIRONMENTS
+
+Looks like logging is a simple matter of turning it on with 2 config lines:
+
+logger: 'file'
+log: 'debug'
+
+then calling 1 of 3 methods:
+debug, warning, error
+
+----------------------------------------------------------------
+
+Looks like the cookie reading code has the bug that I handled in Discern
+where the cookie deserializer cannot handle any value that contains a '='.
+The effect is likely that the cookie value
+an equals sign (=) goes here
+will be truncated at the = sign and return only:
+an equals sign (

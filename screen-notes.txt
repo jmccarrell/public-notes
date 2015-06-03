@@ -1,0 +1,36 @@
+start screen:
+screen emacs prog.py
+
+
+C-a c
+C-a C-c      (screen)      Create a new window with a shell and switch to that window.
+
+C-a space
+C-a n
+C-a C-n      (next)        Switch to the next window (opposite of C-a p).
+
+C-a backspace
+C-a h
+C-a p
+C-a C-p      (prev)        Switch to the previous window (opposite of C-a n).
+
+C-a w
+C-a C-w      (windows)     Show a list of windows.
+
+C-a k
+C-a C-k      (kill)        Destroy current window.
+
+C-a C-\      (quit)        Close all windows and exit.
+
+
+To see the running sessions:
+
+proteus-> screen -list
+There is a screen on:
+	5275.ttys000.usca1mc-27typ4	(Detached)
+1 Socket in /var/folders/lU/lUBL0GoBHp0PDuPWaJ3lYU++Q9A/-Tmp-/.screen.
+
+re-attach to an existing session with 
+
+screen -r
+screen -r [[pid.]tty[.host]]

@@ -1,0 +1,186 @@
+Notes on using gpg:
+
+I can have more than one key in the secret keyring.
+
+    gpg may be run with no commands, in which case it will perform a reasonable action
+    depending on the type of file it is given as input (an encrypted message is decrypted,
+    a signature is verified, a file containing keys is listed).
+
+the default files:
+
+    ~/.gnupg/secring.gpg
+           The secret keyring.  You should backup this file.
+
+we have:
+proteus-> gpg ~/.gnupg/secring.gpg
+sec  2048R/A4841728 2012-04-19 Jeff McCarrell (gpg key 19 April 2012) <jeff@mccarrell.org>
+ssb  2048R/CC8CB138 2012-04-19
+
+    ~/.gnupg/pubring.gpg
+           The public keyring.  You should backup this file.
+
+proteus-> gpg ~/.gnupg/pubring.gpg
+pub  2048R/A4841728 2012-04-19 Jeff McCarrell (gpg key 19 April 2012) <jeff@mccarrell.org>
+sub  2048R/CC8CB138 2012-04-19
+
+    ~/.gnupg/trustdb.gpg
+           The trust database.  There is no need to backup this file; it is
+           better  to  backup the ownertrust values (see: [option --export-
+           ownertrust]).
+
+proteus-> gpg ~/.gnupg/trustdb.gpg
+gpg: no valid OpenPGP data found.
+gpg: processing message failed: eof
+
+
+proteus-> gpg --decrypt budget.gpg > /dev/null
+
+You need a passphrase to unlock the secret key for
+user: "Jeff McCarrell (gpg key 19 April 2012) <jeff@mccarrell.org>"
+2048-bit RSA key, ID CC8CB138, created 2012-04-19 (main key ID A4841728)
+
+Enter passphrase:
+
+q: does --decrypt do the right thing without flags when encrypted symmetrically?
+q: what flags does the emacs support methods pass down through the gpg layer?
+partial a: hard to tell. EasyPG is written by someone from .jp; docs are minimal.
+  q: how can I change these?
+q: what options are there, given a file, to understand how it was encrypted post facto?
+
+AI: figure out how to generate a fingerprint from an encrypted file.
+  well, that would be a signature?
+the man page talks about hiding the recipients, and then guessing
+  a bunch of private keys to use to decrypt.
+
+----
+global documentation:
+
+the top level emacs wiki page that I can find to deal with encryption is:
+http://www.emacswiki.org/emacs/AutoEncryption
+this lists as options:
+  - EasyPG
+  - crypt++
+  - ccrypt
+
+I have read the first bits of:
+  - Easy Privacy Guard:
+    the supported emacs interface to privacy guard in (at least) emacs 23
+    http://emacswiki.org/emacs/EasyPG
+  - Gnu Privacy Handbook (c) 1999 (sic); my notes are below
+
+Easy Privacy Guard: {
+the main home page:  http://epg.sourceforge.jp/
+the wiki: http://emacswiki.org/emacs/EasyPG
+
+On Emacs 23, the info page is in the file system under the name epa:
+  /Applications/Emacs.app/Contents/Resources/info/epa
+which is available from the top level Info page, titled: 'EasyPG Assistant'
+
+Inside Emacs, see if one can list keys:
+
+M-x epa-list-keys
+on proteus, circa Tue Nov  6 15:05:05 PST 2012, I get a *Keys* buffer containing:
+  u 1AE09714A4841728 Jeff McCarrell (gpg key 19 April 2012) <jeff@mccarrell.org>
+
+and epa-list-secret-keys
+}
+
+brew gpg info: {
+proteus-> brew info gpg
+gnupg: stable 1.4.12
+http://www.gnupg.org/
+/usr/local/Cellar/gnupg/1.4.11 (52 files, 4.9M)
+/usr/local/Cellar/gnupg/1.4.12 (52 files, 5.0M) *
+https://github.com/mxcl/homebrew/commits/master/Library/Formula/gnupg.rb
+==> Options
+--8192
+	Build with support for private keys of up to 8192 bits
+--idea
+	Build with the patented IDEA cipher
+
+proteus-> ls -1h /usr/local/bin/gpg*
+/usr/local/bin/gpg@
+/usr/local/bin/gpg-zip@
+/usr/local/bin/gpgsplit@
+/usr/local/bin/gpgv@
+}
+
+Gnu Privacy Handbook (c) 1999 (sic): {
+http://www.gnupg.org/gph/en/manual.pdf
+
+talks about
+  - revocation certificates
+  - exchanging keys
+  - key management
+  - building your web of trust
+
+Ch 1 Getting Started
+
+    GnuPG uses a somewhat more sophisticated scheme in which a user has a primary keypair
+    and then zero or more additional subordinate keypairs. The primary and subordinate
+    keypairs are bundled to facilitate key management and the bundle can often be
+    considered simply as one keypair.
+
+On key generation:
+
+    Only one user ID is created when a key is created, but it is possible to create
+    additional user IDs if you want to use the key in two or more contexts, e.g., as an
+    employee at work and a political activist on the side. A user ID should be created
+    carefully since it cannot be edited after it is created.
+
+On passphrases:
+
+    From the perspective of security, the passphrase to unlock the private key is one of
+    the weakest points in GnuPG (and other public-key encryption systems as well) since it
+    is the only protection you have if another individual gets your private key
+
+On revocation certificates:
+
+    After your keypair is created you should immediately generate a revocation certificate
+    for the primary public key using the option -gen-revoke. If you forget your passphrase
+    or if your private key is compromised or lost, this revocation certificate may be
+    published to notify others that the public key should no longer be used.
+
+    ...
+
+    The certificate should not be stored where others can access it since anybody can
+    publish the revocation certificate and render the corresponding public key useless.
+
+On public key management
+
+The public half of keys can be exported in binary or ascii formats, and then imported for
+sharing.
+
+After importing a key, one should verify it by reading off the fingerprints and matching
+it with the fingerprint read by the other party.
+
+Once that is done, then one can sign the other public key.
+This requires editing the public key.
+The signatures will show on the keys.
+
+On encrypting and decrypting documents
+
+to encrypt do something like:
+
+  alice% gpg -output doc.gpg -encrypt -recipient blake@cyb.org doc
+
+    In particular, you cannot decrypt a document encrypted by you unless you included your
+    own public key in the recipient list.
+
+Symmetric encryption:
+
+    Documents may also be encrypted without using public-key cryptography. Instead, you
+    use a symmetric cipher to encrypt the document. The key used to drive the symmetric
+    cipher is derived from a passphrase supplied when the document is encrypted, and for
+    good security, it should not be the same passphrase that you use to protect your
+    private key. Symmetric encryption is useful for securing documents when the passphrase
+    does not need to be communicated to others. A document can be encrypted with a
+    symmetric cipher by using the --symmetric option.
+
+Since I do not need to support public exchange of my files, it seems like symmetric
+encryption of my private files using a sufficiently long key is sufficient for my privacy
+needs.
+
+Chapter 3: Key Management
+
+}

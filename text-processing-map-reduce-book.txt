@@ -1,0 +1,248 @@
+Notes from
+_Data Intensive Text Processing with Map Reduce_
+Lin & Dyer
+
+
+Chapter 3
+MapReduce algorithm design
+
+3.1 Local Aggregation
+The concept of a local combiner, or "in-mapper combining" is to collapse 
+key value pairs in the mapper to reduce the amount of data that is passed to
+the shuffle / sort.
+
+Using word count as the problem, here is the pseudo code:
+
+class Mapper
+  method Initialize
+    H := new AssocativeArray
+  method Map(docid a, doc d)
+    for all term t in doc d do
+      H{t} := H{t} + 1             # tally counts across all docs in input
+  method Close
+    for all term t in H
+      Emit(term t, count H{t})
+
+This technique uses an in-memory hash to store intermediate state.
+As this in-memory hash could grow to put pressure on the available memory of the map node,
+its contents is typically spilled after some number of inputs are processed,
+or after it reaches a certain size.
+
+In map reduce tasks in general, the efficiency increase of local aggregation 
+is a function of the size of the intermittent keys, the distribution of those keys to mappers,
+and the size of the key value pairs emitted.  
+After all, the optimization only occurs when there are repeated values for the same key 
+processed by the same mapper.
+
+Here is the pseudo code for producing an average of integers using combiners:
+
+class Mapper
+  method Map(string t, integer r)
+    Emit(string t, pair(r, 1))               # emit the partial sum for each input
+
+class Combiner
+  method Combine(string t, pairs[(s1, c1), (s2, c2) ... ])
+    sum := 0
+    count := 0
+    for all pairs(s, c) in pairs[(s1, c1), (s2, c2) ... ] do
+      sum := sum + s
+      count := count + c
+    Emit(string t, pair(sum, count))
+
+class Reducer
+  method Reduce(string t, pairs[(s1, c1), (s2, c2) ... ])
+    <same as combiner computing the sums and counts>
+    r_avg := sum/count
+    Emit(string t, integer r_avg)
+
+We have coded the mapper and combiner here to produce partial sums,
+which is needed as Hadoop may run the combiner, 0, 1 or many times over its input.
+
+We can achieve more efficiency by applying the in-mapper combiner pattern as follows:
+
+class Mapper
+  Method Initialize
+    S := new AssociativeArray
+    C := new AssociativeArray
+  Method Map(string t, integer r)
+    S{t} := S{t} + r
+    C{t} := C{t} + 1
+  Method Close
+    for all t in S do
+      Emit(string t, pair(S{t}, C{t})
+<the reducer is the same as above>
+
+Stripes and Pairs
+
+The problem under consideration is to build a word co-occurence matrix over large corpora.
+Formally, the co-occurence matrix is a square n x n matrix where n is the number of
+unique words in the corpora, ie, the vocabulary size.
+A cell Mij contains the number of times word Wi co-occurs with work Wj within some
+specific application defined context, like a sentence, paragraph, document, HTTP header ...,
+or a certain window of m words, where m is again application dependent.
+
+Notice that for many definitions, the upper and lower triangles of the matrix are identical.
+However, that need not be the case for all word co-occurence problems.
+E.g. the co-occurence matrix where Mij is the count of how many times word Wi was immediately
+followed by word Wj.
+
+Some frequent optimizations to reduce the size of the vocabulary are:
+- replace all rare words with a token, like <UNKNOWN>
+- replace numeric digits, like 1.99 => #.##
+
+Lin and Dyer say that the pairs and stripes algorithms are design patterns to be re used
+in many problem domains.
+
+The pairs alg applied to the word co-occurence problem:
+
+class Mapper
+  method Map(docid a, doc d)
+    for each word w in doc d
+      for each word u in Neighbors(w)
+        Emit(pair(w, u), integer 1)
+
+class Reducer
+  method Reduce(pair(w, u) [c1, c2, ...])
+    sum := 0
+    for each c in [c1, c2, ...] do
+      sum := sum + c
+    Emit(pair(w, u), sum)
+
+This alg uses the pair of words as the key, emits each occurence,
+then sums in th reducer.
+
+For the stripes pattern, the end result is a single row of the co-occurence
+matrix emited as the word w, with the value of the hash of the co-occuring words and their
+counts.
+
+As an example, for the sentence above, the row for the word 'for', the end result
+would look like:
+
+'for' => { 'stripes' => 1, 'the' => 6, 'with' => 1 ... }
+
+Stripes applied to word co-occurence:
+
+class Mapper
+  method Map(docid a, doc d)
+    for each word w in doc d
+      H := new AssociativeArray
+      for each word u in Neighbors(w)
+        H{u} := H{u} + 1
+      Emit(string w, Stripe(H))
+
+class Reducer
+  method Reduce(string w, Stripes[H1, H2, H3 ...])
+    Merged := new AssociativeArray
+    for each H in [H1, H2, H3 ...] do
+      Merged := combine(H, Merged)         # this is an element-wise sum
+    Emit(string w, Stripe(Merged))
+
+Here the Stripe function encodes the entire hash.
+
+Both the pairs and stripes algorithms benefit from combiners, and from in-memory combining.
+As before, care must be taken not to exceed RAM by those hashes, especially in light of
+Heap's Law that says the vocabulary of a given corpora is essentially unbounded.
+For the stripes algorithm, some kind of hash flushing based on the total size of the
+hash in memory would be appropriate.
+For python, using dicts len(d) to approximate based on the number of keys looks to be
+about the best choice.
+
+In memory combining for stripes here would change from emitting every word once per
+document, to once per input split, modulo flushing due to memory constraints.
+
+Lin & Dyer cite their own research which showed stripes 5.7 times faster than pairs
+over a pre-processed 2.7MM document corpus.
+Both stripes and pairs showed linear growth in run time as corpus size increased.
+They showed stripes gave linear reduction in run time as cluster size increased,
+just what one would hope for: the 'gold standard' of scalability.
+
+Lin & Dyers summary:
+
+  Viewed abstractly, the pairs and stripes algorithms represent two different approaches
+  to counting co-occuring events from a large number of observations.  This general
+  description captures the gist of many algorithms in fields as diverse as text
+  processing, data mining, and bioinformatics.  For this reason, these two design patterns
+  are broadly useful ...
+
+  To conclude, it is worth noting that the pairs and stripes approaches represent
+  end-points along a continuum of possibilities.  The pairs approach individually records
+  _each_ co-occuring event, while the stripes approach records _all_ co-occuring events
+  with respect to a conditioning event.
+
+Applied to the word co-occurence, we see that each pair
+viewed/abstractly => 1
+is the result of the pairs approach,
+while the set of results per word
+viewed => { abstractly => 1, pairs => 5, ... }
+emits all of the events in a single record.
+
+Computing Relative Frequencies
+
+The drawback of absolute counts is that words have much different frequencies;
+'the', 'of' ...
+  http://www.ranks.nl/resources/stopwords.html
+    3 lists of different sizes
+  http://www.lextek.com/manuals/onix/stopwords1.html
+    a list of 429
+the so-called 'stop words' will dominate the counts.
+The solution is to compute relative frequencies instead of counts.
+For word co-occurence, this means we compute how often a particular pair occurs
+relative to how often one of the pair appears with every other word in the corpus
+which is known as the marginal for that word.
+
+To do this with minimum state managed in the reducer, we make the mapper emit a count of
+every word and 1 along with the emitted word1, word2 pairs.  Pick a symbol to match with
+this sum, like '*', which collates before every word in the corpora, and then use
+combiners, in-memory or otherwise, to provide partial-sums of all the occurences of the
+word with any other word, aka, the marginal.
+
+As well, the algorithm assumes that every word intermediate result is processed by at the
+same reducer.  To do that, we must introduce a partioner to map reduce that does this
+grouping.
+
+Then, the reducer is presented with the partial sums of the marginal first, followed by
+the pair frequencies.  So the only reducer state to manage is that for a single word, in
+this case, an integer.
+
+As an example, here are some made up data:
+
+
+key            value              notes
+(pear, *)      [5715, 803, 2157]  compute marginal for pear: = 8675
+(pear, apple)  [2, 8]             freq(pear, apple) == 10 / 8675
+(pear, aprioct)[3, 5, 4]          freq(pear, apricot) == 12 / 8675
+...
+(pear, zoo)
+(plum, *)      [2777, 2433, 1675] marginal(plum) == 6885
+(plum, apple)  [3, 7, 9, 4]       freq(plum, apple) == 23 / 6885
+...
+
+Lin & Dyer call this pattern: order inversion
+They summarize the use of order inversion for computing relative frequencies:
+
+-- emit a special key-value pair for each co-occuring word pair to capture
+   its contribution to the marginal (the '*' entries above).
+   Thus each co-occuring word pair emits 2 records.
+
+-- control the sort order of the intermediate keys so the special key-value pair
+   representing the contribution to the marginal is processed by the reducer
+   before any of the pairs representing joint frequency counts.
+
+-- define a custom partitioner to ensure that all pairs with the same left word
+   get processed by (are shuffled to) the same reducer.
+
+-- preserve state in the reducer across multiple keys to first compute the marginal,
+   then to produce the relative frequencies as they stream through.
+
+
+Secondary Sorting
+Map reduce by definition sorts keys in the shuffle/sort phase between mapper and reducer.
+What if we need an ordering over the values, as well as the keys?
+Google's map reduce supports this capability natively, but Hadoop does not.
+
+The answer is to move the portion of the value that you want sorted into the key.
+Lin & Dyer call this "value-to-key-conversion".
+ 
+Apparently, Hadoop defines API hooks to define 'groups' of intermediate keys
+to be processed together in the same reducer.
+

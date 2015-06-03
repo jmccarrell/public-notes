@@ -1,0 +1,294 @@
+* subprocess - Subprocess Management
+
+http://docs.python.org/release/2.6.7/library/subprocess.html
+
+subprocess allows you to fork new processes, connect to their pipes, and obtain return codes.
+It is intended to replace:
+
+  - os.system
+  - os.spawn*
+  - os.popen*
+  - popen2.*
+  - commands.*
+
+
+** Using the subprocess Module
+
+The subprocess Module defines one class: Popen
+
+the constructor defines the interface to spawning processes:
+class subprocess.Popen(args,
+                       bufsize=0,
+                       executable=None,
+                       stdin=None,
+                       stdout=None,
+                       stderr=None,
+                       preexec_fn=None,
+                       close_fds=None,
+                       shell=False,
+                       cwd=None,
+                       env=None,
+                       universal_newlines=False,
+                       startupinfo=None,
+                       creationflags=0)
+
+args
+
+bufsize is interpreted just as in the built-in open() call:
+  0: unbuffered
+  1: line buffering
+  n: buffer of approximately size n
+
+stdin, stdout and stderr
+
+    specify the executed programs’ standard input, standard output and standard error file
+    handles, respectively. Valid values are PIPE, an existing file descriptor (a positive
+    integer), an existing file object, and None. PIPE indicates that a new pipe to the
+    child should be created. With None, no redirection will occur; the child’s file
+    handles will be inherited from the parent. Additionally, stderr can be STDOUT, which
+    indicates that the stderr data from the applications should be captured into the same
+    file handle as for stdout.
+
+preexec_fn
+
+    If preexec_fn is set to a callable object, this object will be called in the child
+    process just before the child is executed. (Unix only)
+
+close_fds
+
+    If close_fds is true, all file descriptors except 0, 1 and 2 will be closed before the
+    child process is executed.
+
+cwd
+
+    If cwd is not None, the child’s current directory will be changed to cwd before it is
+    executed.
+
+env
+
+    If env is not None, it must be a mapping that defines the environment variables for
+    the new process.
+
+startupinfo
+creationflags
+
+    The startupinfo and creationflags, if given, will be passed to the underlying
+    CreateProcess() function. They can specify things such as appearance of the main
+    window and priority for the new process. (Windows only)
+
+*** Convenience Functions
+
+The Popen class defines 2 convenience functions:
+
+subprocess.call(*popenargs, **kwargs)
+
+    Run command with arguments. Wait for command to complete, then return the returncode
+    attribute.
+
+    The arguments are the same as for the Popen constructor.
+
+subprocess check_call(*popenargs, **kwargs)
+
+    Run command with arguments. Wait for command to complete. If the exit code was zero
+    then return, otherwise raise CalledProcessError. The CalledProcessError object will
+    have the return code in the returncode attribute.
+
+    The arguments are the same as for the Popen constructor. 
+
+python 2.7 adds:
+subprocess.check_output(*popenargs, **kwargs)
+
+    e.g.
+
+    >>> subprocess.check_output(
+                                ["/bin/sh", "-c", "ls non_existent_file; exit 0"],
+                                stderr=subprocess.STDOUT)
+        'ls: non_existent_file: No such file or directory\n'
+
+
+*** Exceptions
+
+Exceptions raised in the child before the new process has started will be re-raised
+in the parent.  The exception object will have the added attribute child_trackback,
+which is a string containing traceback info from the childs point of view.
+
+The most common exception is OSError.  Applications should be prepared for OSError
+exceptions.
+
+A ValueError will be raised if Popen is called with invalid args
+
+check_call will raise CalledProcessError if the process returns a non-zero return code.
+
+*** Security
+
+subprocess never calls /bin/sh implicitly, so the issues around shell metacharacters
+are eliminated.
+
+** Popen Objects
+
+*** Popen Methods
+
+Popen.poll()
+  Check if child process has terminated. Set and return returncode attribute.
+
+Popen.wait()
+  Wait for child process to terminate. Set and return returncode attribute.
+
+  Will deadlock if the std{out,err} pipes fill without being read.
+
+Popen.communicate(input=None)
+
+  Interact with process: Send data to stdin. Read data from stdout and stderr, until
+  end-of-file is reached. Wait for process to terminate. The optional input argument
+  should be a string to be sent to the child process, or None, if no data should be sent
+  to the child.
+
+  communicate() returns a tuple (stdoutdata, stderrdata).
+
+  Note that if you want to send data to the process’s stdin, you need to create the Popen
+  object with stdin=PIPE. Similarly, to get anything other than None in the result tuple,
+  you need to give stdout=PIPE and/or stderr=PIPE too.
+
+Popen.send_sig(signal)
+  Sends the signal signal to the child.
+
+Popen.terminate()
+  Send SIGTERM to the child
+
+Popen.kill()
+  Send SIGKILL to the child
+
+*** Popen Attributes
+
+Popen.stdin, stdout, stderr
+  If the stdin argument was PIPE, this attribute is a file object that provides input to
+  the child process. Otherwise, it is None.
+
+Popen.pid
+  child process pid
+
+Popen.returncode
+  child return code; set by poll(), wait() and indirectly by communicate.
+  None means the child has not terminated
+  A negative number -K means the child was terminated by signal K
+
+** Idioms
+
+*** replace /bin/sh backquote
+
+  output=`mycmd myarg`
+  ==>
+  output = Popen(["mycmd", "myarg"], stdout=PIPE).communicate()[0]
+
+*** replace shell pipeline
+
+  output=`dmesg | grep hda`
+  ==>
+  p1 = Popen(["dmesg"], stdout=PIPE)
+  p2 = Popen(["grep", "hda"], stdin=p1.stdout, stdout=PIPE)
+  p1.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
+  output = p2.communicate()[0]
+
+The p1.stdout.close() call after starting the p2 is important in order for p1 to receive a
+SIGPIPE if p2 exits before p1.
+
+*** replace os.system
+
+  sts = os.system("mycmd" + " myarg")
+  ==>
+  p = Popen("mycmd" + " myarg", shell=True)
+  sts = os.waitpid(p.pid, 0)[1]
+
+or using sequences instead of strings (not using the shell)
+
+  >>> p = subprocess.Popen(['/bin/ls', '/tmp'])
+  >>> ssh-HBnxzO9421	ssh-JCRhvK9420	ssh-NxrQbr9419
+  p = sts = os.waitpid(p.pid, 0)[1]
+  >>> print sts
+  0
+
+This is simpler to do with the call() method:
+
+  
+  >>> rc = subprocess.call(['ls', '/home'])
+  ec2-user  jwm
+  >>> print rc
+
+or catching the common exceptions:
+
+try:
+  rc = subprocess.call(['ls', '/nonexistant'])
+  if rc < 0:
+    print >>sys.stderr, 'terminated by signal: ', -rc
+  else:
+    print >>sys.stderr, 'exit status: ', rc
+except OSError, e:
+  print >> sys.stderr, 'process failed: ', e
+
+which gives the stdout from ls and its exit status:
+  ls: cannot access /nonexistant: No such file or directory
+  exit status:  2
+
+When the process cant be executed, we see the exception; try 'lls'
+  ...
+  rc = subprocess.call(['lls', '/nonexistant'])
+  ...
+gives:
+  process failed:  [Errno 2] No such file or director
+
+*** replace os.popen2 os.popen3
+
+NB that the os.popen calls are deprecated in favor of subprocess.
+
+popen2
+
+  (child_stdin, child_stdout) = os.popen2("cmd", mode, bufsize)
+  ==>
+  p = Popen("cmd", shell=True, bufsize=bufsize,
+            stdin=PIPE, stdout=PIPE, close_fds=True)
+  (child_stdin, child_stdout) = (p.stdin, p.stdout)
+
+popen3
+
+  (child_stdin,
+   child_stdout,
+   child_stderr) = os.popen3("cmd", mode, bufsize)
+  ==>
+  p = Popen("cmd", shell=True, bufsize=bufsize,
+            stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True)
+  (child_stdin,
+   child_stdout,
+   child_stderr) = (p.stdin, p.stdout, p.stderr)
+
+popen4
+
+  (child_stdin, child_stdout_and_stderr) = os.popen4("cmd", mode,
+                                                     bufsize)
+  ==>
+  p = Popen("cmd", shell=True, bufsize=bufsize,
+            stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+  (child_stdin, child_stdout_and_stderr) = (p.stdin, p.stdout)
+
+On Unix, os.popen2, os.popen3 and os.popen4 also accept a sequence as the command to
+execute, in which case arguments will be passed directly to the program without shell
+intervention. This usage can be replaced as follows:
+
+  (child_stdin, child_stdout) = os.popen2(["/bin/ls", "-l"], mode,
+                                          bufsize)
+  ==>
+  p = Popen(["/bin/ls", "-l"], bufsize=bufsize, stdin=PIPE, stdout=PIPE)
+  (child_stdin, child_stdout) = (p.stdin, p.stdout)
+
+return code / exit status handling translates as:
+
+  pipe = os.popen("cmd", 'w')
+  ...
+  rc = pipe.close()
+  if rc is not None and rc >> 8:
+      print "There were some errors"
+  ==>
+  process = Popen("cmd", 'w', shell=True, stdin=PIPE)
+  ...
+  process.stdin.close()
+  if process.wait() != 0:
+      print "There were some errors"

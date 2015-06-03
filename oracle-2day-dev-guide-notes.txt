@@ -1,0 +1,33 @@
+    When you connect to the database by providing your user name and password, you specify
+    the schema and indicate that you are its owner. In Oracle Database, the user name and
+    the name of the schema to which the user connects are the same.
+
+About SQL*Plus sqlplus
+
+  SQL*Plus (pronounced sequel plus) is an interactive and batch query tool that is
+  installed with every Oracle Database installation. It has a command-line user interface
+  that acts as the client when connecting to the database.
+
+  SQL*Plus has its own commands and environment. In the SQL*Plus environment, you can
+  enter and run SQL*Plus commands, SQL statements, PL/SQL statements, and operating system
+  commands to perform tasks such as:
+
+    - Formatting, performing calculations on, storing, and printing query results
+
+    - Examining tables and object definitions
+
+    - Developing and running batch scripts
+
+    - Performing database administration
+
+  You can use SQL*Plus to generate reports interactively, to generate reports as batch
+  processes, and to output the results to text file, to screen, or to HTML file for
+  browsing on the Internet. You can generate reports dynamically using the HTML output
+  facility.
+
+  You can use SQL*Plus in SQL Developer. For details, see Oracle Database SQL Developer
+  User's Guide.
+
+  See Also:
+     "Connecting to Oracle Database from SQL*Plus" on page 2-1
+     SQL*Plus User's Guide and Reference for complete information about SQL*Plus

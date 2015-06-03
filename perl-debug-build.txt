@@ -1,0 +1,92 @@
+I got the current 5.8.x release
+then
+
+./Configure -DDEBUGGING -de
+make
+
+The results of a Configure run are stored in the config.sh and Policy.sh files.
+
+make distclean removes the effects of Configure
+
+Next I need to make uninstall work;
+I think there is an UNINST define; check this
+can't find it; uninstall is provided by higher level packaging (rpm)
+Move on.
+
+read mod_perl 2 users's guide section on building and installing mod_perl
+
+Steps:
+
+get apache compiled on jeff-dev
+  static or dynamic linking?
+get perl compiled on jeff-dev
+get mod_perl compiled on jeff-dev
+
+Look at rpm spec files to see what they do to the virgin sources
+
+Right now on jeff-dev, I only have perl module SRPMs.
+Go get the relevant SRPMs:
+
+Accoring to rpm:
+
+jeff-dev-> rpm -qif /usr/bin/perl
+Name        : perl                         Relocations: (not relocatable)
+Version     : 5.8.5                             Vendor: CentOS
+Release     : 36.el4_6.3                    Build Date: Thu 12 Jun 2008 11:34:07 AM EDT
+Install Date: Fri 13 Jun 2008 04:09:26 AM EDT      Build Host: v20z-x86-64
+Group       : Development/Languages         Source RPM: perl-5.8.5-36.el4_6.3.src.rpm
+Size        : 38700889                         License: Artistic or GPL
+Signature   : DSA/SHA1, Thu 12 Jun 2008 02:29:16 PM EDT, Key ID a53d0bab443e1821
+Packager    : Johnny Hughes <johnny@centos.org>
+
+jeff-dev-> rpm -qif /etc/httpd/conf/httpd.conf
+Name        : httpd                        Relocations: (not relocatable)
+Version     : 2.0.52                            Vendor: CentOS
+Release     : 41.ent.centos4                Build Date: Fri 25 Jul 2008 03:15:04 AM EDT
+Install Date: Sun 14 Sep 2008 05:09:49 AM EDT      Build Host: builder10.centos.org
+Group       : System Environment/Daemons    Source RPM: httpd-2.0.52-41.ent.centos4.src.rpm
+Size        : 2757654                          License: Apache Software License
+Signature   : DSA/SHA1, Sat 26 Jul 2008 07:40:01 PM EDT, Key ID a53d0bab443e1821
+
+jeff-dev-> rpm -qif /usr/lib64/httpd/modules/mod_perl.so
+Name        : mod_perl                     Relocations: (not relocatable)
+Version     : 1.99_16                           Vendor: CentOS
+Release     : 4.5                           Build Date: Thu 14 Jun 2007 04:18:37 PM EDT
+Install Date: Fri 11 Apr 2008 04:45:18 PM EDT      Build Host: builder6
+Group       : System Environment/Daemons    Source RPM: mod_perl-1.99_16-4.5.src.rpm
+Size        : 4014431                          License: GPL
+Signature   : DSA/SHA1, Sun 17 Jun 2007 09:03:24 AM EDT, Key ID a53d0bab443e1821
+
+On jeff-dev, I have in ~/tmp:
+
+jeff-dev-> ls *.src.rpm
+httpd-2.0.52-41.ent.centos4.src.rpm  mod_perl-1.99_16-4.5.src.rpm
+
+So I need to get to our package repository, which is behind the firewall at:
+
+lynx http://ops.imiclk.local/centos
+
+navigate to the directory:
+4.7/os/SRPMS
+
+There one can find the apache and mod_perl SRPMs, as well as the perl srpm.
+Now I have all of the SRPMs, so I need to actually build and install them on my box
+with the ability to restore things to their default values without too much trouble.
+
+http://jons-thoughts.blogspot.com/2007/10/rpm-101-brief-tutorial-on-rpm-building.html
+
+is a resource I found.
+According to this tutorial, I have to set up my build environment.
+Don't build as root.
+Assume the build directory is going to be called ~/mp-leak-build
+
+jeff-dev-> cd ~/mp-leak-build/
+jeff-dev-> mkdir SRPMS RPMS SOURCES BUILD SPECS
+
+Now tell rpm to use those directories by creating/editing ~/.rpmmacros:
+
+jeff-dev-> cat ~/.rpmmacros
+%_topdir        /home/imiuser/mp-leak-build
+
+What is in the updates directory of our acerno yum site?
+

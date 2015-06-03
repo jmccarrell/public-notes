@@ -1,0 +1,81 @@
+Circa adopt code review 887
+http://fogbugz.imiclk.com/fogbugz/default.php?887
+Peter suggested that moving the declaration of the variables
+that held 3 hash keys up out of the loop would improve speed.
+
+So I wrote a bit of code to test this hypothesis.
+Turns out Peter is right.
+
+Hoisting the delcaration out of the loop makes it run 40% faster.
+
+
+On my mac laptop, which is a 2.5GHz Intel Core 2 Duo,
+running
+This is perl, v5.8.8 built for darwin-thread-multi-2level
+I get these results:
+
+perl testit.pl 
+running comparison of 100000 iterations...
+               Rate  inline_sub hoisted_sub
+inline_sub  20367/s          --        -30%
+hoisted_sub 29070/s         43%          --
+                  Rate  inline_inline hoisted_inline
+inline_inline  20492/s             --           -30%
+hoisted_inline 29155/s            42%             --
+
+
+On jeff-dev, which claims to be a Intel(R) Xeon(TM) CPU 3.60GHz,
+running
+This is perl, v5.8.5 built for x86_64-linux-thread-multi
+I see:
+
+
+perl testit.pl 
+running comparison of 100000 iterations...
+               Rate  inline_sub hoisted_sub
+inline_sub  15504/s          --        -33%
+hoisted_sub 22989/s         48%          --
+                  Rate  inline_inline hoisted_inline
+inline_inline  15432/s             --           -32%
+hoisted_inline 22727/s            47%             --
+
+
+
+running this code:
+
+#! /usr/bin/perl
+
+#
+# Measure the effect of moving the declaration of a variable
+#  that holds a hash key out of a loop.
+#
+
+use strict;
+use warnings;
+
+use Benchmark qw/:all/;
+
+
+my $count = 100_000;
+
+print "running comparison of $count iterations...\n";
+
+cmpthese($count, {
+    hoisted_sub => sub {
+	# guess that there will be an average of 200 campaigns that match
+	my $key;
+	for (1..200) { $key = 'LEXC:' . $_; }
+    },
+
+    inline_sub => sub {
+	for (1..200) { my $key = 'LEXC:' . $_; }
+    },
+});
+
+
+cmpthese($count, {
+    hoisted_inline => q[my $key; for (1..200) { $key = 'LEXC:' . $_; } ],
+    inline_inline  => q[for (1..200) { my $key = 'LEXC:' . $_; } ],
+});
+
+

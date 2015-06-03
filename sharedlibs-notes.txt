@@ -1,0 +1,61 @@
+The top level Program Library HOWTO:
+  http://tldp.org/HOWTO/Program-Library-HOWTO/index.html
+
+Notes from reading:
+  http://tldp.org/HOWTO/Program-Library-HOWTO/shared-libraries.html
+
+Modern shared libs are capable of:
+
+-- update libraries while still supporting programs that want to use older,
+   non-backward-compatible versions of those libs
+-- override specific libs, or even specific functions in a library for a given program
+-- do this while programs are running using the existing libs.
+
+Conventions:
+
+There is a distinction between the 'soname' and the 'real name'.
+There are also conventions about placement in the file system.
+
+An soname:
+-- has the prefix 'lib', the name of the library, the phrase '.so.' and a version number.
+-- a fully qualified soname includes as a prefix the directory it is in;
+   on a working system, a fully-qualified soname is simply a sym link to the shared libs
+   'real name'.
+
+A real name:
+-- is the filename containing the actual library code.
+-- the real name adds to the soname a period, a minor number, period and the release number.
+   the trailing period and release number are optional.
+   the minor and release numbers support configuration control.
+
+Also, there is the name the compiler uses when requesting a library, call this the linker name,
+which is just the soname without any version numbers.
+
+The key to managing shared libs is the separation of these names.
+Programs, when they interally list the shared libs they need, should only list the soname
+they require, that is, the library name and its major version.
+
+Conversely, when one creates a shared library, one only creates the lib with a specific
+filename (with more detailed version information).
+When one installs a new version of the lib, it goes in one of a few special directories,
+then ldconfig(8) gets run.
+ldconfig examines the existing files and creates the sonames as sym links to the real names,
+in addition to setting up the cache file /etc/ld.so.cache.
+
+----------------
+
+So to create a shared library, one needs to decide the policy of whether or not to support
+versioned libs that can coexist on a system.
+
+If no versioning is required, then just:
+  copy the shared lib to {/usr,}/lib
+  run ldconfig
+and you are done.
+
+ldconfig builds the shared library cache to speed loading.
+ldconfig -n will create symlinks, but do nothing to the cache.
+
+So one could run ldconfig -n to create all of the symlinks (I think)
+then put them in /usr/lib
+then run sudo ldconfig to update the cache.
+

@@ -1,0 +1,24 @@
+_Machine Learning_
+Tom M Mitchell
+McGraw Hill
+1997
+
+Chapter 1 Introduction
+  1.1 Well Posed Learning Problems
+  1.2 Designing a Learning System
+  1.3 Perspectives and Issues in Machine Learning
+  1.4 How to Read this Book
+  1.5 Summary and Further Reading
+
+Definition: Learning (broadly defined)
+
+    A computer program is said to learn from experience E
+    with respect to some class of tasks T
+    as measured by some performance criteria P
+    if its performance in tasks T,
+    as measured by P,
+    improves with experience E.
+
+credit assignment:  determining the extent to which individual choices in a sequence
+  result in the final outcome.
+

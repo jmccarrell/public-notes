@@ -1,0 +1,276 @@
+pep 249 is the DB-API 2.0 specification.
+Here are my notes from reading it:
+
+This is the exception inheritance layout:
+
+        StandardError
+        |__Warning
+        |__Error
+           |__InterfaceError
+           |__DatabaseError
+              |__DataError
+              |__OperationalError
+              |__IntegrityError
+              |__InternalError
+              |__ProgrammingError
+              |__NotSupportedError
+
+
+Connection object methods:
+.close()
+  close without commit is defined rollback().
+
+.commit()
+  by design, auto commit is to be turned off.
+
+.rollback()
+
+.cursor()
+  return a new Cursor object
+
+
+Cursors
+
+Cursors from the same connection are not isolated by definition; changes made by 1 cursor
+are immediately visible by other cursors
+
+Cursors created from different connections may or may not be isolated; depends
+on DB specific implementation.
+
+Cursor attributes and methods:
+.description: read-only sequence of 7-item sequences, one per column
+  name
+  type_code
+  display_size
+  internal_size
+  precision
+  scale
+  null_ok
+name, type_code are mandatory; the rest can be None
+None until an execute* has run.
+
+.rowcount
+read-only: sql affected num rows or -1
+
+.callproc(procname[,parameters])
+call a stored procedure
+
+.close()
+
+.execute(operation[,parameters])
+prepare and execute a DB operation.
+caches the parsed sql and can reuse it.
+it is suggested to use .setinputsizes() to maximize the chance of reuse.
+return values are not defined.
+
+.executemany(operation,seq_of_parameters)
+prepare and execute SQL against a sequence of data.
+
+use of .executemany() that produces one or more result sets is undefined behavior.
+
+.fetchone()
+return the next row or None
+
+.fetchmany([size=cursor.arraysize])
+fetch the next set of rows of a query result, returning a seq of sequences,
+e.g. a list of tuples.
+returns the empty sequence on no more rows.
+
+if size is given, it is best if it is constant over calls to fetchmany()
+
+.fetchall()
+
+.nextset()
+make the cursor skip to the next avaialble result set, discarding any rows
+in the current result set.
+
+.arraysize
+r/w specifies the number of rows to fetch with fetchmany.  default: 1
+may be used by .executemany()
+
+.setinputsizes(sizes)
+can be used before calls to .execute* to predefine memory buffers
+
+sizes is specified as a sequence:
+  1 item for each input parameter
+  the item should be either:
+    Type Object
+    integer to size the string
+    None  to eliminate the buffer
+
+.setoutputsizes(size[,column])
+set column buffer size for fetches of large columns eg LONGs, BLOBs.
+not specifying column will set the default size for all large columns in the cursor.
+must be used before .execute*
+
+Type Objects and Constructors
+
+The problem:
+
+    Many databases need to have the input in a particular format for binding to an
+    operation's input parameters.  For example, if an input is destined for a DATE column,
+    then it must be bound to the database in a particular string format.  Similar problems
+    exist for "Row ID" columns or large binary items (e.g. blobs or RAW columns).  This
+    presents problems for Python since the parameters to the .execute*() method are
+    untyped.  When the database module sees a Python string object, it doesn't know if it
+    should be bound as a simple CHAR column, as a raw BINARY item, or as a DATE.
+
+    A Cursor Object's description attribute returns information about each of the result
+    columns of a query.  The type_code must compare equal to one of Type Objects defined
+    below. Type Objects may be equal to more than one type code (e.g. DATETIME could be
+    equal to the type codes for date, time and timestamp columns; see the Implementation
+    Hints below for details).
+
+Defined Constructor Types:
+
+  - Date(year,month,day)
+  - Time(hour,minute,second)
+  - Timestamp(year,month,day,hour,minute,second)
+  - DateFromTicks(ticks)
+  - TimeFromTicks(ticks)
+  - TimestampFromTicks(ticks)
+  - Binary(string)
+  - STRING
+  - BINARY
+  - NUMBER
+  - DATETIME
+  - ROWID
+
+SQL NULL is represented by python None
+
+
+Implementation Hints for Module Authors
+<no notes>
+
+Optional DB API Extensions
+
+Cursor Attribute .rownumber
+r/o attribute provides 0-based index of cursor in the row set, or None
+The next fetch will get the rows indexed by .rownumber
+
+Connection Attributes: .Error, .ProgrammingError, etc.
+All exception classes defined should be exposed on the Connection objects as attributes,
+in addition to being available at module scope.
+These simplify (scope them) error handling in multi-connection set ups.
+
+Cursor Attributes: .connection
+r/o returns a ref to the Connection object on which the Cursor was created.
+
+Cursor Method .scroll(value[,mode="relative"])
+scroll the cursor in the result set to the new position.
+relative or absolute
+fseek for cursors
+
+Cursor Attribute .messages
+py list object of all messages for this cursor
+the list is implicitly cleared by all std cursor methods, except for .fetch*() calls.
+can be explicitly cleared by 'del cursor.messages[:]'
+All error and warning msgs from the DB are placed here;
+so checking this list validates correct usage.
+The goal is to eliminate the need for a Warning exception
+
+Connection Attribute .messages
+similiar to cursor.messages
+
+Cursor method .next()
+return the next row from the currently executing SQL using the same semantics as .fetchone().
+StopIteration exception is raised when the result set is exhausted.
+
+Cursor method .__iter__()
+return self to make cursors compatible with iteration protocol
+
+Cursor Attribute .lastrowid
+r/o gives the rowid of the last modified row
+(most DBs return a rowid only on a single INSERT)
+If the operation does not set a rowid, or rowid is not supported, then None
+Undefined when the last statement modifies > 1 row.
+
+
+Optional Error Handling Extensions
+
+The Problem:
+
+    The core DB API specification only introduces a set of exceptions which can be raised
+    to report errors to the user. In some cases, exceptions may be too disruptive for the
+    flow of a program or even render execution impossible.
+
+    For these cases and in order to simplify error handling when dealing with databases,
+    database module authors may choose to implement user defineable error handlers. This
+    section describes a standard way of defining these error handlers.
+
+Cursor/Connection Attribute .errorhandler
+r/w attribute which references an error handler to call in case an error condition is met.
+Must by py callable taking args:
+  errorhandler(connection, cursor, errorclass, errorvalue)
+where
+  connection: reference to the connection for the cursor
+  cursor: reference to the cursor, or None
+  errorclass: an error class on which to instantiate using errorvalue as a construction arg
+  
+The standard error handler should add the error info to the appropriate .message attr
+and raise the exception defined by class and value.
+
+If no errorhandler is set (attr == None), the std semantics above should apply.
+
+Cursors should inherit .errorhandler from their connection.
+
+
+Optional Two-phase Commit Extensions
+
+The problem:
+
+    Many databases have support for two-phase commit (TPC) which allows managing
+    transactions across multiple database connections and other resources.
+
+    If a database backend provides support for two-phase commit and the database module
+    author wishes to expose this support, the following API should be implemented.
+    NotSupportedError should be raised, if the database backend support for two-phase
+    commit can only be checked at run-time.
+
+TPC Transaction IDs
+3 components:
+  - a format ID
+  - a global transaction ID
+  - a branch qualifier
+
+transaction ids are created with:
+.xid(format_id, global_trans_id, branch_qualifier)
+
+
+TPC Connection Methods
+.tpc_begin(xid)
+.tpc_prepare()
+.tpc_commit([xid])
+.tpc_rollback([xid])
+.tpc_recover()
+
+FAQ
+
+How can I construct a dictionary out of the tuples returned from .fetch*()
+A: 
+
+   There are several existing tools available which provide helpers for this task. Most of
+   them use the approach of using the column names defined in the cursor attribute
+   .description as basis for the keys in the row dictionary.
+
+   Note that the reason for not extending the DB API specification to also support
+   dictionary return values for the .fetch*() methods is that this approach has several
+   drawbacks:
+
+   - Some databases don't support case-sensitive column names or auto-convert them to all
+     lowercase or all uppercase characters.
+ 
+   - Columns in the result set which are generated by the query (e.g.  using SQL
+     functions) don't map to table column names and databases usually generate names for
+     these columns in a very database specific way.
+
+   As a result, accessing the columns through dictionary keys varies between databases and
+   makes writing portable code impossible.
+
+Open Issues
+
+Define a useful return value for .nextset() for the case where a new result set is available
+
+Integrate the decimal module Decimal object for use as a loss-less monetary and decimal
+interchange format.
+

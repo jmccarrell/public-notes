@@ -1,0 +1,818 @@
+
+
+todo
+DONE get a basic understanding of how to work with subversion
+  subversion tutorial
+  import: The import command will import a new project into the Subversion repository.
+  checkout: The checkout command creates a local copy of your Subversion repository on your system.
+      svn checkout http://svn.maczealots.com/myapp/trunk
+
+  update: Get the latest updates to your working copy of the repository. If someone else
+  is working on your project, you will most likely want their latest changes to the code
+  base.
+    svn update
+  add: Add a file to a repository.
+      svn add source.m
+  delete: Delete a file from the repository.
+      svn delete source.m
+  copy: Create a duplicate of one file as another.
+      svn copy source.m source_copy.m
+  move: This will rename the original file to a new name.
+      svn move source.m source_copy.m
+  status: The status command will detect all file and tree changes you have made to your repository.
+      svn status
+  diff: The diff command shows you exactly what you have changed in each file in your respository.
+      svn diff
+  revert: If you find out that you have really screwed up a file, and want to go back to
+  the way things used to be, revert is what you need to use.
+      svn revert source.m 
+
+  subversion book
+    http://svnbook.red-bean.com/svnbook/
+
+  DONE install subversion support (what pkg?) from homebrew
+    brew search subversion
+    sudo brew install subversion
+
+
+DONE go get my XS bindings book
+
+DONE get a copy of the avro trunk now
+  svn checkout http://svn.apache.org/repos/asf/avro/ avro-trunk
+    ....
+  Checked out external at revision 979797.
+
+  Checked out revision 979790.
+
+
+DONE read the avro specifications
+  DONE intro.pdf
+  DONE spec.pdf
+  
+understand the C avro api
+  /j/proj/avro-perl/avro-trunk/trunk/lang/c/docs/index.txt
+
+study the python / ruby / java bindings
+
+
+
+Notes from the specification {
+----------------------------
+
+2. Schema Declaration
+schemas are represented in JSON by one of:
+- a JSON string, naming a defined type
+- a JSON object, of the form:
+  { "type": "typeName" ...attributes... }
+  where typeName is either a primitive or derived type name, as defined below.
+  Attributes not defined in this document are permitted as metadata,
+  but must not affect the format of serialized data.
+- a JSON array, representing a union of embedded types.
+
+
+2.1 Primitive Types
+- null: no value
+- boolean: a binary value
+- int: 32 bit signed integer
+- long: 64 bit signed integer
+- float: single precision (32-bit) IEEE 754 floating point number
+- double: double precision (64-bit) IEEE 754 floating point number
+- bytes: sequence of 8-bit unsigned bytes
+- string: unicode character sequence
+
+Primitive types have no specified attributes.
+
+2.2 Complex Types
+6 complex types:  records, enums, arrays, maps, unions, and fixed.
+
+Records
+
+Records use the type name 'record' and support attributes:
+- name: a JSON string providing the name of the record (required)
+- namespace: a JSON string that qualifies the name
+- doc: a JSON string providing documentation to the user of this schema (optional)
+- fields: a JSON array, listing fields (required).
+  Each field is a JSON object with:
+  - name: a JSON string providing the name of the field (required)
+  - doc: a JSON string describing this field for users (optional)
+  - type: a JSON object defining a schema, or a JSON string naming a record definition (required)
+  - default: a default value for this field, used when reading instances that lack this
+    field (optional).  default values for unions correspond to the first schema in the union.
+  - order: specifies how this field impacts ordering of this record (optional).
+    Allowed values are: "ascending", "descending", "ignore"
+
+E.g. linked list of 64 bit values:
+
+{
+  "type": "record",
+  "name": "LongList",
+  "fields": [
+    { "name": "value", "type": "long" },     // each element has a long
+    { "name": "next",
+       "type": [ "LongList", "null" ] },     // optional next element
+  ],
+}
+
+Enums
+
+Enums use the type name "enum" and support attributes:
+
+- name: a JSON string providing the type name of the enum (required)
+- namespace: qualifier 
+- doc: (optional)
+- symbols: a JSON array, listing symbols, as JSON strings (required).
+  all symbols must be unique; duplicates are prohibited.
+
+e.g.:
+{ "type": "enum",
+  "name": "suit",
+  "symbols": [ "SPADES", "HEARTS", "CLUBS", "DIAMONDS"],
+}
+
+
+Arrays
+
+Arrays use the type name "array" and support a single attribute:
+
+- items: the schema of the array's items
+
+E.g. an array of strings is declared with:
+{ "type": "array", "items": "string" }
+
+
+Maps
+
+Maps use the type name "map" and support one attribute:
+
+- values: the schema of the map's values
+
+keys are assumed to be strings
+
+e.g. a map from string to long is declared with:
+{ "type": "map", "values": "long" }
+
+
+Unions
+
+Unions are represented using JSON arrays.
+E.g., 
+[ "string", "null" ]
+declares a schema which may be either a string or null.
+Unions may not contain more than one schema with the same type,
+except for the named types record, fixed and enum.
+E.g., unions containing 2 array types or 2 map types are not permitted,
+but two types with different names are permitted.
+(Names permit efficient resolution when reading and writing unions).
+
+Unions may not immediately contain other unions.
+
+Fixed
+
+Fixed uses the type name "fixed" and supports attributes:
+- name: (required)
+- namespace:
+- size: an integer, specifying the number of bytes per value (required)
+
+e.g. a 16 byte quantity:
+{ "type": "fixed", "name": "buffer16", "size": 16 }
+
+
+Encoding Rules
+
+Encoding can be either in JSON, or a binary format.
+
+Primitive Binary Encoding:
+
+- null: 0 bytes
+- boolean: 1 byte with value 0 or 1
+- int and long are encoded with variable length zig-zag coding:
+  http://lucene.apache.org/java/2_4_0/fileformats.html#VInt
+- a float is written as 4 bytes.  The float is converted into a 32-bit integer using a
+  method equivalent to Java's floatToIntBits and then encoded in little-endian format.
+- a double is written as 8 bytes. The double is converted into a 64-bit integer using a
+  method equivalent to Java's doubleToLongBits and then encoded in little-endian format.
+- bytes are encoded as a long followed by that many bytes of data.
+- a string is encoded as a long followed by that many bytes of UTF-8 encoded character
+  data.
+
+Complex Binary Encodings:
+
+Records:
+A record is encoded by encoding the values of its fields in the order they were declared.
+Aka, a record is encoded as the concatenation of its fields.
+
+Enums:
+An enum is encoded as an int, representing the zero-based position of the symbol in the schema.
+
+Arrays 
+Arrays are encoded as a series of blocks.
+Each block consists of a long count value, followed by that many items.
+A block with count 0 indicates the end of the array.
+If a blocks count is negative, its absolute value is used,
+and the count is immediately followed by a long block size indicating the number
+of bytes in the block.
+This block size permits fast skipping through the data, e.g., when projecting a record
+to a subset of its fields.
+
+The blocked representation allows one to read and write arrays larger than can be
+buffered in memory, since one can start writing items without knowing the full
+length of the array.
+
+Maps
+
+Maps are encoded as a series of blocks.
+Each block consists of a long count value, followed by that many key / value pairs.
+A block with count zero marks the end of the map.
+
+If a blocks count is negative, its absolute value is used, and the count is followed
+immediately by a long block size indicating the number of bytes in the block.
+
+Unions
+
+A union is encoded by first writing a long value indicating the zero-based position
+within the union of the schema of its value.  
+The value is then encoded per the indicated schema within the union.
+
+Fixed
+
+Fixed instances are encoded using the number of bytes declared in the schema.
+
+JSON Encoding
+<see the spec>
+
+4. Sort Order
+
+}
+
+
+Notes from the C API {
+
+The C library does reference counting.
+Primitives are fine.
+Ref counting of complex record types is pushed onto the caller. (me).
+
+Strings can be allocated in 3 ways:
+
+  To create a string datum, you have three different methods:
+  ----
+  avro_datum_t avro_string(const char *str);
+  avro_datum_t avro_wrapstring(const char *str);
+  avro_datum_t avro_givestring(const char *str);
+  ----
+
+with various free semantics for each call.
+
+}
+
+----------------
+
+try building the C api
+
+./build.sh test {
+  ...
+libtool: link: gcc -Wall -Wextra -Wunused-parameter -g -O2 -o .libs/test_avro_schema test_avro_schema.o  ../src/.libs/libavro-1.4.0-SNAPSHOT.21.0.0.dylib
+Undefined symbols:
+  "_dir_iterator_value", referenced from:
+      _run_tests in test_avro_schema.o
+  "_dir_iterator_new", referenced from:
+      _run_tests in test_avro_schema.o
+  "_dir_iterator_destroy", referenced from:
+      _run_tests in test_avro_schema.o
+  "_dir_iterator_next", referenced from:
+      _run_tests in test_avro_schema.o
+      _run_tests in test_avro_schema.o
+ld: symbol(s) not found
+collect2: ld returned 1 exit status
+make[2]: *** [test_avro_schema] Error 1
+make[1]: *** [check-am] Error 2
+make: *** [check-recursive] Error 1
+}
+
+which leads me to cmake:
+http://www.cmake.org/Wiki/CMake
+
+so install cmake and try it:
+
+proteus-> brew search cmake
+cmake
+proteus-> sudo brew install cmake
+==> Downloading http://www.cmake.org/files/v2.8/cmake-2.8.2.tar.gz
+==> ./bootstrap --prefix=/usr/local/Cellar/cmake/2.8.2 --system-libs --datadir=/share/cmake --docdir
+==> make
+==> make install
+/usr/local/Cellar/cmake/2.8.2: 550 files, 28M, built in 8.1 minutes
+
+ls -tlr /usr/local/bin
+  ...
+lrwxr-xr-x  1 root      staff    31B Jul 27 14:21 ctest@ -> ../Cellar/cmake/2.8.2/bin/ctest
+lrwxr-xr-x  1 root      staff    31B Jul 27 14:21 cpack@ -> ../Cellar/cmake/2.8.2/bin/cpack
+lrwxr-xr-x  1 root      staff    37B Jul 27 14:21 cmakexbuild@ -> ../Cellar/cmake/2.8.2/bin/cmakexbuild
+lrwxr-xr-x  1 root      staff    31B Jul 27 14:21 cmake@ -> ../Cellar/cmake/2.8.2/bin/cmake
+lrwxr-xr-x  1 root      staff    32B Jul 27 14:21 ccmake@ -> ../Cellar/cmake/2.8.2/bin/ccmake
+
+some docs found at:
+http://www.cmake.org/cmake/help/runningcmake.html
+
+proteus-> cmake .
+-- The C compiler identification is GNU
+-- The CXX compiler identification is GNU
+-- Checking whether C compiler has -isysroot
+-- Checking whether C compiler has -isysroot - yes
+-- Checking whether C compiler supports OSX deployment target flag
+-- Checking whether C compiler supports OSX deployment target flag - yes
+-- Check for working C compiler: /usr/bin/gcc
+-- Check for working C compiler: /usr/bin/gcc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Checking whether CXX compiler has -isysroot
+-- Checking whether CXX compiler has -isysroot - yes
+-- Checking whether CXX compiler supports OSX deployment target flag
+-- Checking whether CXX compiler supports OSX deployment target flag - yes
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /j/proj/avro-perl/avro-trunk/trunk/lang/c
+
+make && make test
+then works
+
+I created the install prefix of /j/local
+then make installed it:
+
+proteus-> make install
+[ 43%] Built target avro-shared
+[ 87%] Built target avro-static
+[ 89%] Built target quickstop
+[ 90%] Built target generate_interop_data
+[ 92%] Built target test_avro_data
+[ 96%] Built target test_avro_schema
+[ 98%] Built target test_cpp
+[100%] Built target test_interop_data
+Install the project...
+-- Install configuration: ""
+-- Installing: /j/local/include/avro.h
+-- Installing: /j/local/lib/libavro.a
+-- Installing: /j/local/lib/libavro.1.4.0-SNAPSHOT.dylib
+-- Installing: /j/local/lib/libavro.dylib
+
+So I have the C libraries sitting in my local file system
+
+----------------------------------------------------------------
+
+Now try to build something perl-ish on top of them:
+
+DONE First, read the .h file:
+  /j/local/include/avro.h
+
+Decide on the memory model I'm going to use as the first blush:
+
+I guess to decide this, I need to refresh my model of memory sharing
+across the C / perl boundary.
+
+Certainly the model of memory being allocated separately on each side
+seems possible.
+
+For data that are created on the perl side that I want to serialized to an avro file,
+if I know the scope of the refcounts made in the C side, then I can define some
+appropriate C semantics, which would look like:
+
+open the avro file
+declare the schema
+  add one or more records
+close the file
+
+This is a pretty direct analog to the C example in the distro.
+
+I suppose I need to define what an appropriate perl-ish client side would look like.
+
+The example record is:
+	add_person(db, "Dante", "Hicks", "(555) 123-4567", 32);
+
+void
+add_person(avro_file_writer_t db, const char *first, const char *last,
+	   const char *phone, int32_t age)
+
+----------------------------------------------------------------
+
+review of XS from the Jeness & Cozens book:
+
+  XS is a glue language that is used to indicate to Perl the types of variables
+  to be passed into functions and the variables to be returned.
+  The XS file is translated by the XS compiler (xsubpp) into C code that the rest
+  of the Perl internals can understand.
+  In addition to the XS file, the compiler requires a file that knows how to deal
+  with specific variable types (for input and output).
+  This file is called a typemap.
+
+  ...
+
+  The XS part of the file is indicated by using the MODULE keyword.
+  It declares the module namespace and defines the name of the shared library
+  that is created.  Anything after this line must be in the XS language.
+  The name of the Perl namespace to be used for subroutines is also defined on this line,
+  thus allowing multiple namespaces to be defined in a single module.
+
+----------------------------------------------------------------
+
+I will need to decide how to encode opaque blobs used on the C side
+(like avro_file_reader_t) so they can be held on the perl side during
+call sequences.
+
+All I really need is a struct-like mechanism on the C side to stash state.
+
+I also need to know how to hook up to the perl memory deallocator to call
+the avro-side functions at the appropriate time.
+
+I need to decide how to encode json structs on the perl side;
+
+what support is there natively?
+  http://search.cpan.org/~mlehmann/JSON-XS-2.29/XS.pm
+which looks pretty spot on.
+JSON::XS exports
+   $utf8_encoded_json_text = encode_json $perl_hash_or_arrayref;
+   $perl_hash_or_arrayref  = decode_json $utf8_encoded_json_text;
+which Avro::XS should just call when needed to convert in/out of strings <-> JSON.
+
+How do I load / reference JSON::XS within my XS code?
+A: ?
+
+For functions that take arguments and return values,
+the XS code must declare those types to perl.
+
+For a C function:
+int foo(int i)
+
+the XS is:
+
+int
+foo(i)
+  int i
+
+where the return value is alone on a line
+the function name is line 2,
+and lines 3 and ...
+declare subsequent arguments.
+For C simple types, perl knows the translation without having to be told.
+
+For more complex wrapping scenarios, the XS wrapper lets you provide C code
+as part of the subroutine definition by using the CODE keyword.
+XS keywords occur after the initial XSUB declaration, and are followed by a colon:
+
+int
+treble( x )
+  int x
+CODE:
+  RETVAL = 3 * x;
+OUTPUT:
+  RETVAL
+
+The CODE keyword indicates the following lines are code (surpise!).
+The xsubpp compiler creates a lexical RETVAL of the same type as the XSUB
+(int in this case for treble); however, xsubpp will not create stub code
+that returns RETVAL; that is what OUTPUT is for.
+
+----------------
+
+ExtUtils::Constant
+
+is used from perl 5.8.0 on to simplify constant handling in the XS layer.
+
+----------------
+
+What is the best module builder to use for XS code?
+  I assume MakeMaker, not Module::Build?
+
+----------------
+
+I need to get an IRC reader going: use Adium beta
+  DONE install Adium beta
+IRC is a text-based command language; overview:
+  http://irchelp.org/irchelp/irctutorial.html
+
+/JOIN #perl
+/JOIN #perl-help
+
+is the command to add to irc.perl.org
+I'm not sure about irc.freenode.net
+
+----------------
+
+perlfaq3 contains a section for linking to C code,
+which directs the reader to read:
+
+       Where can I learn about linking C with Perl?
+
+       If you want to call C from Perl, start with perlxstut, moving on to
+       perlxs, xsubpp, and perlguts.  If you want to call Perl from C, then
+       read perlembed, perlcall, and perlguts.  Don’t forget that you can
+       learn a lot from looking at how the authors of existing extension
+       modules wrote their code and solved their problems.
+
+       You might not need all the power of XS. The Inline::C module lets you
+       put C code directly in your Perl source. It handles all the magic to
+       make it work. You still have to learn at least some of the perl API but
+       you won’t have to deal with the complexity of the XS support files.
+
+read 
+  perlxstut
+
+
+----------------------------------------------------------------
+
+make the documentation better: JIRA AVRO-319
+https://issues.apache.org/jira/browse/AVRO-319
+
+Try getting anakia installed and running on proteus.
+
+http://projects.apache.org/projects/anakia.html
+http://velocity.apache.org/anakia/releases/anakia-1.0/
+
+Strategy:
+
+- install the anakia 1.0 tarball somewhere:
+- attempt to render avro/..././trunk/doc/src/content/xdocs/index.xml
+
+  convert it by hand to the necessary format following the pattern DougC
+  referred to in the jira: which refers to an Ant file to build things.
+  So write an ant build.xml file that will create the docs.
+  Mirror the build.xml from the httpd site:
+  https://svn.apache.org/repos/asf/httpd/site/trunk/build.xml
+
+This implies significant structural changes to the site.
+So deepen my svn understanding a bit first.
+
+read svnbook 
+  DONE ch 1: Fundamental Concepts
+  DONE    2: Basic Usage
+
+install anakia on proteus
+  DONE requires installing velocity
+    where are jars typically installed?
+     Decide to put the jars for this project in: /j/local/share/java
+    it isn't exactly clear which variant of velocity to install;
+    but guess that the velocity tools 2.0 collection will suffice.
+    thus:
+      proteus-> tar -zxf ~/Downloads/velocity-tools-2.0.tar.gz 
+      proteus-> ls -trl
+      total 0
+      drwxr-xr-x  11 jmccarre  admin   374B Apr 26 09:49 velocity-tools-2.0/
+  install anakia there too:
+      proteus-> tar -zxf ~/Downloads/anakia-1.0.tar.gz
+      proteus-> ls -tlr
+      total 0
+      drwxr-xr-x  12 jmccarre  admin   408B Apr 22  2007 anakia-1.0/
+      drwxr-xr-x  11 jmccarre  admin   374B Apr 26 09:49 velocity-tools-2.0/
+  start reading the docs for AnakiaTask
+    anakia-1.0/docs/api/org/apache/anakia/AnakiaTask.html
+    this is just the java doc for the class
+  the next thing I need to understand better is Ant.
+
+I'm guessing the document build process should look something like:
+
+-- install anakia somewhere
+-- set ANAKIA_HOME to that directory
+-- ant build-docs
+bingo a full tree of documents are generated.
+maybe not.
+Looks like httpd-site has the .jars checked into trunk/lib
+  then loads them in an ant task:
+    <path id="classpath">
+        <fileset dir="./lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+  I can follow this pattern as well.
+
+What can I infer from httpd/site's anakia task?
+  nothing.  this appears to be simply the velocity anakia task class.
+    no specialization; all parameterization is in the ant build file.
+
+Where can I see a copy of the forrest generated documentation?
+  http://avro.apache.org/docs/current/index.html
+
+Each page contains a link to the PDF version of the page as well as the html
+  eg.
+  http://avro.apache.org/docs/current/spec.html
+  http://avro.apache.org/docs/current/spec.pdf
+
+So that has to be supported by anakia?
+N.B. that the main httpd site does not have PDFs.
+
+What can I infer from httpd/site's stylesheets?
+  stylesheets/site.vsl
+    /j/proj/httpd-site/trunk/xdocs/stylesheets/site.vsl
+    full of macros, looks like top level html page template.
+  stylesheets/project.xml
+    front page; contains menu definitions, etc.
+
+The existing avro docs site looks like:
+proteus-> find doc | grep -v -e .svn
+doc
+doc/build.xml
+doc/src
+doc/src/content
+doc/src/content/xdocs
+doc/src/content/xdocs/idl.xml
+doc/src/content/xdocs/index.xml
+doc/src/content/xdocs/site.xml
+doc/src/content/xdocs/spec.xml
+doc/src/content/xdocs/tabs.xml
+doc/src/resources
+doc/src/resources/images
+doc/src/resources/images/avro-logo.png
+doc/src/resources/images/favicon.ico
+doc/src/resources/images/hadoop-logo.jpg
+doc/src/skinconf.xml
+
+skinconf.xml contains some of the top level decarlation that appear in project.xml:
+  <project-name>Avro</project-name>
+  favicon
+  copyright info
+  breadcrumbs
+  table of contents
+  colors, PDF colors
+
+Nothing major that doesn't appear to have immediate support in anakia.
+
+the result of building the httpd-site docs
+{
+proteus-> ant docs
+Buildfile: build.xml
+
+prepare:
+
+prepare-error:
+
+vulnerabilitydb:
+     [xslt] Processing /j/proj/httpd-site/trunk/xdocs/security/vulnerabilities-httpd.xml to /j/proj/httpd-site/trunk/xdocs/security/vulnerabilities_13.xml
+     [xslt] Loading stylesheet /j/proj/httpd-site/trunk/xdocs/stylesheets/securitydb.xsl
+     [xslt] Processing /j/proj/httpd-site/trunk/xdocs/security/vulnerabilities-httpd.xml to /j/proj/httpd-site/trunk/xdocs/security/vulnerabilities_20.xml
+     [xslt] Loading stylesheet /j/proj/httpd-site/trunk/xdocs/stylesheets/securitydb.xsl
+     [xslt] Processing /j/proj/httpd-site/trunk/xdocs/security/vulnerabilities-httpd.xml to /j/proj/httpd-site/trunk/xdocs/security/vulnerabilities_22.xml
+     [xslt] Loading stylesheet /j/proj/httpd-site/trunk/xdocs/stylesheets/securitydb.xsl
+
+docs:
+   [anakia] Transforming into: /j/proj/httpd-site/trunk/docs
+   [anakia] Input:  security/vulnerabilities_13.xml
+   [anakia] Output: /j/proj/httpd-site/trunk/docs/security/vulnerabilities_13.html
+   [anakia] Input:  security/vulnerabilities_20.xml
+   [anakia] Output: /j/proj/httpd-site/trunk/docs/security/vulnerabilities_20.html
+   [anakia] Input:  security/vulnerabilities_22.xml
+   [anakia] Output: /j/proj/httpd-site/trunk/docs/security/vulnerabilities_22.html
+   [anakia] Transforming into: /j/proj/httpd-site/trunk/docs
+
+BUILD SUCCESSFUL
+Total time: 4 seconds
+}
+
+Open Issues:
+- looks like some of the external site is not checked into the trunk in svn;
+  eg. I can't find the IRC page in any file in the tree:
+
+proteus-> pwd
+/j/proj/avro-perl/avro-trunk/trunk
+proteus-> grep -R IRC .
+  
+Yeah, it is not in the trunk; it is in site: {
+proteus-> ack --xml --html IRC site
+site/author/content/xdocs/irc.xml
+9:    <title>Avro IRC Channel</title>
+14:    <p>There is an IRC channel dedicated to avro at <strong>irc.freenode.org</strong>. 
+18:      The IRC channel can be used for online discussion about avro related stuff, but developers should be careful to transfer all the official decisions or useful discussions to the issue tracking system.
+
+site/author/content/xdocs/site.xml
+37:    <irc       label="IRC Channel"        href="irc.html" />
+
+}
+
+So the top level avro site gets built from:{
+proteus-> find site/author/content/xdocs | grep -v .svn
+site/author/content/xdocs
+site/author/content/xdocs/credits.xml
+site/author/content/xdocs/index.xml
+site/author/content/xdocs/irc.xml
+site/author/content/xdocs/issue_tracking.xml
+site/author/content/xdocs/mailing_lists.xml
+site/author/content/xdocs/releases.xml
+site/author/content/xdocs/site.xml
+site/author/content/xdocs/tabs.xml
+site/author/content/xdocs/version_control.xml
+}
+
+where do the language documentation versions get built from?
+A: 
+C++
+  is generated from doxygen
+  formatting is supplied by doxygen
+C
+  lang/c/docs/index.txt
+  is written in stylized ascii
+  is converted by Makefile.am to html by asciidoc
+    which brew knows about
+    http://www.methods.co.nz/asciidoc
+  asciidoc can generate docbook, which can generate PDFs
+java
+  javadocs are generated with an ant javadoc target in
+  trunk/lang/java/build.xml
+  
+
+how do I understand the velocity templating language?
+maybe A: http://wiki.apache.org/velocity/FrontPage
+better is: http://velocity.apache.org/engine/devel/user-guide.html
+
+all Velocity Template Language statements begin with #
+variables start with $
+strings may be single or double quoted 'Avro' or "Avro".
+'Avro' is passed as is; "Avro" is interpolated.
+
+## single line comment
+#* multi
+   line
+   comment *#
+
+VTL comment block: (?)
+#**
+...
+**#
+
+#[[
+literal block syntax
+nothing inside here gets parsed by VTL
+so is good for code ...
+]]#
+
+the #foreach directive will give a 0 or 1-based element count for lists
+#break from within #foreach is supported.
+$foreach.hasNext can be used to do comma separated lists.
+
+#include inserts text from a file that is not rendered through the template engine.
+
+#parse inserts rendered VTL files
+
+#break will break out of the current execution scope.
+
+----------------
+
+So now re-read the velocity templating sections of httpd-site.
+
+It makes sense.
+I should be able to use this pretty much as is.
+
+----------------
+
+proposal:
+
+the goal is: to end the suffering of forrest
+ - other possible documentation refactoring is not in scope
+follow the existing model as much as possible:
+ - only change what has to change; don't make additional work
+ - existing language formatters do not change
+ -- C++ : doxygen
+ -- C : asciidoc
+ -- java : javadoc
+ - language doc generation steps are separate from the top level docs generation
+desired style will resemble httpd.apache.org
+ - use anakia to build the top level site
+ - but only the top level site gets generated via anakia
+PDF support is dropped as of 1.4
+ - because anakia doesn't support it
+older versions of the documentation get stored as is (post rendering) in svn?
+  or live on the site?
+  open issue
+to build the top level site docs requires:
+ - a modern jvm and ant installed
+ - svn checkout trunk
+ - cd xdocs && ant docs
+ - source: xdocs; target: build/docs
+ -- anakia/velocity jar(s) checked into svn
+
+so that means these sets of files:
+
+proteus-> find site/author/content/xdocs -type f | grep -v .svn
+site/author/content/xdocs/credits.xml
+site/author/content/xdocs/index.xml
+site/author/content/xdocs/irc.xml
+site/author/content/xdocs/issue_tracking.xml
+site/author/content/xdocs/mailing_lists.xml
+site/author/content/xdocs/releases.xml
+site/author/content/xdocs/site.xml
+site/author/content/xdocs/tabs.xml
+site/author/content/xdocs/version_control.xml
+
+proteus-> find trunk/doc -type f | grep -v .svn
+trunk/doc/build.xml
+trunk/doc/src/content/xdocs/idl.xml
+trunk/doc/src/content/xdocs/index.xml
+trunk/doc/src/content/xdocs/site.xml
+trunk/doc/src/content/xdocs/spec.xml
+trunk/doc/src/content/xdocs/tabs.xml
+trunk/doc/src/resources/images/avro-logo.png
+trunk/doc/src/resources/images/favicon.ico
+trunk/doc/src/resources/images/hadoop-logo.jpg
+trunk/doc/src/skinconf.xml
+
+are changed, and pretty much nothing else is.
+

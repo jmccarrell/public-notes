@@ -1,0 +1,114 @@
+A quick tutorial: http://www.nuxified.org/topic/a_quick_guide_to_yum
+
+Man yum works as well
+
+basic installation commands
+
+yum list
+yum search
+yum install
+yum update
+
+another good link:
+
+http://fedoraproject.org/wiki/Docs/Drafts/SoftwareManagementGuide
+
+Keeping Fedora Up to Date with Yum
+http://madpenguin.org/cms/index.php/?m=show&id=918
+
+Creating A Local Yum Repository (CentOS)
+http://www.howtoforge.com/creating_a_local_yum_repository_centos
+
+----------------------------------------------------------------
+
+cases:
+http://fogbugz.imiclk.com/fogbugz/default.php?1296
+
+http://fogbugz.imiclk.com/fogbugz/default.php?1327
+
+1296 has the most info
+
+a copule of yum repositories mirrored on ops.imiclk.local:
+CentOS OS and update RPMs are mirrored at:
+http://ops.imiclk.local/centos
+
+----------------------------------------------------------------
+
+sample commands I've used to update my machines in the past:
+
+yum check-update
+to see what is out of date
+then, e.g.: to update the pkgs:
+
+jeff-dev# yum upgrade perl-\*
+
+jeff-dev# yum upgrade awstats bash expat\* curl\* firefox gd kdelibs lftp libtool libvorbis nspr ntp rsync samba-\* strace tzdata unix2dos wget
+
+----------------------------------------------------------------
+
+Sat Feb 19 11:11:18 PST 2011
+
+The repositories used on jeff-dev (which are the same in production on netops):
+
+yum.conf: {
+[main]
+cachedir=/var/cache/yum
+debuglevel=2
+logfile=/var/log/yum.log
+pkgpolicy=newest
+installonlypkgs=kernel kernel-smp kernel-devel kernel-smp-devel kernel-largesmp kernel-largesmp-devel kernel-hugemem kernel-hugemem-devel
+distroverpkg=centos-release
+tolerant=1
+exactarch=1
+retries=20
+obsoletes=1
+gpgcheck=1
+plugins=1
+
+# PUT YOUR REPOS HERE OR IN separate files named file.repo
+# in /etc/yum.repos.d
+
+}
+
+jeff-dev-> ls -l /etc/yum.repos.d/
+total 24K
+-rw-r--r--  1 root root 2.5K Jun 11  2009 CentOS-Base.repo
+-rw-r--r--  1 root root  610 Jul  8  2009 CentOS-Media.repo
+-rw-r--r--  1 root root  739 Nov 12 22:55 mirrors-rpmforge
+-rw-r--r--  1 root root  717 Nov 12 22:55 mirrors-rpmforge-extras
+-rw-r--r--  1 root root  728 Nov 12 22:55 mirrors-rpmforge-testing
+-rw-r--r--  1 root root 1.1K Nov 12 22:55 rpmforge.repo
+
+rpmforge.repo: {
+### Name: RPMforge RPM Repository for RHEL 4 - dag
+### URL: http://rpmforge.net/
+[rpmforge]
+name = RHEL $releasever - RPMforge.net - dag
+baseurl = http://apt.sw.be/redhat/el4/en/$basearch/rpmforge
+mirrorlist = http://apt.sw.be/redhat/el4/en/mirrors-rpmforge
+#mirrorlist = file:///etc/yum.repos.d/mirrors-rpmforge
+enabled = 1
+protect = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
+gpgcheck = 1
+
+[rpmforge-extras]
+name = RHEL $releasever - RPMforge.net - extras
+baseurl = http://apt.sw.be/redhat/el4/en/$basearch/extras
+mirrorlist = http://apt.sw.be/redhat/el4/en/mirrors-rpmforge-extras
+#mirrorlist = file:///etc/yum.repos.d/mirrors-rpmforge-extras
+enabled = 0
+protect = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
+gpgcheck = 1
+
+[rpmforge-testing]
+name = RHEL $releasever - RPMforge.net - testing
+baseurl = http://apt.sw.be/redhat/el4/en/$basearch/testing
+mirrorlist = http://apt.sw.be/redhat/el4/en/mirrors-rpmforge-testing
+#mirrorlist = file:///etc/yum.repos.d/mirrors-rpmforge-testing
+enabled = 0
+protect = 0
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-rpmforge-dag
+gpgcheck = 1
+}

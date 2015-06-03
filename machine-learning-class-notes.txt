@@ -1,0 +1,205 @@
+Prof. Ng's goals for the class:
+-- convey his excitement of the field
+-- students to be able to apply machine learning algs to their work
+-- students will be qualified to do research in machine learning
+
+Prereqs
+
+Statistics
+
+random variables
+expectation
+variance
+
+Assume familiarity with basic linear algebra
+that we know what matrix operations are about
+- what matrices and vectors are
+- multiply matrices and vectors
+- matrix inverse
+- eigen vectors of a matrix is
+
+2 handouts:
+course info handout
+online resources
+
+----------------------------------------------------------------
+
+Octave vs. matlab
+
+matlab is a programming language that makes it very easy to write matrix operations.
+octave - somewhat fewer features that matlab, but is will suffice for cs229.
+
+Ng. recommends matlab highly.
+  look into this to see what it costs.
+
+the discussion sections will go over some of the prerequisites; 
+  statistics, matrices, matlab
+
+complex optimization
+complex markhov models
+
+Prof Ng. prefers matlab to R explicitly.
+He appears to have a relatively strong preference for matlab over R.
+
+----------------------------------------------------------------
+
+http://machinelearning123.pbworks.com/
+http://www.meetup.com/HackerDojo-Cloud-Computing/calendar/14439477/
+http://www.stanford.edu/class/cs229/
+
+make a copy of the materials from the course for local use
+
+introduction / table of contents:
+DONE http://www.stanford.edu/class/cs229/materials.html
+DONE http://www.stanford.edu/class/cs229/schedule.html
+DONE http://www.stanford.edu/class/cs229/info.html
+
+DONE all lecture, section notes in /j/proj/ml-cs229/class/cs229/
+DONE download section notes
+
+IN PROGRESS get all handouts plus data in cs229/materials
+  DONE problem set 1: 
+    file:///j/proj/ml-cs229/class/cs229/materials/ps1.pdf
+    http://www.stanford.edu/class/cs229/ps1.pdf
+    http://www.stanford.edu/class/cs229/ps/ps1/q1x.dat
+                                                 y
+                                                2x
+                                                 y
+  problem set 2
+              3
+              4
+
+
+----------------------------------------------------------------
+
+Lecture 1
+
+Machine Learning Introduction
+
+
+Learning Algorithms
+
+Early definitions of machine learning:
+
+Arthur Samuel: 1959
+
+    Field of study that gives computers the ability to learn without being explicitly
+    programmed.
+
+Arthur Samuel was famous for his work on a checkers playing program.
+It played many games against itself.
+After thousands of games, it learned the patterns of pieces.
+After time, the checkers program played checkers better than Arthur Samuel was able to.
+This may be the first such instance of a program exceeding the capabilities of its creator.
+
+Tom Mitchell: 1998
+
+    A well posed Learning Problem: A computer program is said to learn from experience E
+    with respect to some task T and some performance measure P, if its performance on T,
+    as measured by P, improves with experience E.
+
+----------------------------------------------------------------
+
+4 Major Sections of the course
+
+1. Supervised Learning
+
+It is called supervised learning because we give the algorithm a data set, e.g., the right
+answer for a set of inputs, from which we want the algorithm to give us more correct
+answers.
+
+The housing example he gave is an example of a regression problem.
+
+Classification problems:
+
+The variable we are trying to predict is discrete.
+E.g. breast cancer tumors.  Determine if a given tumor is malignant based on 'features' of
+the tumor, e.g. tumor size.
+So the domain inputs are the size, and the range is 0 or 1; it is or is not malignant.
+
+
+2. Learning Theory
+
+Try to convey an understanding of how and why learning algorithms work.
+
+What algorithms can approximate different functions and when, and how much training data
+is required?
+
+Learning algs are a tool;
+Prof Ng. asserts there is a big difference between someone who really understands ML, and
+between someone who just kind of knows it.
+
+Guarantees of predictive accuracy.
+
+Large parts of the class will be giving the raw tools, but also to try to convey the
+skills to apply the learning tools well.
+
+It turns out to be quite easy to spend 6 months doing something that won't yield good results.
+Prof Ng. thinks his cs229 class gives guidelines to apply learning algs in the correct
+context to most efficiently make progress.
+
+
+3. Unsupervised Learning
+
+Given just a set of data, with no "right answers", the problem is to find structure within
+the data set.  The algorithm might find clustering, e.g. the Cocktail party problem:
+
+You are at a cocktail party, with lots of people talking.  The problem: can you separate
+out just the voices given a couple of microphones.  Solved with independent component
+analysis.
+
+
+4. Reinforcement Learning
+
+Where you do not do 1 shot prediction.
+Reinforcement learning processes make a series of decisions over time.
+
+the basic idea: the reward function
+a way to specify what we want done; it is up to the learning alg to maximize the good signals,
+and minimize the negative reinforcement.
+
+----------------------------------------------------------------
+
+Lecture 2
+
+Notation used throughout the class
+
+How can I write Prof Ng's notation in asciimathml?
+
+for Lecture 2, h(x) 
+
+I need to figure out how I am going to write the kinds of notation Prof Ng uses
+around time 15:30 of lecture 2.
+
+Do I need latex on my OS X box?
+What would it take to get it?
+  http://mactex-wiki.tug.org/wiki/index.php/Main_Page
+
+feature x_1
+
+Gradient Descent
+Sometimes also called batch gradient descent
+refers to the fact that we look at all of the training examples as a 'batch'.
+
+Each step of batch gradient descent can take a long time since each step
+iterates over every training example; e.g. US Census population == M = 300M.
+
+Stochastic Gradient Descent
+
+repeat: {
+  for j = 1 to m {
+    update theta for each element of the training set
+  }
+}
+
+so sometimes theta will go in the wrong direction, but on average,
+it will converge.
+
+----------------
+
+A non-iterative solution to this problem.
+
+For linear regression, there is a way to solve for minimizing J(theta).
+
+Matrix derivative notation (defined by Prof Ng).
+

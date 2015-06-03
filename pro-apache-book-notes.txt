@@ -1,0 +1,51 @@
+graceful restart
+
+sending apache the USR1 signal will cause it to gracefully restart
+as opposed to HUP
+this will
+  - allow any current requests to complete
+  - not drop any tcp queued requests
+
+HTTP 1.1 requires a host to be passed after the GET request, which can be used
+to test virtual servers with telnet, or telnet inside the browser
+
+GET / HTTP/1.1
+Host: www.virtual1.com
+
+and
+
+GET / HTTP/1.1
+Host: www.othervirtual.com
+
+apache will check its configuration without starting up if given the -t flag.
+
+can I pass the -t flag through?
+service apache start -t
+
+
+To build a copy from src that won't conflict with any existing copy do
+something like:
+
+./configure --prefix=/opt/apache2 --port=4444
+
+use a port above 1024 if not building as root
+
+----------------
+Sat Dec 24 11:56:43 PST 2011
+
+read this for apache configuration:
+http://httpd.apache.org/docs/2.2/urlmapping.html
+
+Alternatively, the Alias directive will map any part of the filesystem into the web
+space. For example, with
+
+Alias /docs /var/web
+
+the URL http://www.example.com/docs/dir/file.html will be served from
+/var/web/dir/file.html. The ScriptAlias directive works the same way, with the additional
+effect that all content located at the target path is treated as CGI scripts.
+
+
+http://httpd.apache.org/docs/2.2/sections.html
+Search for 'Filesystem and Webspace'
+

@@ -1,0 +1,17 @@
+jquery notes as I climb the knowledge curve.
+Fri Feb 11 19:23:51 PST 2011
+
+A callback without any arguments:
+  $.get('myhtmlpage.html', myCallback);
+
+NB the second (function) argument is not a string, and has no parentheses.
+
+A callback with args.
+First of all, this fails:
+  $.get('myhtmlpage', myCallback(arg1, arg2));
+because myCallback gets evaluated immediately.
+
+Use
+  $.get('myhtmlpage', function(){
+    myCallback(arg1, arg2);
+  });

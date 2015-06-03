@@ -1,0 +1,20 @@
+companion website to the book:
+http://seat.massey.ac.nz/personal/s.r.marsland/MLbook.html
+
+The UCI Machine Learning Repository
+http://archive.ics.uci.edu/ml/
+
+Machine Learning Open Source Software site:
+http://mloss.org/
+
+----------------
+
+Learning is loosely defined as 'getting better at some task through practice' pg 6
+
+Supervised Learning
+
+  a training set of examples with the correct responses (targets) are provided and, based
+  on this training set, the algorithm generalizes to respond correctly to all possible
+  inputs.  This is also called learning from exemplars.
+
+  

@@ -1,0 +1,73 @@
+from: http://www.yiiframework.com/doc/guide/1.1/en/database.arr
+
+The options that can be specified to customize the relational query are:
+
+select: a list of columns to return in the query.  defaults to '*'.
+condition: the where clause.  defaults to empty.
+params: array of name value pairs to be bound to the sql
+on: the ON clause. appended to JOINing condition with AND. not applied to MANY_MANY relationships
+order: the ORDER BY clause; default empty
+with: a list of child related objects that should be loaded together.
+joinType: default: LEFT OUTER JOIN
+alias: an alternate name for the table in this relationship.
+together: optimization for combining HAS_MANY and MANY_MANY relationships.
+join: an extra JOIN clause 
+group: GROUP BY clause
+having: HAVING
+index: names the column to provide the keys of the resulting array.  default is 0-based integer
+  only for HAS_MANY and MANY_MANY.
+
+
+Also, lazy loading relations can be customized with:
+limit: limit the number of rows selected
+offset: offset
+
+Here is an example of usage:
+class User extends CActiveRecord
+{
+    public function relations()
+    {
+        return array(
+            'posts'=>array(self::HAS_MANY, 'Post', 'author_id',
+                            'order'=>'posts.create_time DESC',
+                            'with'=>'categories'),
+            'profile'=>array(self::HAS_ONE, 'Profile', 'owner_id'),
+        );
+    }
+}
+
+----
+
+query disambiguation
+
+the primary query's name in relational queries is 't'.
+other tables in the relation have their expected names.
+
+----
+dynamic relational query options
+
+There is a way to override customizations dynamically, e.g., to load posts in ascending order.
+Of both with() and the with option.  E.g.:
+
+User::model()->with(array(
+    'posts'=>array('order'=>'posts.create_time ASC'),
+    'profile',
+))->findAll();
+
+----
+performance
+
+the main perf tool is to use eager loading to cause related objects to be loaded in a
+single sql round trip.
+
+the together option is used to break apart these large-ish sql statements on an as needed basis.
+
+----
+named scopes can be applied to the main query, or to the related models.
+
+Here is a scoped main query:
+$posts=Post::model()->published()->recently()->with('comments')->findAll();
+
+and a related model scoped:
+$posts=Post::model()->with('comments:recently:approved')->findAll();
+

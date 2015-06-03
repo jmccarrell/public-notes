@@ -1,0 +1,3467 @@
+to generate a java binding:
+
+Many target languages will also generate proxy class files in the target language. The
+default output directory for these language specific files is the same directory as the
+generated C/C++ file. This can be modified using the -outdir option.
+
+C and C++ style comments may appear anywhere in interface files. In previous versions of
+SWIG, comments were used to generate documentation files. However, this feature is
+currently under repair and will reappear in a later SWIG release.
+
+swig runs all .i files through a C preprocessor.
+All statements are processed, except #include unless overridden by -includeall.
+This is so that swig processes the interface itself, instead of everything referenced
+by the interface.
+In the case of my inet_pton layer, we don't want all of <arpa/inet.h> expanded.
+Also, everything in a %{ %} block is skipped.
+Also, the preprocessor used has some additional features described here:
+http://www.swig.org/Doc2.0/Preprocessor.html#Preprocessor
+
+Swig Directives
+
+All directives start with %
+They are not normal C syntax, so they have to protected if placed directly in headers:
+
+#ifdef SWIG
+%module foo
+#endif /* SWIG */
+
+Parser Limitations
+
+some rarely used by legal C constructs
+
+running swig on C++ source files is not recommended.
+the usual approach is to feed swig .h file describing the interface.
+
+C++ nested classes are not supported.
+
+Basic Type Handling
+
+here is the list of integer data types swig will convert to native:
+
+int
+short
+long
+unsigned
+signed
+unsigned short
+unsigned long
+unsigned char
+signed char
+bool
+
+there is some support for long long, depends on language and compiler.
+long long is supported by the java module.
+
+swig recognizes floating point types
+
+float
+double
+
+long double is not supported by swig.
+
+char is mapped into a null terminated ASCII string with a single char.
+char * is mapped into a null terminated ASCII string.
+So using char buffer to pass binary text is not recommended.
+Use typemaps instead: http://www.swig.org/Doc2.0/Typemaps.html#Typemaps
+
+There is limited support for Unicode strings. YMMV.
+There is no reference to unicode in the java page: http://www.swig.org/Doc2.0/Java.html
+
+Global Variables
+
+swig maps global variables whenever possible.
+the java module generates a pair of setter/getter functions for globals.
+
+Constants
+Constants can be created with #define, enumerations, or a special %constant directive.
+
+In #define constants, the type of the constant is inferred from the syntax.
+
+Constant expressions are allowed, but swig does not evaluate them instead deferring that
+to the C compiler.
+
+For enumerations, swig must be able to see the complete declaration to generate correct
+code.
+
+Typically, %constant is only used to add constants to the interface not in the .h file.
+
+swig pretty much ignores const declarations of const parameters and return types to functions.
+See const-correctness for more details:
+http://www.swig.org/Doc2.0/SWIGPlus.html#SWIGPlus_const
+
+The bottom line: don't rely on char * for anything other than read-only input
+values. However, it must be noted that you could change the behavior of SWIG using
+typemaps.
+http://www.swig.org/Doc2.0/Typemaps.html#Typemaps
+
+Pointers and Complex Objects
+
+swig encodes all pointers into a representation that contains the actual value and a
+type-tag.  E.g.
+char **
+might be represented as
+_f8ac_pp_char
+
+All pointers are treated as opaque objects by swig.
+
+So pointers can be passed across the boundary, just never deferenced on the scripting side
+as that would require all target langs to understand the memory layout of the C compiler.
+
+swig does some run time checking of pointer values using the type-tag.
+
+Derived types, structs and classes
+
+For everything else (structs, classes, arrays, ...) swig applies the simple rule:
+  Everything else is a pointer
+
+I.e., swig manipulates everything else by reference.
+
+An example.  Given this interface file:
+
+%module fileio
+FILE *fopen(char *, char *);
+int fclose(FILE *);
+unsigned fread(void *ptr, unsigned size, unsigned nobj, FILE *);
+unsigned fwrite(void *ptr, unsigned size, unsigned nobj, FILE *);
+void *malloc(int nbytes);
+void free(void *);
+
+and this python binding:
+
+# Copy a file 
+def filecopy(source,target):
+    f1 = fopen(source,"r")
+    f2 = fopen(target,"w")
+    buffer = malloc(8192)
+    nbytes = fread(buffer,8192,1,f1)
+    while (nbytes > 0):
+        fwrite(buffer,8192,1,f2)
+        nbytes = fread(buffer,8192,1,f1)
+    free(buffer)
+
+then python knows nothing about the contents of f1, f2 and buffer.
+It doesn't have to; it just passed them back and forth across the boundary.
+
+Undefined datatypes
+
+swig automatically assumes any unkown datatype to be a struct or class, and uses its
+generic pointer wrapping strategy.  This allows swig to wrap interfaces where the full
+types are not known.
+
+So some care must be taken for primitive types of a different name, like size_t:
+void foo(size_t num);
+if size_t's type is not known to swig, it will generate a wrapper expecting to receive
+a size_t *, which can cause errors like:
+foo(40);
+TypeError: expected a _p_size_t.
+
+Typedef
+swig tracks typedefs and uses the info for run-time type checking.
+
+Passing structures by value
+
+Following the opaque pointer strategy, if a function takes structures as parameters,
+swig generates a wrapper function that takes pointers instead.
+E.g. this method:
+  double dot_product(Vector a, Vector b);
+
+gets wrapped like this:
+  double wrap_dot_product(Vector *a, Vector *b) {
+      Vector x = *a;
+      Vector y = *b;
+      return dot_product(x,y);
+  }
+NB this method returns a supported primitive type.
+
+Return by Value
+When the return value is not a primitive type, swig allocates memory, which must be
+freed elsewhere, or there will be memory leaks.
+
+e.g. this method:
+  Vector cross_product(Vector v1, Vector v2);
+
+gets wrapped:
+  Vector *wrap_cross_product(Vector *v1, Vector *v2) {
+        Vector x = *v1;
+        Vector y = *v2;
+        Vector *result;
+        result = (Vector *) malloc(sizeof(Vector));
+        *(result) = cross(x,y);
+        return result;
+  }
+or if -c++ was specified:
+        Vector *result = new Vector(cross(x,y)); // Uses default copy constructor
+In both cases, memory is allocated that must be freed elsewhere.
+
+The java module has explicit support for wrapping C++ objects.
+
+Linking to char *
+
+when a global of type char * appears, swig links to it like this:
+
+/* C mode */
+void foo_set(char *value) {
+   if (foo) free(foo);
+   foo = (char *) malloc(strlen(value)+1);
+   strcpy(foo,value);
+}
+
+/* C++ mode.  When -c++ option is used */
+void foo_set(char *value) {
+   if (foo) delete [] foo;
+   foo = new char[strlen(value)+1];
+   strcpy(foo,value);
+}
+
+if the variable is declared as const char *, then swig treats it as read only and
+does not free/delete it.  It will allocate new memory if set, and will thus leak memory.
+
+Arrays
+Arrays are fully supported by swig, but they are always handled as pointers.
+
+This declaration:
+  int foobar(int a[40]);
+is treated like:
+  int foobar(int *a);
+
+char arrays are a special case.  swig will generate getters and setter methods:
+  char pathname[256];
+gets handled like:
+  char *pathname_get() {
+     return pathname;
+  }
+  void pathname_set(char *value) {
+     strncpy(pathname,value,256);
+  }
+
+Read-only variables
+
+int 	a; 			// Can read/write
+%immutable;
+int	b,c,d			// Read only variables
+%mutable;
+double	x,y			// read/write
+
+the tag can be applied to individual declarations too:
+
+%immutable x;                   // Make x read-only
+...
+double x;                       // Read-only (from earlier %immutable directive)
+double y;                       // Read-write
+...
+
+Renaming and ignoring declarations
+
+simple rename: use %rename
+
+// interface.i
+%rename(my_print) print;
+extern void print(const char *);
+
+calls 'print' in the C code from target language name 'my_print'.
+
+The %rename directive must precede the declarations to be renamed.
+Which leads to this idiomatic swig rename:
+
+// interface.i
+%rename(my_print) print;
+%include "header.h"
+
+%rename applies to all future occurrences of a name, including functions, variables,
+class and structure names, member functions and member data.
+
+Closely related to %rename is %ignore, which tells swig not to generate a mapping
+for those names.  Typically used to drop out small sections of an interface without
+resorting to the preprocessor.
+
+There are also advanced renaming techniques that can transform names in the interface.
+Some supported transforms are:
+  camelCase
+  lower case
+  upper case
+  strip a prefix
+  do a regex substitution
+  run a command with the input; substitute the process output
+
+Default/optional arguments
+
+defaults are supported by swig
+
+Pointers to functions and callbacks
+swig provides full support for callback functions defined in C, but not for those
+defined in the target language.
+
+Well, there is some support for callbacks in the target language.
+See the Typemaps chapter and the individual target language section, with focus on
+callbacks and the 'director' feature.
+
+Structures and Unions
+
+swig supports the common C idiom typedef struct:
+
+  typedef struct {
+     double x,y,z;
+  } Vector;
+
+when encountered, swig assumes the name of the object is Vector and creates member accessor
+functions.  The typedef allows the interface to drop the struct keyword:
+
+  double Vector_x_get(Vector *obj) {
+     return obj->x;
+  }
+
+Character strings and structures
+
+Structures involving character strings require some care.
+swig assumes that all members of type char * have been dynamically allocated,
+and that they are null-terminated ASCII strings.
+
+E.g.
+
+  %module mymodule
+  ...
+  struct Foo {
+  	char *name;
+  	...
+  }
+
+compiles to:
+
+  char *Foo_name_get(Foo *obj) {
+  	return Foo->name;
+  }
+
+  char *Foo_name_set(Foo *obj, char *c) {
+  	if (obj->name) free(obj->name);
+  	obj->name = (char *) malloc(strlen(c)+1);
+  	strcpy(obj->name,c);
+  	return obj->name;
+  }
+
+If this is not the desired behavior, the swig "memberin" typemap can be used.
+See the typemaps chapter.
+
+Structure data members
+
+Sometimes a struct will contain another struct:
+
+  typedef struct Foo {
+     int x;
+  } Foo;
+
+  typedef struct Bar {
+     int y;
+     Foo f;           /* struct member */
+  } Bar;
+
+When a structure member is wrapped, it is handled as a pointer, unless %naturalvar
+is used where it is handled more like a C++ reference.
+See C++ member data: 
+http://www.swig.org/Doc2.0/SWIGPlus.html#SWIGPlus_member_data
+
+
+Accessors to the member variable are effectively wrapped like:
+
+  Foo *Bar_f_get(Bar *b) {
+     return &b->f;
+  }
+  void Bar_f_set(Bar *b, Foo *value) {
+     b->f = *value;
+  }
+
+C constructors and destructors
+
+By default, swig will generate a malloc/free based constructor/destructor method
+for all objects. C++ is used differently.
+
+  %nodefaultctor Foo;      // No default constructor for Foo
+  ...
+  struct Foo {             // No default constructor generated.
+  };
+
+  struct Bar {             // Default constructor generated.
+  };
+
+Adding member functions to C structures
+
+%extend makes it possible to attach methods to C structures to build an OO interface.
+%extend can also add synthesized attributes or modify existing attributes.
+  these new members cannot require the allocation of additional storage in the object.
+
+Nested structures
+
+swig handles enumerated unions by effectively splitting them into 2 structs:
+
+  typedef struct Object {
+    int objtype;
+    union {
+      int         ivalue;
+      double      dvalue;
+      char        *strvalue;
+      void        *ptrvalue;
+    } intRep;
+  } Object;
+
+gets mapped to:
+
+  typedef union {
+    int           ivalue;
+    double        dvalue;
+    char          *strvalue;
+    void          *ptrvalue;
+  } Object_intRep;
+  
+  typedef struct Object {
+    int           objType;
+    Object_intRep intRep;
+  } Object;
+
+swig will then create accessor functions for Object_intRep.
+This works ok in the target language, especially when proxy classes are used.
+Here is a perl instance:
+
+  # Perl5 script for accessing nested member
+  $o = CreateObject();                    # Create an object somehow
+  $o->{intRep}->{ivalue} = 7              # Change value of o.intRep.ivalue
+
+Code Insertion
+
+Sometimes you want to insert certain code into the generated wrapper file.
+Maybe to perform initialization.
+It is useful to know swig's output format first:
+
+when swig creates its output, there are 5 sections corresponding to:
+  runtime code
+          headers
+  wrapper functions
+  module  initialization
+in that order.
+
+begin section: a placeholder for users to put code at the beginning.  most often used to
+  define preprocessor macros to be used in later sections.
+runtime code: internal to swig; includes type-checking and other support code.
+header section: user-defined support code that has been included by the %{ .. %}
+  directive.  usually consists of header files and other helper funcs.
+wrapper code: these are the swig generated wrappers
+module initialization: the function generated by swig to initialized the module on loading.
+
+Code insertion blocks
+One can insert code into the relevant block by named directive:
+  %begin   %{ ... %}
+  %runtime %{ ... %}
+  %header  %{ ... %}
+  %wrapper %{ ... %}
+  %init    %{ ... %}
+
+the bare %{ ... %} is the same as %header %{ ... %}
+
+the %begin section is effectively empty as it just contains the swig banner by default.
+
+everything in a code insertion block is copied verbatim; not parsed by swig.
+
+%inline %{ ... %}
+inserts all of the code verbatim into the header portion of the output file.
+the code is parsed by both the swig preprocessor and parser.
+
+%init %{
+    init_variables();
+%}
+then init_variables() will get invoked by the module initialization function on module load.
+
+An Interface Building Strategy
+
+Preparing a C program for swig
+
+a general recipe:
+- identify the functions you want to wrap.
+- create a new interace file to describe the scripting language interface to your program
+- copy the appropriate decls into the interface file, or use %include to process an entire file
+- make sure everything in the interface file uses ANSI C/C++ syntax
+- make sure all necessary typedef decls and type information is available in the interface file.
+  most importantly, define all types before they are used.
+- if your code has a main() you may need to rename it
+- run swig and compile
+
+the swig interface file
+
+the preferred method of using swig is generate a separate interface file.
+why use separate interface files?
+- it is rarely necessary to access every single function in a large package.
+  Many C functions have little or no use in the target language, so why wrap them?
+- separate interace files provide an opportunity to be more precise about the how the
+  interface should be constructed
+- interface files can provide more structure and organization
+- swig can't parse certain definitions that appear in header files.  a separate interface
+  file allows you to work around these issues.
+- interface files provide a more precise definition of what the interface is.
+
+To load certain header files so the target code will compile, add them to a %{ %} section:
+
+  %module graphics
+  %{
+  #include <GL/gl.h>
+  #include <GL/glu.h>
+  %}
+  // put the rest of the decls here
+
+main()
+  you have to get rid of main in most cases.
+
+
+swig and C++
+
+the issues: how to wrap when there may not be analogs in the target language?
+  multiple inheritance
+  overloaded operators
+  templates
+
+swig generates a C++ interface in layers:
+- at the lowest level, a layer of procedural ANSI-C style wrappers
+  these take care of basic type conversion, type checking, error handling, etc.
+  at some level, this can be viewed as a C layer on top of the C++ code.
+- next a proxy class layer, often in the target language that provides a more
+  natural OO layer.
+
+Supported C++ features
+
+  classes
+  constructors and destructors
+  virtual functions
+  public inheritance, including multiple inheritance
+  static functions
+  function and method overloading
+  operator overloading for many standard operators
+  references
+  templates (including specialization and member templates)
+  pointers to members
+  namespaces
+  default parameters
+  smart pointers
+
+Unsupported C++ features
+
+  overloaded versions of certain operators (new, delete, ...)
+  nested classes; however, there are some work arounds
+
+As a rule of thumb, swig should not be used on raw C++ sources files;
+use header files only.
+
+Proxy classes
+
+typically, an OO target language will wrap each C++ class with a class.
+this is true for at least python and java.
+
+proxy classes are always constructed as an extra layer of wrapping that uses
+low-level accessor functions.
+
+  class Foo {
+  public:
+      Foo();
+     ~Foo();
+      int  bar(int x);
+      int  x;
+  };
+
+using C++ as pseudo code, a proxy class might look like:
+
+  class FooProxy {
+  private:
+      Foo    *self;
+  public:
+      FooProxy() {
+            self = new_Foo();
+      }
+     ~FooProxy() {
+            delete_Foo(self);
+      }
+      int bar(int x) {
+            return Foo_bar(self,x);
+      }
+      int x_get() {
+            return Foo_x_get(self);
+      }
+      void x_set(int x) {
+            Foo_x_set(self,x);
+      }
+  };
+
+recall that the low-level accessor functions are always used by the proxy classes.
+Whenever possible, proxies try to take advantage of similiar language features.
+This might include operator overloading, exception handling, ...
+
+Resource management in proxies
+
+generated proxy classes contain an ownership interface: disown()/acquire()
+  to help with difficult reference issues.
+
+Simple C++ wrapping
+
+Here is an example interface:
+
+  %module list
+  %{
+  #include "list.h"
+  %}
+
+  // Very simple C++ example for linked list
+
+  class List {
+  public:
+    List();
+    ~List();
+    int  search(char *value);
+    void insert(char *);
+    void remove(char *);
+    char *get(int n);
+    int  length;
+  static void print(List *l);
+  };
+
+swig generates a collection of low-level accessor functions, which are then used by the
+proxy classes.
+
+The generated constructor/destructor have the form:
+
+  List * new_List(void) {
+  	return new List;
+  }
+  void delete_List(List *l) {
+  	delete l;
+  }
+
+In general swig will:
+
+- if a class does not declare an explicit constructor, swig will generate a wrapper for one
+- swig will generate a default copy constructor if there is not an explicit copy ctor in the
+  interface and %copyctor is used.
+- if a class does not declare an explicit destructor, swig will generate a wrapper for one.
+
+Rules that alter the above behavior:
+
+- a default ctor is not created if a class already defines a ctor with arguments
+- default ctors are not generated for classes with pure virtual methods or for classes that
+  inherit from an abstract class, but don't provide definitions for all of the pure methods
+- a default ctor is not created unless all base classes support a default ctor
+- default ctors and implicit destructors are not created if a class defines them in a private
+  or protected section
+- default ctors and implicit destructors are not created if any base class defines a non-public
+  default ctor or destructor
+
+manually disable these with %nodefaultctor and %nodefaultdtor feature flag directives.
+
+to see when swig is generating (or not) default ctor/dtors, turn all warnings on:
+
+  % swig -Wall -python module.i
+
+this will report which classes are thought to be abstract.
+One can override swigs choice with:
+  %feature("notabstract") Foo;
+  class Foo : public Bar {
+    ...
+  };
+
+If a class defines more than 1 copy ctor, its behavior depends on the target language.
+If overloading is supported, then copy ctor is accessible using the normal ctor function.
+E.g.
+
+  class List {
+  public:
+      List();    
+      List(const List &);      // Copy constructor
+      ...
+  }
+then the copy ctor can be used like this:
+  x = List()               # Create a list
+  y = List(x)              # Copy list x
+
+if the target language does not support overloading, then the copy ctor is available
+under another name:
+
+  List *copy_List(List *f) {
+      return new List(*f);
+  }
+
+Member functions
+
+recall the List class above and the search member function:
+    int  search(char *value);
+
+The generated accessor function will have the form:
+
+  int List_search(List *obj, char *value) {
+    return obj->search(value);
+  }
+
+These accessor functions are often inlined into the generated wrapper functions.
+
+Static members
+Static member functions are called directly without making any special transformations.
+E.g. the static member function
+  print(List *l)
+directly invokes
+  List::print(List *l)
+in the generated wrapper code.
+
+Member data
+
+Member data is handled exactly the same as for C structures.
+A pair of accessor functions are effectively created.
+
+e.g. for the 
+    int  length;
+decl, we would have:
+  int List_length_get(List *obj) {
+    return obj->length;
+  }
+  int List_length_set(List *obj, int value) {
+    obj->length = value;
+    return value;
+  }
+
+read-only members can be created with %immutable, and its analog %mutable.
+e.g. we probably don't want to allow others to change the list length, so:
+
+  class List {
+  public:
+   ...
+  %immutanble
+      int length;
+  %mutable
+   ...
+  };
+
+this can also be written:
+
+  %immutable List::length;
+  ...
+  class List {
+     ...
+     int length;         // Immutable by above directive
+     ...
+  };
+
+Recall that nested structure members, and thus also nested class members are modelled
+as pointers.
+
+  class Foo {
+  public:
+      List items;
+      ...
+  };
+
+the generated accessor uses pointers:
+
+  List *Foo_items_get(Foo *self) {
+      return &self->items;
+  }
+  void Foo_items_set(Foo *self, List *value) {
+      self->items = *value;
+  }
+
+this can lead to some unnatural consequences for some types.
+e.g. one would expect std::string class member variables to be wrapped as a string
+in the target language, rather than a pointer to a std::string.
+The const reference typemaps offer this type of marshalling, so there is a feature to tell
+swig to use the const reference typemaps, rather than the pointer typemaps, named %naturalvar
+
+  // All List variables will use const List& typemaps
+  %naturalvar List;
+
+  // Only Foo::myList will use const List& typemaps
+  %naturalvar Foo::myList;
+  struct Foo {
+    List myList;
+  };
+
+  // All variables will use const reference typemaps
+  %naturalvar;
+
+Effectively %naturalvar changes the way the accessors are generated to:
+
+  const List &Foo_items_get(Foo *self) {
+      return self->items;
+  }
+  void Foo_items_set(Foo *self, const List &value) {
+      self->items = value;
+  }
+
+it is a good idea to use %naturalvar globally as the reference typemaps have extra NULL
+checking compared to the pointer typemaps.
+the %naturalvar feature will apply to global variables in addition to member variables
+in some language modules, like C# and java.
+
+one can turn %naturalvar on for globally with a command line switch, or module mode option:
+  swig -naturalvar
+or
+  %module(naturalvar=1)
+
+Default arguments
+
+swig will wrap all types of functions that have default arguments, by generating an
+extra overloaded method for each defaulted argument.  swig is effectively handling methods
+with default arguments as if it was wrapping the equivalent overloaded methods.
+
+  class Foo {
+  public:
+      void bar(int x, int y = 3, int z = 4);
+  };
+
+swig will generate wrapper functions is if the interface had been given as:
+
+  class Foo {
+  public:
+      void bar(int x, int y, int z);
+      void bar(int x, int y);
+      void bar(int x);
+  };
+
+this approach allows swig to wrap all possible default args, but can be verbose.
+
+    Please see the Features and default arguments section for more information on using
+    %feature with functions with default arguments. The Ambiguity resolution and renaming
+    section also deals with using %rename and %ignore on methods with default
+    arguments. If you are writing your own typemaps for types used in methods with default
+    arguments, you may also need to write a typecheck typemap. See the Typemaps and
+    overloading section for details or otherwise use the compactdefaultargs feature flag
+    as mentioned below.
+
+Protection
+
+swig wraps class members that are public, following C++ convention.
+anything declared protected or private is ignored by default.
+
+Enums and constants
+
+Enums and constant handling is different per language module.
+However, many languages map enums and constants in a class definition into constants
+with the classname as a prefix.
+
+  class Swig {
+  public:
+    enum {ALE, LAGER, PORTER, STOUT};
+  };
+generates:
+  Swig_ALE = Swig::ALE
+  Swig_LAGER = Swig::LAGER
+  Swig_PORTER = Swig::PORTER
+  Swig_STOUT = Swig::STOUT
+
+members declared as const are wrapped as read-only members and do not create constants.
+
+Friends
+
+Friend declarations are recognized by swig.
+
+References and pointers
+
+C++ references are supported, but swig transforms them back to pointers.
+
+  class Foo {
+  public:
+      double bar(double &a);
+  }
+has low-level accessor
+  double Foo_bar(Foo *obj, double *a) {
+    obj->bar(*a);
+  }
+
+As a special case, most language modules pass const references to primitive datatypes
+by value instead of pointers.
+  void foo(const int &x);
+is called from a script like this:
+  foo(3)              # Notice pass by value
+
+functions that return a reference are remapped to return a pointer instead.
+  class Bar {
+  public:
+      Foo &spam();
+  };
+Generates an accessor like this:
+  Foo *Bar_spam(Bar *obj) {
+     Foo &result = obj->spam();
+     return &result;
+  }
+
+However, functions that return const references to primitive datatypes normally return
+the result as a value rather than a pointer.
+  const int &bar();
+will return integers such as 37 or 42 in the target scripting language rather than a
+pointer to an integer.
+
+Pass and return by value
+
+Sometimes a C++ program will pass and return class objects by value.
+  Vector cross_product(Vector a, Vector b);
+
+If no info is know about Vector, swig creates a wrapper like this:
+  Vector *wrap_cross_product(Vector *a, Vector *b) {
+     Vector x = *a;
+     Vector y = *b;
+     Vector r = cross_product(x,y);
+     return new Vector(r);
+  }
+here Vector must supply a default ctor and a copy ctor for this to compile.
+
+If Vector is defined as a class in the interface, but does not support a default ctor,
+swig generates code that encapsulates the arguments in a special C++ template wrapper
+class via a process named the "Fulton Transform".
+  Vector cross_product(Vector *a, Vector *b) {
+     SwigValueWrapper<Vector> x = *a;
+     SwigValueWrapper<Vector> y = *b;
+     SwigValueWrapper<Vector> r = cross_product(x,y);
+     return new Vector(r);
+  }
+this can be turned on/off with %feature("novaluewrapper")
+
+    It is well worth considering turning this feature on for classes that do have a
+    default constructor. It will remove a redundant constructor call at the point of the
+    variable declaration in the wrapper, so will generate notably better performance for
+    large objects or for classes with expensive construction. Alternatively consider
+    returning a reference or a pointer.
+
+Inheritance
+
+swig supports C++ inheritance of classes and allows both single and multiple inheritance,
+as limited or allowed by the target language.
+The swig typechecker knows about the relationship between base and derived classes and
+allows pointers to any object of a derived class to be used in functions of a base class.
+The typechecker properly casts pointer values and is safe to use with multiple inheritance.
+
+swig treats private or protected inheritance as close to the C++ spirit, and target language
+capabilities, as possible.  In most cases, this means that swig will parse the non-public
+inheritance declarations, but they will have no effect on the generated code, except for
+the implicit policies derived for constructors and destructors.
+
+E.g.  (not all code is shown)
+
+  // shapes.i
+  %module shapes
+  %{
+  #include "shapes.h"
+  %}
+
+  class Shape {
+  public:
+      double x,y;
+      virtual double area() = 0;
+      virtual double perimeter() = 0;
+      void    set_location(double x, double y);
+  };
+  class Circle : public Shape {
+  public:
+      Circle(double radius);
+      ~Circle();
+      double area();
+      double perimeter();
+  };
+  class Square : public Shape {
+  public:
+      Square(double size);
+      ~Square();
+      double area();
+      double perimeter();
+  }
+
+when wrapped into Python, we can do the following using the low-level python accessors:
+
+  $ python
+  >>> import shapes
+  >>> circle = shapes.new_Circle(7)
+  >>> square = shapes.new_Square(10)
+  >>> print shapes.Circle_area(circle)
+  153.93804004599999757
+  >>> print shapes.Shape_area(circle)
+  153.93804004599999757
+  >>> print shapes.Shape_area(square)
+  100.00000000000000000
+  >>> shapes.Shape_set_location(square,2,-3)
+  >>> print shapes.Shape_perimeter(square)
+  40.00000000000000000
+
+NB that the area can be calculated by Circle_area, or Shape_area
+
+The low level accessor functions are generated in the class where declared.
+So that means
+  Shape_set_location()
+is defined, but
+  Circle_set_location() and Square_set_location()
+are not.
+
+    Note: For the best results, SWIG requires all base classes to be defined in an
+    interface. Otherwise, you may get a warning message like this:
+
+      example.i:18: Warning 401: Nothing known about base class 'Foo'. Ignored.
+
+    If any base class is undefined, SWIG still generates correct type relationships. For
+    instance, a function accepting a Foo * will accept any object derived from Foo
+    regardless of whether or not SWIG actually wrapped the Foo class. If you really don't
+    want to generate wrappers for the base class, but you want to silence the warning, you
+    might consider using the %import directive to include the file that defines
+    Foo. %import simply gathers type information, but doesn't generate
+    wrappers. Alternatively, you could just define Foo as an empty class in the SWIG
+    interface or use warning suppression.
+
+A brief discussion of multiple inheritance, pointers, and type checking
+
+<detail about why swig must carry tagged pointers to handle casts correctly>
+
+Wrapping Overloaded Functions and Methods
+
+In many languages, swig provides partial support for overloaded functions,  methods
+and constructors. eg
+
+  void foo(int x) {
+     printf("x is %d\n", x);
+  }
+  void foo(char *x) {
+     printf("x is '%s'\n", x);
+  }
+can often be naturally used as:
+  >>> foo(3)
+  x is 3
+  >>> foo("hello")
+  x is 'hello'
+
+overloading works similiarly for methods and constructors.  eg
+
+  class Foo {
+  public:
+       Foo();
+       Foo(const Foo &);   // Copy constructor
+       void bar(int x);
+       void bar(char *s, int y);
+  };
+
+might be used like this:
+
+  >>> f = Foo()          # Create a Foo
+  >>> f.bar(3)
+  >>> g = Foo(f)         # Copy Foo
+  >>> f.bar("hello",2)
+
+Dispatch function generation
+
+used to decide how to handle eg
+  void foo(int x);
+  void foo(long x);
+
+especially when the target language has the same type for both int and long.
+which method gets called?
+there are disambiguation rules and precedence to help the swig run time type
+checking code to figure out which method to call.
+
+Wrapping overloaded operators
+
+Consider this example:
+
+  class Complex {
+  private:
+    double rpart, ipart;
+  public:
+    Complex(double r = 0, double i = 0) : rpart(r), ipart(i) { }
+    Complex(const Complex &c) : rpart(c.rpart), ipart(c.ipart) { }
+    Complex &operator=(const Complex &c) {
+      rpart = c.rpart;
+      ipart = c.ipart;
+      return *this;
+    }
+    Complex operator+(const Complex &c) const {
+      return Complex(rpart+c.rpart, ipart+c.ipart);
+    }
+    Complex operator-(const Complex &c) const {
+      return Complex(rpart-c.rpart, ipart-c.ipart);
+    }
+    Complex operator*(const Complex &c) const {
+      return Complex(rpart*c.rpart - ipart*c.ipart,
+  		   rpart*c.ipart + c.rpart*ipart);
+    }
+    Complex operator-() const {
+      return Complex(-rpart, -ipart);
+    }
+    double re() const { return rpart; }
+    double im() const { return ipart; }
+  };
+
+swig handles operator declarations in exactly the same manner as regular methods.
+however, the names of these methods look like: "operator +" or "operator -".
+these are often not legal names in the target language.
+
+Some language modules know how to handle certain operators, typically using the %rename
+directive.
+
+Class extension
+
+New methods can be added to a class using the %extend directive.
+This is primarily used with proxy classes to add additional functionality to an existing class:
+
+  %module vector
+  %{
+  #include "vector.h"
+  %}
+
+  class Vector {
+  public:
+     double x,y,z;
+     Vector();
+     ~Vector();
+     ... bunch of C++ methods ...
+     %extend {
+        char *__str__() {
+           static char temp[256];
+           sprintf(temp,"[ %g, %g, %g ]", $self->x,$self->y,$self->z);
+           return &temp[0];
+        }
+     }
+  };
+NB use of $self in place of this
+
+Templates
+
+Template type names may appear anywhere a type is expected in an interface file.
+
+  void foo(vector<int> *a, int n);
+  void bar(list<int,100> *x);
+
+there are some restrictions on the use of non-type arguments.
+Simple literals are supported, and so are some constant expressions.
+Hower, the use of '<' and '>' within a constant expression is not supported.
+'<=' and '>=' are though:
+
+  void bar(list<int,100> *x);                // OK
+  void bar(list<int,2*50> *x);               // OK
+  void bar(list<int,(2>1 ? 100 : 50)> *x)    // Not supported
+
+Simple C++ template declarations can be wrapped.
+However, a bare C++ template does not define any runnable object-code for swig to build
+a wrapper around.  Therefore, to wrap a template, you must give swig information about
+a particular template instantiation, e.g. vector<int>, array<double> etc.
+Second, an instantiation name such as vector<int> is generally not a valid name in the
+target language.  Thus you must give the template instantiation a more suitable name
+such as intvector when creating a wrapper.
+
+Consider the template:
+
+  template<class T> class List {
+  private:
+      T *data;
+      int nitems;
+      int maxitems;
+  public:
+      List(int max) {
+        data = new T [max];
+        nitems = 0;
+        maxitems = max;
+      }
+      ~List() {
+        delete [] data;
+      };
+      void append(T obj) {
+        if (nitems < maxitems) {
+          data[nitems++] = obj;
+        }
+      }
+      int length() {
+        return nitems;
+      }
+      T get(int n) {
+        return data[n];
+      }
+  };
+
+swig will simply ignore this as it doesn't know how to generate any code until a definition of
+T is known.
+
+One way to create wrappers for a specific template instantiation is simply to provide
+an expanded version of the class directly like this:
+
+  %rename(intList) List<int>;       // Rename to a suitable identifier
+  class List<int> {
+  private:
+      int *data;
+      int nitems;
+      int maxitems;
+  public:
+      List(int max);
+      ~List();
+      void append(int obj);
+      int length();
+      int get(int n);
+  };
+
+%rename here is needed to give the template class a good name.
+the rest of the code is the same as what would appear in a normal class definition.
+
+Since manual expansion is error prone, the %template directive can create instantiations
+of a template class.  Semantically, %template is just a shortcut:
+
+  /* Instantiate a few different versions of the template */
+  %template(intList) List<int>;
+  %template(doubleList) List<double>;
+
+The argument to %template is the type name.  The name must be unique, with 1 exception:
+typedef names:
+
+  %template(intList) List<int>;
+  ...
+  typedef List<int> intList;    // OK
+
+swig can also generate wrappers for function templates:
+
+  // Function template
+  template<class T> T max(T a, T b) { return a > b ? a : b; }
+
+  // Make some different versions of this function
+  %template(maxint) max<int>;
+  %template(maxdouble) max<double>;
+
+this creates maxint and maxdouble function names.
+
+template default arguments are supported:
+
+  template vector<typename T, int max=100> class vector {
+  ...
+  };
+
+  %template(intvec) vector<int>;           // OK
+  %template(vec1000) vector<int,1000>;     // OK
+
+
+Namespaces
+
+Simple namespaces are supported out of the box;
+more advanced namespace support is enabled per language module via the nspace feature.
+
+C++ namespaces can do things like:
+
+  namespace math {
+     double sin(double);
+     double cos(double);
+
+     class Complex {
+        double im,re;
+     public:
+        ...
+     };
+     ...
+  };
+
+In C++, members of the namespace are accessed by prepending the namespace prefix to names:
+
+  double x = math::sin(1.0);
+  double magnitude(math::Complex *c);
+  math::Complex c;
+
+Selective symbols can be exported from a namespace with 'using':
+
+  using math::Complex;
+  double magnitude(Complex *c);       // Namespace prefix stripped
+
+Map in the entire contents of the namespace:
+
+  using namespace math;
+  double x = sin(1.0);
+  double magnitude(Complex *c);
+
+Also, one can alias a namespace:
+
+  namespace M = math;
+  double x = M::sin(1.0);
+  double magnitude(M::Complex *c);
+
+swig fully supports C++ namespaces in its internal type system.
+However, the default wrapping behavior is to flatten namespaces in the target language.
+Thus all namespaces are merged together in the target language module.
+Eg
+
+  %module foo
+  namespace foo {
+     void bar(int);
+     void spam();
+  }
+
+  namespace bar {
+     void blah();
+  }
+
+will generate 3 wrapper functions: bar(), spam() and blah().
+
+using declarations do not have any effect on the generated wrapper code.
+They are ignored by the swig language modules and they do not result in any code.
+However, these declarations are used by the internal type system to track type-names.
+Thus:
+
+  namespace A {
+     typedef int Integer;
+  }
+  using namespace A;
+  void foo(Integer x);
+
+swig knows that Integer is the same as A::Integer which is the same as int.
+
+Namespaces may be combined with templates.
+This combination may introduce subtle scope-related issues.
+
+    The key thing to keep in mind is that all swig generated wrappers are produced in the
+    global namespace.  Symbols from other namespaces are always accessed using fully
+    qualified names -- names are never iported into the global space unless the interface
+    happens to do so with a 'using' declaration.  In almost all cases, swig adjusts
+    typenames and symbols to be fully qualified.  However, this is not done in code
+    fragments such as function bodies, typemaps, exception handlers and so forth.  E.g.
+
+  namespace foo {
+      typedef int Integer;
+      class bar {
+      public:
+         ...
+      };
+  }
+
+  %extend foo::bar {
+     Integer add(Integer x, Integer y) {
+         Integer r = x + y;        // Error. Integer not defined in this scope
+         return r;
+     }
+  };
+
+swig correctly resolves the added method parameters and return type to foo::Integer.
+However, since funciton bodies are not parsed ...
+To fix the problem:
+
+         foo::Integer r = x + y;        // Ok.
+
+code inclusion directives such as %{ ... %} or %inline %{ ... %} should not be placed
+inside a namespace declaration.  If you need namespaces with these directives follow this:
+
+  // Good version
+  %inline %{
+  namespace foo {
+       void bar(int) { ... }
+       ...
+  }
+  %}
+
+  // Bad version.  Emitted code not placed in namespace.
+  namespace foo {
+  %inline %{
+       void bar(int) { ... }   /* I'm bad */
+       ...
+  %}
+  }
+
+when the %extend directive is used inside a namespace,
+the namespace name is included in the generated functions.
+
+  namespace foo {
+     class bar {
+     public:
+          %extend {
+             int blah(int x);
+          };
+     };
+  }
+
+the added blah() method is mapped to:
+  int foo_bar_blah(foo::bar *self, int x)
+
+The nspace feature for namespaces
+
+Some target languages support the nspace feature.  The feature can be applied to any
+class, struct, union or enum declared within a named namespace.  The feature wraps the
+type within the target language specific concept of a namespace, eg, a Java package or a
+C# namespace.
+
+  %feature("nspace") MyWorld::Material::Color;
+  %nspace MyWorld::Wrapping::Color; // %nspace is a macro for %feature("nspace")
+
+  namespace MyWorld {
+    namespace Material {
+      class Color {
+      ...
+      };
+    }
+    namespace Wrapping {
+      class Color {
+      ...
+      };
+    }
+  }
+
+this declares the 2 namespaces and eliminates the name clash on Color in the global
+namespace for the generated methods that would occur without %namespace.
+
+%nspace does not apply to variables and functions simply declared in a namespace.
+Eg the following symbols cannot co-exist in the target language without renaming:
+
+  namespace MyWorld {
+    namespace Material {
+      int quantity;
+      void dispatch();
+    }
+    namespace Wrapping {
+      int quantity;
+      void dispatch();
+    }
+  }
+
+Renaming templated types in namespaces
+
+When %rename includes parameters, the parameter types must match exactly; no typedef or
+namespace resolution is performed.  swig treats templated types differently and has an
+additional matching rule, so unlike non-templated types, an exact match is not always
+required.  A fully qualified templated type has precedence over the generic template type.
+
+In this example, the generic type is used to rename to bbb, and the fully qualified is
+used to rename ccc:
+
+  %rename(bbb) Space::ABC::aaa(T t);                  // will match but with lower precedence than ccc
+  %rename(ccc) Space::ABC<Space::XYZ>::aaa(Space::XYZ t);// will match but with higher precedence
+                                                         // than bbb
+
+  namespace Space {
+    class XYZ {};
+    template<typename T> struct ABC {
+      void aaa(T t) {}
+    };
+  }
+  %template(ABCXYZ) Space::ABC<Space::XYZ>;
+
+there are many ways to achieve a rename.
+here is how %rename can be used inside a namespace:
+
+  namespace Space {
+    %rename(bbb) ABC::aaa(T t);                     // will match but with lower precedence than ccc
+    %rename(ccc) ABC<Space::XYZ>::aaa(Space::XYZ t);// will match but with higher precedence than bbb
+    %rename(ddd) ABC<Space::XYZ>::aaa(XYZ t);       // will not match
+  }
+
+  namespace Space {
+    class XYZ {};
+    template<typename T> struct ABC {
+      void aaa(T t) {}
+    };
+  }
+  %template(ABCXYZ) Space::ABC<Space::XYZ>;
+
+NB ddd does not match because there is no namespace resolution for parameter types.
+here is how %rename can be placed within %extend:
+
+  namespace Space {
+    %extend ABC {
+      %rename(bbb) aaa(T t);         // will match but with lower precedence than ccc
+    }
+    %extend ABC<Space::XYZ> {
+      %rename(ccc) aaa(Space::XYZ t);// will match but with higher precedence than bbb
+      %rename(ddd) aaa(XYZ t);       // will not match
+    }
+  }
+
+  namespace Space {
+    class XYZ {};
+    template<typename T> struct ABC {
+      void aaa(T t) {}
+    };
+  }
+  %template(ABCXYZ) Space::ABC<Space::XYZ>;
+
+Exception specifications
+
+What should swig do when exceptions are part of the interface?
+
+  class Error { };
+
+  class Foo {
+  public:
+      ...
+      void blah() throw(Error);
+      ...
+  };
+
+if an exception specification is used, swig generates wrapper code for catching the
+indicated exception, and when possible, rethrowing it into the target language, or
+converting it into an error in the target language.
+
+eg in python:
+
+  f = Foo()
+  try:
+      f.blah()
+  except Error,e:
+       # e is a wrapped instance of "Error"
+
+details for exception handling and conversion are outlined in the "throws" typemap section
+http://www.swig.org/Doc2.0/Typemaps.html#throws_typemap
+
+Since exception specifications in the interface are sometimes used only sparinly,
+they alone may not be sufficient to properly handle C++ exceptions.
+To do that, a different set of special swig directives are used.
+See "Exception handling with %exception":
+http://www.swig.org/Doc2.0/Customization.html#Customization_exception
+
+Exception handling with %catches
+
+Exception handling is generated for methods with an exception specification.  Similiar
+handling can be achieved for methods without exception specifications via the %catches
+feature.  It is also possible to replace existing exception specifications using %catches.
+%catches uses the same "throws Typemap"
+http://www.swig.org/Doc2.0/Typemaps.html#throws_typemap that swig uses for exception
+specifications.  %catches must contain a list of possible types that can be thrown. For
+each type in the list, swig generates a catch handler, in the same way that it would for
+types declared in an exception specification.  NB the list may include the catch all
+specification "..."
+
+  struct EBase { virtual ~EBase(); };
+  struct Error1 : EBase { };
+  struct Error2 : EBase { };
+  struct Error3 : EBase { };
+  struct Error4 : EBase { };
+
+  %catches(Error1,Error2,...) Foo::bar();
+  %catches(EBase) Foo::blah();
+
+  class Foo {
+  public:
+      ...
+      void bar();
+      void blah() throw(Error1,Error2,Error3,Error4);
+      ...
+  };
+
+    For the Foo::bar() method, which can throw anything, SWIG will generate catch handlers
+    for Error1, Error2 as well as a catch all handler (...). Each catch handler will
+    convert the caught exception and convert it into a target language
+    error/exception. The catch all handler will convert the caught exception into an
+    unknown error/exception.
+
+    Without the %catches feature being attached to Foo::blah(), SWIG will generate catch
+    handlers for all of the types in the exception specification, that is, Error1, Error2,
+    Error3, Error4. However, with the %catches feature above, just a single catch handler
+    for the base class, EBase will be generated to convert the C++ exception into a target
+    language error/exception.
+
+Pointers to members
+
+there is limited support for parsing pointers to C++ class members
+
+  double do_op(Object *o, double (Object::*callback)(double,double));
+  extern double (Object::*fooptr)(double,double);
+  %constant double (Object::*FOO)(double,double) = &Object::foo;
+
+this is advanced foo.  see the manual.
+
+Smart pointers and operator->()
+
+smart pointers are often templated usages of ordinary classes to support reference
+counting or persistence.  eg
+
+  // Smart-pointer class
+  template<class T> class SmartPtr {
+      T *pointee;
+  public:
+      ...
+      T *operator->() {
+          return pointee;
+      }
+      ...
+  };
+
+  // Ordinary class
+  class Foo_Impl {
+  public:
+      int x;
+      virtual void bar();
+      ...
+  };
+
+  // Smart-pointer wrapper
+  typedef SmartPtr<Foo_Impl> Foo;
+
+  // Create smart pointer Foo
+  Foo make_Foo() {
+      return SmartPtr(new Foo_Impl());
+  }
+
+  // Do something with smart pointer Foo
+  void do_something(Foo f) {
+      printf("x = %d\n", f->x);
+      f->bar();
+  }
+
+the key feature of this approach is that by defining operator->, the methods and
+attributes of the object wrapped by the smart pointer are transparently accessible.  eg
+
+  f->x
+  f->bar()
+
+are transparently mapped to the following
+
+  (f.operator->())->x;
+  (f.operator->())->bar();
+
+When generating wrappers, swig tries to emulate this functionality as much as possible.
+To do this, whenever operator->() is encountered in a class, swig looks at its returned
+type and uses it to generate wrappers for accessing attributes of the underlying object.
+eg
+
+  int Foo_x_get(Foo *f) {
+     return (*f)->x;
+  }
+  void Foo_x_set(Foo *f, int value) {
+     (*f)->x = value;
+  }
+  void Foo_bar(Foo *f) {
+     (*f)->bar();
+  }
+
+these wrappers take a smart pointer instance as an argument, but dereference it in a way
+to gain access to the object returned by operator->().  Carefully compare these wrappers
+to those in the first part of this chapter.
+
+The end result is that access looks very similiar to C++.  eg python:
+
+  >>> f = make_Foo()
+  >>> print f.x
+  0
+  >>> f.bar()
+  >>>
+
+when generating wrappers through a smart pointer, swig tries to generate wrappers for all
+methods and attributes that might be accessible through operator->().  this includes
+methods visible via inheritance.  However there are a number of restrictions:
+
+-- member variables and methods are wrapped through a smart pointer.  enums, constructors
+   and destructors are not wrapped.
+-- if the smart pointer class and the underlying object both define a method or variable
+   of the same name, then the smart pointer version has precedence.  eg
+
+  class Foo {
+  public:
+      int x;
+  };
+
+  class Bar {
+  public:
+      int x;       
+      Foo *operator->();
+  };
+
+then the wrapper for Bar::x accesses the x defined in Bar, not the x in Foo.
+
+If your intent is to only expose the smart pointer class in the interface, it is not
+necessary to wrap both the smart pointer class and the pointed to class.  However, you
+must tell swig about both classes for the mechanisms here to work.  To only generate
+wrappers for the smart pointer class, use the %ignore directive:
+
+  %ignore Foo;
+  class Foo {       // Ignored
+  };
+
+  class Bar {
+  public:
+     Foo *operator->();
+     ...
+  };
+
+An alternative is to import the definition of Foo from a separate file with %import.
+
+NB When a class defines operator->(), the operator itself is wrapped as method __deref__().
+
+  f = Foo()               # Smart-pointer
+  p = f.__deref__()       # Raw pointer from operator->
+
+NB to disable smart pointer behavior, %ignore operator->()
+
+  %ignore Bar::operator->;
+
+Using declarations and inheritance
+
+'using' declarations are sometimes used to adjust access to members of base classes:
+
+  class Foo {
+  public:
+        int  blah(int x);
+  };
+
+  class Bar {
+  public:
+        double blah(double x);
+  };
+
+  class FooBar : public Foo, public Bar {
+  public:
+        using Foo::blah;  
+        using Bar::blah;
+        char *blah(const char *x);
+  };
+
+In this example, the 'using' declarations make different overloaded versions of blah available:
+
+  FooBar *f;
+  f->blah(3);         // Ok. Invokes Foo::blah(int)
+  f->blah(3.5);       // Ok. Invokes Bar::blah(double)
+  f->blah("hello");   // Ok. Invokes FooBar::blah(const char *);
+
+swig wraps this just fine; in python:
+
+  >>> import example
+  >>> f = example.FooBar()
+  >>> f.blah(3)
+  >>> f.blah(3.5)
+  >>> f.blah("hello")
+
+'using' declarations can also be used to change access when applicable:
+
+  class Foo {
+  protected:
+      int x;
+      int blah(int x);
+  };
+
+  class Bar : public Foo {
+  public:
+      using Foo::x;       // Make x public
+      using Foo::blah;    // Make blah public
+  };
+
+this also works in swig.
+
+When 'using' is used in this way, declarations from the base classes are copied into the
+derived class and wrapped normally.  When copied, the declarations retain any properties
+that might have been attached using %rename, %ignore or %feature.  Thus, if a method is
+ignored in a base class, it will also be ignored by a 'using' declaration.
+
+Because 'using' does not provide fine-grained control over the declarations that get
+imported, it may be difficult to manage 'using' with heavy use of swig customization.  A
+solution could be:
+
+  class FooBar : public Foo, public Bar {
+  public:
+  #ifndef SWIG
+        using Foo::blah;  
+        using Bar::blah;
+  #else
+        int blah(int x);         // explicitly tell SWIG about other declarations
+        double blah(double x);
+  #endif
+
+        char *blah(const char *x);
+  };
+
+there are subtleties here with methods redefined in derived classes, and other ambiguity.
+See the manual.
+
+Nested classes
+
+There is some support for nested structs and unions when wrapping C code.
+The added C++ complexity means the C approach does not work well for C++ code.
+
+For C++, a nested class is treated much like an opaque pointer, so anything useful within
+the nested class, such as its methods and variables, are not accessible in the target
+language.
+
+True nested class support may be added in the future; until then there are some work arounds.
+See the manual.
+
+A brief rant about const-correctness
+
+swig does not make any attempt to preserve or model const-correctness across the target
+language boundary.  thus it is possible to pass const qualified objects to non-const
+methods and functions.  eg
+
+  const Object * foo();
+  void bar(Object *);
+
+  ...
+  // C++ code
+  void blah() {
+     bar(foo());         // Error: bar discards const
+  };
+
+when wrapped, the const-ness is not preserved:
+
+  >>> bar(foo())         # Okay
+
+while this is an issue, it isn't a big enough issue to be fixed in swig.
+
+swig and Java
+
+Swig and Java Table of Contents
+  Overview
+  Preliminaries
+    Running SWIG
+    Additional Commandline Options
+    Getting the right header files
+    Compiling a dynamic module
+    Using your module
+    Dynamic linking problems
+    Compilation problems and compiling with C++
+    Building on Windows
+      Running SWIG from Visual Studio
+      Using NMAKE
+  A tour of basic C/C++ wrapping
+    Modules, packages and generated Java classes
+    Functions
+    Global variables
+    Constants
+    Enumerations
+      Anonymous enums
+      Typesafe enums
+      Proper Java enums
+      Type unsafe enums
+      Simple enums
+    Pointers
+    Structures
+    C++ classes
+    C++ inheritance
+    Pointers, references, arrays and pass by value
+      Null pointers
+    C++ overloaded functions
+    C++ default arguments
+    C++ namespaces
+    C++ templates
+    C++ Smart Pointers
+  Further details on the generated Java classes
+    The intermediary JNI class
+      The intermediary JNI class pragmas
+    The Java module class
+      The Java module class pragmas
+    Java proxy classes
+      Memory management
+      Inheritance
+      Proxy classes and garbage collection
+      The premature garbage collection prevention parameter for proxy class marshalling
+      Single threaded applications and thread safety
+    Type wrapper classes
+    Enum classes
+      Typesafe enum classes
+      Proper Java enum classes
+      Type unsafe enum classes
+  Cross language polymorphism using directors
+    Enabling directors
+    Director classes
+    Overhead and code bloat
+    Simple directors example
+    Director threading issues
+  Accessing protected members
+  Common customization features
+    C/C++ helper functions
+    Class extension with %extend
+    Exception handling with %exception and %javaexception
+    Method access with %javamethodmodifiers
+  Tips and techniques
+    Input and output parameters using primitive pointers and references
+    Simple pointers
+    Wrapping C arrays with Java arrays
+    Unbounded C Arrays
+    Binary data vs Strings
+    Overriding new and delete to allocate from Java heap
+  Java typemaps
+    Default primitive type mappings
+    Default typemaps for non-primitive types
+    Sixty four bit JVMs
+    What is a typemap?
+    Typemaps for mapping C/C++ types to Java types
+    Java typemap attributes
+    Java special variables
+    Typemaps for both C and C++ compilation
+    Java code typemaps
+    Director specific typemaps
+  Typemap Examples
+    Simpler Java enums for enums without initializers
+    Handling C++ exception specifications as Java exceptions
+    NaN Exception - exception handling for a particular type
+    Converting Java String arrays to char **
+    Expanding a Java object to multiple arguments
+    Using typemaps to return arguments
+    Adding Java downcasts to polymorphic return types
+    Adding an equals method to the Java classes
+    Void pointers and a common Java base class
+    Struct pointer to pointer
+    Memory management when returning references to member variables
+    Memory management for objects passed to the C++ layer
+    Date marshalling using the javain typemap and associated attributes
+  Living with Java Directors
+  Odds and ends
+    JavaDoc comments
+    Functional interface without proxy classes
+    Using your own JNI functions
+    Performance concerns and hints
+    Debugging
+  Examples
+
+swig is useful to wrap large amounts of C++; probably not worth the effort for a few JNI calls.
+
+swig supports full cross language polymorphism and code is generated to call up from C++
+to Java when wrapping C++ virtual methods using the director feature.
+
+Java is one of the few non-scripting language modules offered by swig.  swig utilizes Java
+type safety, so it takes a different approach than is used by most scripting language
+modules.  In particular, run-time type checking and the run time library are not used by
+Java.
+
+Due to complexity, there are different ways C vs C++ code could be wrapped and called from
+Java.  swig is a powerful tool, and the rest of the chapter shows how to use that power.
+
+Running swig
+
+Given a module:
+
+  /* File: example.i */
+  %module test
+  %{
+  #include "stuff.h"
+  %}
+  int fact(int n);
+
+build it for C with:
+
+  %swig -java example.i
+
+or C++:
+
+  $ swig -c++ -java example.i
+
+this creates 2 files: a C/C++ source file example_wrap.[c,cxx] and numerous Java files.
+The generated C/C++ source contains the JNI wrapper code that must be compiled and linked.
+
+The name of the wrapper file is derived from the input filename.
+example.i => example_wrap.[c,cxx].
+Use -o to change this.
+There is also -outdir to name the output directory.
+
+The module name is give by %module, and determines the name of hte generated classes.
+NB the module name does not defined a java package, and by default, the generated java
+classes do not have a java package declaration.  Use -package if you want one.
+
+Additional commandline options
+
+swig -java -help
+shows java specific options at the end:
+
+  Java Options (available with -java)
+       -nopgcpp        - Suppress premature garbage collection prevention parameter
+       -noproxy        - Generate the low-level functional interface instead
+                         of proxy classes
+       -oldvarnames    - Old intermediary method names for variable wrappers
+       -package <name> - Set name of the Java package to <name>
+
+Getting the right header files
+
+the swig compiler needs jni.h, jni_md.h
+
+Compiling a dynamic module
+
+The JNI code exists in a dynamically loadable module or shared lib.
+The examples in dir: Examples/java may show how to build a dll on your platform.
+Also see the 'SWIG Wiki': http://www.dabeaz.com/cgi-bin/wiki.pl
+JNI compilation is also useful: 
+http://weblogs.java.net/blog/kellyohair/archive/2006/01/compilation_of.html
+
+NB.  if you build with optimizations turned on, also build with -fno-strict-aliasing.
+See 'C/C++ to Java typemaps' for more info
+http://www.swig.org/Doc2.0/Java.html#Java_typemaps_c_to_java_types
+
+The name of the shared lib output file is important.
+example.i => libexample.so
+
+Using your module
+
+To load your shared native library module in Java, simply use Java's System.loadLibrary:
+
+  // runme.java
+
+  public class runme {
+    static {
+      System.loadLibrary("example");
+    }
+
+    public static void main(String argv[]) {
+      System.out.println(example.fact(4));
+    }
+  }
+
+compile all the java files and run:
+
+  $ javac *.java
+  $ java runme
+  24
+
+  java -verbose:jni
+is a great way to get more info on unresolved symbols.
+
+A tour of basic C/C++ wrapping
+
+swig attempts to build a natural java interface to C/C++.
+Functions are wrapped as functions, classes as classes, variables are wrapped with JavaBean
+like getters and setters, etc.
+
+Modules, packages, and generated Java classes
+
+%module specifies the name of the java module.
+Given '%module example', the module name determines the name of some of the generated files
+in the module.  The generated code consists of:
+-- a module class file example.java
+-- an intermediary JNI class file exampleJNI.java
+-- numerous other java proxy class files
+Each proxy class is named after the structs, unions and classes being wrapped.
+There may also be a constants interface file if any unnamed enumerations or constants exist,
+perhaps named exampleConstants.java
+
+When choosing a module name, dont use the same name as one of the generated proxy class files,
+nor a java keyword.
+Sometimes a C/C++ type cannot be wrapped by a proxy class, eg, a pointer to a primitive type.
+A type wrapper class is generated instead.
+Wrapping an enum generates an enum class, either a proper Java enum, or a Java class that
+simulates enum patterns.
+
+Often the java classes are placed into a java package and an output directory:
+
+  swig -java -package com.bloggs.swig -outdir com/bloggs/swig example.i
+
+Functions
+
+There is no such thing as a global Java function, so global C functions are wrapped as 
+static methods of the module class.
+
+  %module example
+  int fact(int n);
+
+becomes
+
+  public class example {
+    public static int fact(int n) {
+      // makes call using JNI to the C function
+    }
+  }
+
+which can be called as:
+
+  System.out.println(example.fact(4));
+
+Global variables
+
+C/C++ globals are fully supported by swig.  Java does not allow the overriding of the dot
+operator so all variables are accessed through getters and setters.  Again, because there
+is no such concept as a Java global variable, access to C/C++ globals is done through
+static setter/getters of the module class.
+
+  // SWIG interface file with global variables
+  %module example
+  ...
+  %inline %{
+  extern int My_variable;
+  extern double density;
+  %}
+
+can be referenced as:
+
+  // Print out value of a C global variable
+  System.out.println("My_variable = " + example.getMy_variable());
+  // Set the value of a C global variable
+  example.setDensity(0.8442);
+
+NB the setters and getters produced follow the JavaBean property design pattern.
+The first letter of the variable name is capitalized, preceded by set/get.
+
+const variables only produce a getter.
+
+normal vars can be made read-only with %immutable
+
+  %{
+  extern char *path;
+  %}
+  %immutable;
+  extern char *path;
+  %mutable;
+
+can also be written:
+
+  %{
+  extern char *path;
+  %}
+  %immutable path;
+  ...
+  extern char *path;      // Read-only (due to %immutable)
+
+Constants
+
+C/C++ constants are wrapped as Java static final variables.
+To create a constant, use #define or %constant:
+
+  #define PI 3.14159
+  #define VERSION "1.0"
+  %constant int FOO = 42;
+  %constant const char *path = "/usr/local";
+
+By default, the static final variables are initialized with a JNI call.
+Constants are generated into the constants interface and look like this:
+
+  public interface exampleConstants {
+    public final static double PI = exampleJNI.PI_get();
+    public final static String VERSION = exampleJNI.VERSION_get();
+    public final static int FOO = exampleJNI.FOO_get();
+    public final static String path = exampleJNI.path_get();
+  }
+
+by default the generated constants are runtime constants, not compile time constants.
+this can be changed with %javaconst:
+
+  %javaconst(1);
+  %javaconst(0) BIG;
+  %javaconst(0) LARGE;
+
+  #define EXPRESSION (0x100+5)
+  #define BIG 1000LL
+  #define LARGE 2000ULL
+
+generates:
+
+  public interface exampleConstants {
+    public final static int EXPRESSION = (0x100+5);
+    public final static long BIG = exampleJNI.BIG_get();
+    public final static java.math.BigInteger LARGE = exampleJNI.LARGE_get();
+  }
+
+NB swig has inferred the appropriate C long long type from BIG; similiarly for LARGE.
+
+Be careful using %javaconst(1) as not all C code will compile into java, cf BIG 1000LL.
+For this reason, the default is %javaconst(0).
+However, %javaconst(1) is strongly recommended.
+
+The alternative %javaconstvalue can be used where the C wont compile as java:
+
+  %javaconst(1);
+  %javaconstvalue("new java.math.BigInteger(\"2000\")") LARGE;
+  %javaconstvalue(1000) BIG;
+
+  #define EXPRESSION (0x100+5)
+  #define BIG 1000LL
+  #define LARGE 2000ULL
+
+NB string quotes escaped for "2000".  This gives:
+
+  public interface exampleConstants {
+    public final static int EXPRESSION = (0x100+5);
+    public final static long BIG = 1000;
+    public final static java.math.BigInteger LARGE = new java.math.BigInteger("2000");
+  }
+
+Declarations declared as const are wrapped as read-only variables, and accessed with a
+getter; not as constants.  The exception to this rule are static const integral values
+defined within a class/struct, where they are wrapped as constants:
+
+  struct Maths {
+    static const int FIVE = 5;
+  };
+
+Enumerations
+
+Anonymous enums are handled like constants:
+
+  enum { ALE, LAGER=10, STOUT, PILSNER, PILZ=PILSNER };
+
+gets wrapped into:
+
+  public interface exampleConstants {
+    public final static int ALE = exampleJNI.ALE_get();
+    public final static int LAGER = exampleJNI.LAGER_get();
+    public final static int STOUT = exampleJNI.STOUT_get();
+    public final static int PILSNER = exampleJNI.PILSNER_get();
+    public final static int PILZ = exampleJNI.PILZ_get();
+  }
+
+%javaconst(0 / 1) have the usual effect here as well.
+
+Typesafe enums
+This is the default approach.
+It is known to work around the lack of enums prior to jdk 1.5.
+
+Proper java enums
+
+Introduced in jdk 1.5, proper java enums are the preferred solution.
+Each C/C++ enum is wrapped by a Java enum.
+Java enums, by default, do not support enums with initializers.
+
+Java enums are in many respects similiar to java classes in that they can be customized
+with additional methods.  swig uses this feature.
+
+In order to wrap all possbile C/C++ enums with proper java enums, the "enums.swg" file
+must be used:
+
+  %include "enums.swg"
+  %javaconst(1);
+  enum Beverage { ALE, LAGER=10, STOUT, PILSNER, PILZ=PILSNER };
+
+will generate:
+
+  public enum Beverage {
+    ALE,
+    LAGER(10),
+    STOUT,
+    PILSNER,
+    PILZ(PILSNER);
+    [... additional support methods omitted for brevity ...]
+  }
+
+javaconst(1) here is the preferred style, as in the constants section.
+
+There are other enum styles as well that may be suitable:
+
+type unsafe enums
+simple enums
+
+
+Pointers
+
+eg
+
+  %module example
+
+  FILE *fopen(const char *filename, const char *mode);
+  int fputs(const char *, FILE *);
+  int fclose(FILE *);
+
+could be used like this:
+
+  SWIGTYPE_p_FILE f = example.fopen("junk","w");
+  example.fputs("Hello World\n", f);
+  example.fclose(f);
+
+C/C++ pointers are fully supported by swig.  C pointers in the java module are stored in a
+java long, and cross the JNI boundary held within this 64 bit number.  Many other language
+modules use an encoding of the pointer in a string.  These scripting languages use the
+swig runtime type checker as they are dynamically typed.  In order to implement static
+type checking of pointers within java, they are wrapped by a simple java class.  In the
+above example, the FILE * pointer is wrapped with a 'type wrapper class' called
+SWIGTYPE_p_FILE.
+
+The type wrapper object can be passed around to all C functions expecting a FILE *.
+However, you cannot dereference the pointer from java.
+
+You cannot modify a pointer value from java.  the type wrapper class may not be the actual
+memory address.  By design it is not possible to manually cast a pointer to a new type
+using java casts.  Use helper functions instead of casts:
+
+  %inline %{
+  /* C-style cast */
+  Bar *FooToBar(Foo *f) {
+     return (Bar *) f;
+  }
+
+  /* C++-style cast */
+  Foo *BarToFoo(Bar *b) {
+     return dynamic_cast<Foo*>(b);
+  }
+
+  Foo *IncrFoo(Foo *f, int i) {
+      return f+i;
+  }
+  %}
+
+Also, when working with C++, use the new C++ style casts.
+The C++ casts will return NULL if the conversion cannot be performed.
+
+Structures
+
+C structures are wrapped by a java class with getters and setters.
+
+Eg
+
+  struct Vector {
+      double x,y,z;
+  };
+
+is used as follows:
+
+  Vector v = new Vector();
+  v.setX(3.5);
+  v.setY(7.2);
+  double x = v.getX();
+  double y = v.getY();
+
+NB the names of the accessors are modelled after JavaBean design pattern.
+Similiar access is provided for unions and the public data members of C++ classes.
+
+This object is actually an instance of a java class that has been wrapped around a pointer
+to the C structure.  This instance doesn't do anything -- it is just a proxy.  The address
+of the C structure is held in the java proxy class in much the same way as pointers are
+held by type wrapper classes.
+
+const members of a struct are read-only.  data members can also be forced read-only via
+%immutable:
+
+  struct Foo {
+     ...
+     %immutable;
+     int x;        /* Read-only members */
+     char *name;
+     %mutable;
+     ...
+  };
+
+When char * members of a structure are wrapped, the contents are assumed to be dynamically
+allocated using malloc or new.  When the structure member is set, the old contents will be
+released and a new value stored.  If the default doesn't work, then use a typemap.
+
+If a structure contains arrays, access to those arrays is managed through pointers.  Eg
+
+  struct Bar {
+      int  x[16];
+  };
+
+access in java something like this:
+
+  Bar b = new Bar();
+  SWIGTYPE_p_int x = b.getX();
+
+this pointer can be passed around to functions that expect to receive an int *, just like
+C.  You can also set the value of an array member using another pointer:
+
+  Bar b = new Bar();
+  SWIGTYPE_p_int x = b.getX();
+  Bar c = new Bar();
+  c.setX(x);                    // Copy contents of b.x to c.x
+
+For array assignment (setters, not getters) swig copies the entire contents of the array
+starting with the data pointer to by b.x.  Eg, 16 integers would be copied.  Like C, swig
+makes no assumptions about bounds checking -- caveat programmer.  The default wrapping
+make it hard to set or get just one element of the array; thus array access from Java is
+somewhat limited.  However, this is easily changed with 'Wrapping C arrays with Java
+arrays' and 'Unbounded C Arrays'.
+
+When a structure member is again a structure, it is handled like a pointer:
+
+  struct Foo {
+     int a;
+  };
+
+  struct Bar {
+     Foo f;
+  };
+
+Now suppose we have:
+
+  Bar b = new Bar();
+  Foo x = b.getF();
+
+then x is a pointer that points into the Foo inside b.
+This is the same value as generated by this C code:
+
+  Bar b;
+  Foo *x = &b->f;       /* Points inside b */
+
+because the pointer points inside the structure, you can modify its contents:
+
+  Bar b = new Bar();
+  b.getF().setA(3);   // Modify b.f.a
+  Foo x = b.getF();                   
+  x.setA(3);          // Modify x.a - this is the same as b.f.a
+
+C++ classes
+
+C++ classes are wrapped by java classes as well:
+
+  class List {
+  public:
+    List();
+    ~List();
+    int  search(char *item);
+    void insert(char *item);
+    void remove(char *item);
+    char *get(int n);
+    int  length;
+  };
+
+you can use it in Java like this:
+
+  List l = new List();
+  l.insert("Ale");
+  l.insert("Stout");
+  l.insert("Lager");
+  String item = l.get(2);
+  int length = l.getLength();
+
+Class data members are accessed just like C structures.
+Static class members are wrapped as static members of the java class:
+
+  class Spam {
+  public:
+     static void foo();
+     static int bar;
+  };
+
+The static members work like any other Java static member:
+
+  Spam.foo();
+  int bar = Spam.getBar();
+
+C++ inheritance
+
+swig is fully aware of C++ inheritance and its issues.  thus:
+
+  class Foo {
+  ...
+  };
+
+  class Bar : public Foo {
+  ...
+  };
+
+these classes are wrapped into a hierarchy of Java classes that reflect the same inheritance:
+
+  Bar b = new Bar();
+  Class c = b.getClass();
+  System.out.println(c.getSuperclass().getName());
+
+produces:
+
+  Foo
+
+further:
+
+  void spam(Foo *f);
+
+then the java function spam() accepts instances of Foo, or any other proxy class derived
+from Foo
+
+NB Java does not support multiple inheritance, so no C++ multiple inheritance code can be
+wrapped.  A warning is issued, and only the first base class is used.
+
+Pointers, references, arrays and pass by value
+
+In C++, there are many different ways a function might receive and manipulate objects:
+
+  void spam1(Foo *x);      // Pass by pointer
+  void spam2(Foo &x);      // Pass by reference
+  void spam3(Foo x);       // Pass by value
+  void spam4(Foo x[]);     // Array of objects
+
+In java there is no analogous detailed distinction -- there are only instances of classes.
+There are no pointers nor references.  Thus, swig unifies all of these types together in
+the wrapper code.  Ie, swig would allow in java:
+
+  Foo f = new Foo();  // Create a Foo
+  example.spam1(f);   // Ok. Pointer
+  example.spam2(f);   // Ok. Reference
+  example.spam3(f);   // Ok. Value.
+  example.spam4(f);   // Ok. Array (1 element)
+
+Similiar behavior occurs for return values:
+
+  Foo *spam5();
+  Foo &spam6();
+  Foo  spam7();
+
+then all 3 functions will return a pointer to some Foo object.
+Since spam7 returns a value, newly allocated memory is used to hold the result,
+and a pointer is returned.  
+(java will release this memory when the returned object's finalizer is run by the GC)
+
+Null pointers
+
+Working with null pointers is easy.  A java null can be used whenever a method expects a
+proxy class or a typewrapper class.  However, it is not possible to pass null to C/C++
+functions that take parameters by reference or by value; a NullPointerException occurs.
+
+  example.spam1(null);   // Pointer - ok
+  example.spam2(null);   // Reference - NullPointerException
+  example.spam3(null);   // Value - NullPointerException
+  example.spam4(null);   // Array - ok
+
+For spam1 and 4, the java null gets translated to a null pointer.  The converse also
+occurs, ie, null pointers are translated into java null objects when returned from a C/C++
+function.
+
+Overloaded functions
+
+C++ overloaded functions, methods and ctors are mostly supported by swig:
+
+  %module example
+
+  void foo(int);
+  void foo(char *c);
+
+You can use them in Java in a straightforward manner:
+
+  example.foo(3);           // foo(int)
+  example.foo("Hello");     // foo(char *c)
+
+Similiarly for classes:
+
+  class Foo {
+  public:
+      Foo();
+      Foo(const Foo &);
+      ...
+  };
+
+you can write Java code like this:
+
+  Foo f = new Foo();        // Create a Foo
+  Foo g = new Foo(f);       // Copy f
+
+swig cannot disambiguate when the C/C++ types map onto a single java type:
+
+  void spam(int);
+  void spam(unsigned short);
+
+Here both int and unsigned short map onto a Java int. Here is another example:
+
+  void foo(Bar *b);
+  void foo(Bar &b);
+
+A warning will appear:
+
+  example.i:12: Warning 515: Overloaded method spam(unsigned short) ignored.
+  Method spam(int) at example.i:11 used.
+
+to fix this, either rename or ignore one of the methods.
+
+C++ default arguments
+
+Any function with a default argument is wrapped by generating an additional function
+for each argument that is defaulted:
+
+  %module example
+
+  void defaults(double d=10.0, int i=0);
+
+The following methods are generated in the Java module class:
+
+  public class example {
+    public static void defaults(double d, int i) { ... }
+    public static void defaults(double d) { ... }
+    public static void defaults() { ... }
+  }
+
+the same approach is taken for static methods, ctors and member methods.
+
+C++ namespaces
+
+swig flattens C++ namespaces, so nested namespaces don't work so well.
+The idiom for more than one namespace is to wrap them separately, placing each in the
+desired package.
+
+The default behavior can be improved upon by %nspace.
+NB it only works for classes, structs, unions and enums declared within a named C++ namespace.
+Under %nspace, the C++ namespaces are converted to java packages of the same name.
+Proxy classes are thus declared within a package; this proxy makes numerous calls to the JNI
+intermediary class, which is declared in the unnamed package by default.
+As java does not support types declared in a pakcage accessing types declared in an
+unnamed package, the -package command line option must be used to provide a parent package.
+Eg, run swig with -package com.myco over a wrapped class MyWorld::Material::Color.
+then access via com.myco.MyWorld.Material.Color.
+If no package is specified an error results:
+
+  example.i:16: Error: The nspace feature used on 'MyWorld::Material::Color' is not
+  supported unless a package is specified with -package - Java does not support types
+  declared in a named package accessing types declared in an unnamed package.
+
+C++ templates
+
+C++ templates are not a big problem.  However, you must create wrapper on an instantiation
+of a template.  Do this with %template:
+
+  %module example
+  %{
+  #include <utility>
+  %}
+
+  template<class T1, class T2>
+  struct pair {
+     typedef T1 first_type;
+     typedef T2 second_type;
+     T1 first;
+     T2 second;
+     pair();
+     pair(const T1&, const T2&);
+    ~pair();
+  };
+
+  %template(pairii) pair<int,int>;
+
+then in java:
+
+  pairii p = new pairii(3,4);
+  int first = p.getFirst();
+  int second = p.getSecond();
+
+C++ smart pointers
+
+To wrap smart pointer classes, which overload operator->(), do something like this:
+
+  template<class T> class SmartPtr {
+     ...
+     T *operator->();
+     ...
+  }
+
+  class Foo {
+  public:
+       int x;
+       int bar();
+  };
+
+C++ usage:
+
+  SmartPtr<Foo> p = CreateFoo();   // Created somehow (not shown)
+  ...
+  p->x = 3;                        // Foo::x
+  int y = p->bar();                // Foo::bar
+
+To wrap these in java, tell swig about the SmartPtr class and the low-level Foo object.
+Instantiate SmartPtr using %template:
+
+  %module example
+  ...
+  %template(SmartPtrFoo) SmartPtr<Foo>;
+  ...
+
+Now, in Java, everything should just "work":
+
+  SmartPtrFoo p = example.CreateFoo(); // Create a smart-pointer somehow
+  p.setX(3);                           // Foo::x
+  int y = p.bar();                     // Foo::bar
+
+If you ever need to access the underlying pointer returned by operator->() itself, simply
+use the __deref__() method. For example:
+
+  Foo f = p.__deref__();               // Returns underlying Foo *
+
+Further details on the generated java classes
+
+A java proxy class is generated for each structure, union, or C++ class that is wrapped.
+
+The intermediary JNI class
+
+This model class:
+
+  class Foo {
+  public:
+       int x;
+       int spam(int num, Foo* foo);
+  };
+  void egg(Foo* chips);
+
+will generate this form of JNI calls:
+
+  SWIGEXPORT jlong JNICALL Java_exampleJNI_new_1Foo(JNIEnv *jenv, jclass jcls);
+  SWIGEXPORT void JNICALL Java_exampleJNI_delete_1Foo(JNIEnv *jenv, jclass jcls,
+                                                      jlong jarg1);
+  SWIGEXPORT void JNICALL Java_exampleJNI_Foo_1x_1set(JNIEnv *jenv, jclass jcls,
+                                                      jlong jarg1, jobject jarg1_, jint jarg2);
+  SWIGEXPORT jint JNICALL Java_exampleJNI_Foo_1x_1get(JNIEnv *jenv, jclass jcls,
+                                                      jlong jarg1, jobject jarg1_);
+  SWIGEXPORT jint JNICALL Java_exampleJNI_Foo_1spam(JNIEnv *jenv, jclass jcls,
+                                                    jlong jarg1, jobject jarg1_, jint jarg2,
+                                                    jlong jarg3, jobject jarg3_);
+  SWIGEXPORT void JNICALL Java_exampleJNI_egg(JNIEnv *jenv, jclass jcls,
+                                              jlong jarg1, jobject jarg1_);
+
+which are wrapped in a java class in the 'intermediary JNI class':
+
+  class exampleJNI {
+    public final static native long new_Foo();
+    public final static native void delete_Foo(long jarg1);
+    public final static native void Foo_x_set(long jarg1, Foo jarg1_, int jarg2);
+    public final static native int Foo_x_get(long jarg1, Foo jarg1_);
+    public final static native int Foo_spam(long jarg1, Foo jarg1_, int jarg2,
+                                            long jarg3, Foo jarg3_);
+    public final static native void egg(long jarg1, Foo jarg1_);
+  }
+
+The intermediary class contains the complete C/C++ - Java interface, so all function calls
+are made via this class, from java proxy classes, type wrapper classes and the module
+class.
+
+JNI pragmas
+
+The jniclasscode pragma is quite useful for adding in a static block for loading the
+shared library / dynamic link library and demonstrates how pragmas work:
+
+  %pragma(java) jniclasscode=%{
+    static {
+      try {
+          System.loadLibrary("example");
+      } catch (UnsatisfiedLinkError e) {
+        System.err.println("Native code library failed to load. \n" + e);
+        System.exit(1);
+      }
+    }
+  %}
+
+The java module class
+
+All global functions and variable setter/getters are stored in the module class.
+In our sample, there is only 1 function:
+
+  public class example {
+    public static void egg(Foo chips) {
+      exampleJNI.egg(Foo.getCPtr(chips), chips);
+    }
+  }
+
+The interface between the module class and the intermediary class means we can insert
+static type checking: example::egg will only take type Foo; while exampleJNI::egg takes
+any long.
+
+Java proxy classes
+
+A java proxy class is generated for each structure, union or C++ class that is wrapped.
+Continuing our example:
+
+  public class Foo {
+    private long swigCPtr;
+    protected boolean swigCMemOwn;
+
+    protected Foo(long cPtr, boolean cMemoryOwn) {
+      swigCMemOwn = cMemoryOwn;
+      swigCPtr = cPtr;
+    }
+
+    public static long getCPtr(Foo obj) {
+      return (obj == null) ? 0 : obj.swigCPtr;
+    }
+
+    protected void finalize() {
+      delete();
+    }
+
+    public synchronized void delete() {
+      if(swigCPtr != 0 && swigCMemOwn) {
+        swigCMemOwn = false;
+        exampleJNI.delete_Foo(swigCPtr);
+      }
+      swigCPtr = 0;
+    }
+
+    public void setX(int value) {
+      exampleJNI.Foo_x_set(swigCPtr, this, value);
+    }
+
+    public int getX() {
+      return exampleJNI.Foo_x_get(swigCPtr, this);
+    }
+
+    public int spam(int num, Foo foo) {
+      return exampleJNI.Foo_spam(swigCPtr, this, num, Foo.getCPtr(foo), foo);
+    }
+
+    public Foo() {
+      this(exampleJNI.new_Foo(), true);
+    }
+  }
+
+This class holds a pointer to the underlying C++ object, and a flag to indicate if it owns
+the object.  A setters/getters for public member variables.  These functions call the
+intermediary JNI class.  The advantage here of this extra layer is the type safety the
+proxy class functions provide.  This gets us static type checking.  Eg the spam() function
+will only compile when its parameters are int and Foo.  Thus the interface user can write:
+
+  Foo f = new Foo();
+  f.setX(3);
+  int y = f.spam(5, new Foo());
+
+Memory management
+
+Each proxy class has the ownership flag swigCMemOwn.  If true, the proxy class's finalizer
+will destroy the C++ object when the proxy class is garbage collected.
+
+When an object is created by constructor or by value, java will take ownership of the
+result via this mechanism.  OTOH, when pointers or references are returned to java, there
+is often no way to know what their lifecycle should be, so swigCMemOwn is set to false:
+
+  class Foo {
+  public:
+      Foo();
+      Foo bar1();
+      Foo &bar2();
+      Foo *bar2();
+  };
+
+gives:
+
+  Foo f = new Foo();   //  f.swigCMemOwn = true
+  Foo f1 = f.bar1();   // f1.swigCMemOwn = true
+  Foo f2 = f.bar2();   // f2.swigCMemOwn = false
+  Foo f3 = f.bar3();   // f3.swigCMemOwn = false
+
+This behavior for pointers and references is especially important for classes that act as
+containers.  Eg, if a method returns a pointer to an object that is contained inside
+another object, we do not want java to take control and destroy it.
+
+Mostly, memory management issues remain hidden.  However, some code requires manual
+intervention:
+
+  class Obj {};
+  class Node {
+     Obj *value;
+  public:
+     void set_value(Obj *v) { value = v; }
+  };
+
+Now, consider the following Java code:
+
+  Node n = new Node();    // Create a node
+  {
+    Obj o = new Obj();    // Create an object
+    n.set_value(o);       // Set value
+  }                       // o goes out of scope
+
+Here Node n has a pointer to o; however, o could be destroyed when it goes out of scope.
+Then n will be holding a stale pointer to o.  To work around this case, the ownership flag
+of o needs to be false.  The ownership flag is private to the proxy class, so this is not
+possible without some customization of the proxy class.  The usual approach is to use a
+typemap to customize the proxy class with pure java code, described later in typemaps.
+
+Sometimes functions allocate memory and return a pointer to it.  swig has no way of
+knowing this, so by default the proxy class does not manage the returned memory.  You can
+tell the proxy clas to manage the memory with the %newobject directive:
+
+  class Obj {...};
+  class Factory {
+  public:
+      static Obj *createObj() { return new Obj(); }
+  };
+
+If we call the factory function, then we have to manually delete the memory:
+
+  Obj obj = Factory.createObj();   // obj.swigCMemOwn = false
+  ...
+  obj.delete();
+
+Now add in the %newobject directive:
+
+  %newobject Factory::createObj();
+
+  class Obj {...};
+  class Factory {
+  public:
+      static Obj *createObj() { return new Obj(); }
+  };
+
+A call to delete() is no longer necessary as the garbage collector will make the C++
+destructor call because swigCMemOwn is now true.
+
+  Obj obj = Factory.createObj();   // obj.swigCMemOwn = true;
+
+Inheritance
+
+the java proxy classes will mirror the C++ inheritance chain:
+
+  class Base {
+  public:
+    virtual double foo();
+  };
+
+  class Derived : public Base {
+  public:
+    virtual double foo();
+  };
+
+The base class follows the pattern:
+
+  public class Base {
+    private long swigCPtr;
+    protected boolean swigCMemOwn;
+
+    protected Base(long cPtr, boolean cMemoryOwn) {
+      swigCMemOwn = cMemoryOwn;
+      swigCPtr = cPtr;
+    }
+
+    public static long getCPtr(Base obj) {
+      return (obj == null) ? 0 : obj.swigCPtr;
+    }
+
+    protected void finalize() {
+      delete();
+    }
+
+    public synchronized void delete() {
+      if(swigCPtr != 0 && swigCMemOwn) {
+        swigCMemOwn = false;
+        exampleJNI.delete_Base(swigCPtr);
+      }
+      swigCPtr = 0;
+    }
+
+    public double foo() {
+      return exampleJNI.Base_foo(swigCPtr, this);
+    }
+
+    public Base() {
+      this(exampleJNI.new_Base(), true);
+    }
+
+  }
+
+class Derived extends Base mirroring the C++ side:
+
+  public class Derived extends Base {
+    private long swigCPtr;
+
+    protected Derived(long cPtr, boolean cMemoryOwn) {
+      super(exampleJNI.SWIGDerivedUpcast(cPtr), cMemoryOwn);
+      swigCPtr = cPtr;
+    }
+
+    public static long getCPtr(Derived obj) {
+      return (obj == null) ? 0 : obj.swigCPtr;
+    }
+
+    protected void finalize() {
+      delete();
+    }
+
+    public synchronized void delete() {
+      if(swigCPtr != 0 && swigCMemOwn) {
+        swigCMemOwn = false;
+        exampleJNI.delete_Derived(swigCPtr);
+      }
+      swigCPtr = 0;
+      super.delete();
+    }
+
+    public double foo() {
+      return exampleJNI.Derived_foo(swigCPtr, this);
+    }
+
+    public Derived() {
+      this(exampleJNI.new_Derived(), true);
+    }
+
+NB that memory ownership of the derived class is controlled by the base class.
+However, each class in the instance hierarchy has its own pointer obtained during construction.
+SWIGDerivedUpcast() converts the pointer from Derived * to Base *.
+
+It is of course possible to extend Base with your own java class.
+If Derived is provided by the C++ code line, you could eg add in a pure java class 'Extended'
+derived from Base.  The caveat is that any C++ code will not know about the pure java class.
+Directors overcome this restriction.
+
+Proxy classes and GC
+
+Type wrapper classes
+
+Here is what is generated for eg, an int *:
+
+  public class SWIGTYPE_p_int {
+    private long swigCPtr;
+
+    protected SWIGTYPE_p_int(long cPtr, boolean bFutureUse) {
+      swigCPtr = cPtr;
+    }
+
+    protected SWIGTYPE_p_int() {
+      swigCPtr = 0;
+    }
+
+    protected static long getCPtr(SWIGTYPE_p_int obj) {
+      return obj.swigCPtr;
+    }
+  }
+
+typedefs are tracked by swig, and the typedef name is used to construct the type wrapper class name.
+
+  typedef int Snazzy;
+  void spam(Snazzy *x, Snazzy &y, Snazzy z);
+
+Because the typedefs have been tracked the Java function generated is:
+
+  public static void spam(SWIGTYPE_p_int x, SWIGTYPE_p_int y, int z) { ... }
+
+Enum classes
+
+We want proper java enums, not typesafe enum classes, not type unsafe enum classes.
+
+Proper java enum classes
+
+  %include "enums.swg"
+  %javaconst(1);
+  enum Beverage { ALE, LAGER=10, STOUT, PILSNER, PILZ=PILSNER };
+
+generates:
+
+  public enum Beverage {
+    ALE,
+    LAGER(10),
+    STOUT,
+    PILSNER,
+    PILZ(PILSNER);
+
+    public final int swigValue() {
+      return swigValue;
+    }
+
+    public static Beverage swigToEnum(int swigValue) {
+      Beverage[] swigValues = Beverage.class.getEnumConstants();
+      if (swigValue < swigValues.length && swigValue >= 0 &&
+          swigValues[swigValue].swigValue == swigValue)
+        return swigValues[swigValue];
+      for (Beverage swigEnum : swigValues)
+        if (swigEnum.swigValue == swigValue)
+          return swigEnum;
+      throw new IllegalArgumentException("No enum " + Beverage.class +
+                                         " with value " + swigValue);
+    }
+
+    private Beverage() {
+      this.swigValue = SwigNext.next++;
+    }
+
+    private Beverage(int swigValue) {
+      this.swigValue = swigValue;
+      SwigNext.next = swigValue+1;
+    }
+
+    private Beverage(Beverage swigEnum) {
+      this.swigValue = swigEnum.swigValue;
+      SwigNext.next = this.swigValue+1;
+    }
+
+    private final int swigValue;
+
+    private static class SwigNext {
+      private static int next = 0;
+    }
+  }
+
+    The enum items appear first. Like the typesafe enum pattern, the constructors are
+    private. The constructors are required to handle C/C++ enums with initializers. The
+    next variable is in the SwigNext inner class rather than in the enum class as static
+    primitive variables cannot be modified from within enum constructors. Marshalling
+    between Java enums and the C/C++ enum integer value is handled via the swigToEnum and
+    swigValue methods. All the constructors and methods in the Java enum are required just
+    to handle C/C++ enums with initializers. These needn't be generated if the enum being
+    wrapped does not have any initializers and the Simpler Java enums for enums without
+    initializers section describes how typemaps can be used to achieve this.
+
+Directors
+
+used to provide full symmetry between java and C++ code, so methods can be transparently
+implemented in java or C++.
+
+Common Customization Features
+
+C/C++ helper functions
+
+write C/C++ code with %inline to build helper functions that make the interface more usable.
+
+Class extension with %extend
+
+  %module example
+  %{
+  #include "someheader.h"
+  %}
+
+  struct Vector {
+     double x,y,z;
+  };
+
+  %extend Vector {
+     char *toString() {
+         static char tmp[1024];
+         sprintf(tmp,"Vector(%g,%g,%g)", $self->x,$self->y,$self->z);
+         return tmp;
+     }
+     Vector(double x, double y, double z) {
+         Vector *v = (Vector *) malloc(sizeof(Vector));
+         v->x = x;
+         v->y = y;
+         v->z = z;
+         return v;
+     }
+  };
+
+Now, in Java
+
+  Vector v = new Vector(2,3,4);
+  System.out.println(v);
+
+    %extend works with both C and C++ code. It does not modify the underlying object in
+    any way---the extensions only show up in the Java interface.
+
+Exception handling with %exception and %javaexception
+
+If C/C++ code throws an exception, you may want to convert that error to a java exception.
+Use %exception for that.
+
+%exception rewrites the generated exception code so you can do more useful things in it.
+
+You can produce more meaningful errors, from malloc failures, from out of range exceptions ...
+  http://www.swig.org/Doc2.0/Java.html#Java_exception_handling
+
+  %exception getitem {
+    try {
+       $action
+    } catch (std::out_of_range &e) {
+      jclass clazz = jenv->FindClass("java/lang/Exception");
+      jenv->ThrowNew(clazz, "Range error");
+      return $null;
+     }
+  }
+
+  class FooClass {
+  public:
+       FooClass *getitem(int index);      // Might throw std::out_of_range exception
+       ...
+  };
+
+here getitem's out of range error is specially handled.
+
+To declare the java exceptions that getitem throws, use %javaexception(classes) in place
+of %exception.  classes is a comma separated list of java class names.
+There is also %clearjavaexceptiona and %nojavaexception.
+
+  %javaexception("java.lang.Exception") getitem {
+
+now the generated proxy method is:
+
+  public class FooClass {
+    ...
+    public FooClass getitem(int index) throws java.lang.Exception { ... }
+    ...
+  }
+
+The exception.i library file can also be used to raise exceptions.
+See 'SWIG Library': http://www.swig.org/Doc2.0/Library.html#Library
+See also: Handling C++ exception specifications as Java exceptions:
+  http://www.swig.org/Doc2.0/Java.html#Java_exception_typemap
+
+Method access with %javamethodmodifiers
+
+The visibility of class methods can be change from public with %javamethodmodifiers.
+
+Tips and techniques
+
+use typemaps.i for primitive type parameters passed by reference or pointers:
+IN, OUT, INOUT parameters
+
+  %module example
+  %include "typemaps.i"
+
+  void add(int, int, int *OUTPUT);
+  int  sub(int *INPUT, int *INPUT);
+
+In Java, this allows you to pass simple values. For example:
+
+  int result = example.sub(7,4);
+  System.out.println("7 - 4 = " + result);
+  int[] sum = {0};
+  example.add(3,4,sum);
+  System.out.println("3 + 4 = " + sum[0]);
+
+The OUTPUT parametes is stored in the first elt of the array.
+You can change the INPUT/OUTPUT names with %apply.
+
+Simple pointers
+
+An alternative to typemaps.i for pointers to primitive datatypes like int *, double *
+is the cpointer.i library file:
+
+  %module example
+  %include "cpointer.i"
+
+  %inline %{
+  extern void add(int x, int y, int *result);
+  %}
+
+  %pointer_functions(int, intp);
+
+The %pointer_functions(type,name) macro generates five helper functions that can be used
+to create, destroy, copy, assign, and dereference a pointer:
+
+  int  *new_intp();
+  int  *copy_intp(int *x);
+  void  delete_intp(int *x);
+  void  intp_assign(int *x, int value);
+  int   intp_value(int *x);
+
+which could be used:
+
+  SWIGTYPE_p_int intPtr = example.new_intp();
+  example.add(3,4,intPtr);
+  int result = example.intp_value(intPtr);
+  System.out.println("3 + 4 = " + result;)
+
+or with %pointer_class(int,intp):
+
+  intp intPtr = new intp();
+  example.add(3,4,intPtr.cast());
+  int result = intPtr.value();
+  System.out.println("3 + 4 = " + result);
+
+See also 'SWIG Library':  http://www.swig.org/Doc2.0/Library.html#Library
+
+Wrapping C arrays with Java arrays
+
+arrays_java.i gives a more natural mapping between C and Java arrays
+
+  %include "arrays_java.i";
+  int array[4];
+  void populate(int x[]) {
+      int i;
+      for (i=0; i<4; i++)
+          x[i] = 100 + i;
+  }
+
+These one dimensional arrays can then be used as if they were Java arrays:
+
+  int[] array = new int[4];
+  example.populate(array);
+
+  System.out.print("array: ");
+  for (int i=0; i<array.length; i++)
+      System.out.print(array[i] + " ");
+
+  example.setArray(array);
+
+  int[] global_array = example.getArray();
+
+  System.out.print("\nglobal_array: ");
+  for (int i=0; i<array.length; i++)
+      System.out.print(global_array[i] + " ");
+
+java arrays are always passed by reference.
+
+however, this approach copies the contents of the array from java to C space
+whenever the the array is passed either way across the JNI boundary.`
+Unbounded C arrays do not have this behavior.
+
+Unbounded C Arrays
+
+Consider when a C function expects an array to be passed as a pointer:
+
+  int sumitems(int *first, int nitems) {
+      int i, sum = 0;
+      for (i = 0; i < nitems; i++) {
+          sum += first[i];
+      }
+      return sum;
+  }
+
+One way to map this is via arrays_java.i:
+
+  %include "arrays_java.i"
+  %apply int[] {int *};
+
+however, this approach suffers the array copying issue.
+
+Another approach is the swig library file carrays.i
+It is more efficient for large arrays as each element is accessed individually:
+
+  %include "carrays.i"
+  %array_functions(int, intArray);
+
+The %array_functions(type,name) macro generates four helper functions that can be used to
+create and destroy arrays and operate on elements:
+
+  int *new_intArray(int nelements);
+  void delete_intArray(int *x);
+  int intArray_getitem(int *x, int index);
+  void intArray_setitem(int *x, int index, int value);
+
+If you replace %array_functions(int,intp) by %array_class(int,intp), the interface is more
+class-like and a couple more helper functions are available for casting between the array
+and the type wrapper class.
+
+  %include "carrays.i"
+  %array_class(int, intArray);
+
+The %array_class(type, name) macro creates wrappers for an unbounded array object that can
+be passed around as a simple pointer like int * or double *. For instance, you will be
+able to do this in Java:
+
+  intArray array = new intArray(10000000);  // Array of 10-million integers
+  for (int i=0; i<10000; i++) {             // Set some values
+      array.setitem(i,i);
+  }
+  int sum = example.sumitems(array.cast(),10000);
+  System.out.println("Sum = " + sum);
+
+The array "object" created by %array_class() does not encapsulate pointers.
+In fact, there is no bounds checking, nor anything else.  Just like C.
+These are very low-level arrays -- you cannot iterate over them nor query their length.
+Any valid memory address can be used.
+This approach is extremely efficient and well suited to create buffers, package binary data ...
+
+Binary data vs Strings
+
+By default, swig handles char * as a C string, but there are options:
+Passing binary data: http://www.swig.org/Doc2.0/Library.html#Library_nn10
+
+Here is an example using a byte array:
+
+  %apply (char *STRING, size_t LENGTH) { (const char data[], size_t len) }
+  %inline %{
+  void binaryChar1(const char data[], size_t len) {
+    printf("len: %d data: ", len);
+    for (size_t i=0; i<len; ++i)
+      printf("%x ", data[i]);
+    printf("\n");
+  }
+  %}
+
+the typemap here reduces the number of arguments from 2 to 1 in the target language,
+so the call in java looks like:
+
+  byte[] data = "hi\0jk".getBytes();
+  example.binaryChar1(data);     
+
+resulting in:
+
+  $ java runme
+  len: 5 data: 68 69 0 6a 6b
+
+Overriding new and delete to allocate from the java heap
+
+To avoid issues where java is unaware of C allocated memory blocks, and thus cannot choose
+optimal GC through un-finalize()d proxy objects, one can override new and delete to
+allocate from the java heap.  Then the java GC will be aware of the memory, and more
+optimal GC can occur.  This is available via java_heap.i
+
+Odds and ends
+
+javadoc comments: the documentation system is being overhauled in swig.
+in the meantime, one can hack in javadoc comments with
+%javamethodmodifiers
+%typemap(javaimports)
+
+  %javamethodmodifiers Barmy::lose_marbles() "
+    /**
+      * Calling this method will make you mad.
+      * Use with <b>utmost</b> caution. 
+      */
+    public";
+
+  %typemap(javaimports) Barmy "
+  /** The crazy class. Use as a last resort. */"
+
+  class Barmy {
+  public:
+    void lose_marbles() {}
+  };
+
+NB the public at the end of %javamethodmodifiers
+This will give:
+
+/** The crazy class. Use as a last resort. */
+public class Barmy {
+...
+  /**
+    * Calling this method will make you mad.
+    * Use with <b>utmost</b> caution. 
+    */
+  public void lose_marbles() {
+    ...
+  }
+...
+}
+
+Functional interface without proxy classes
+
+It is possible to run swig which will not produce proxy classes via -noproxy.
+The interface is rather primitive when wrapping structures or classes and
+is accessed through function calls to the module class.
+All functions in the module class are wrapped by functions with identical names
+as those in the intermediary JNI class.  Consider:
+
+  class Foo {
+  public:
+       int x;
+       int spam(int num, Foo* foo);
+  };
+
+Under -noproxy, type wrapper classes are generated instead of proxy classes:
+
+  public class example {
+    public static void Foo_x_get(SWIGTYPE_p_Foo self, int x) {...}
+    public static int Foo_x_get(SWIGTYPE_p_Foo self) {...}
+    public static int Foo_spam(SWIGTYPE_p_Foo self, int num, SWIGTYPE_p_Foo foo) {...}
+    public static SWIGTYPE_p_Foo new_Foo() {...}
+    public static void delete_Foo(SWIGTYPE_p_Foo self) {...}
+  }
+
+  SWIGTYPE_p_Foo foo = example.new_Foo();
+  example.Foo_x_set(foo, 10);
+  int var = example.Foo_x_get(foo);
+  example.Foo_spam(foo, 20, foo);
+  example.delete_Foo(foo);
+
+Unlike proxy classes, there is no attempt to track memory.
+You must manually call the destructors, eg delete_Foo(foo) above.
+
+Using your won JNI functions
+
+You can add hand coded JNI functions to the swig generated package with %native
+
+Performance tips
+
+arrays_java.i will copy to/from C/Java memory space as noted above.
+
+Java classes without finalizers generally speed up code execution.
+An empty javafinalize typemap can help.
+
+----------------
+
+Choose the package name where the interface will be found:
+(what is the portal convention for package names?
+  com/akamai/portal/waf/webservice/
+
+com.akamai.portal.IPBlockValidator
+
+is the goal.  Start with something simpler though:
+
+
+
+
+
+Place the resulting java classes where they will be found by directory:
+
+swig -java IPBV_ipaddr.i -outdir src/com/akamai/portal/IPBlockValidator
+
+produces:
+
+  -rw-r--r--   1 jmccarre  admin     800 Oct  3 12:26 IPBV_ipaddr.java
+  -rw-r--r--   1 jmccarre  admin    1143 Oct  3 12:26 IPBV_ipaddrJNI.java
+  -rw-r--r--   1 jmccarre  admin   10334 Oct  3 12:26 IPBV_ipaddr_wrap.c
+  -rw-r--r--   1 jmccarre  admin    1460 Oct  3 12:26 IPBV_value.java
+  -rw-r--r--   1 jmccarre  admin    2222 Oct  3 12:26 IPBV_value_t.java
+
+To compile the JNI classes on my mac, I need the path the include directory,
+which is given by /usr/libexec/java_home:
+then compile:
+
+gcc -c IPBV_ipaddr_wrap.c -I $(/usr/libexec/java_home)/include 
+
+which produces
+
+IPBV_ipaddr_wrap.o
+
+create a shared library:
+
+gcc -dynamiclib -current_version 0.1 IPBV_ipaddr.o IPBV_ipaddr_wrap.o -o libIPBV_ipaddr.dylib
+
+try loading and executing the simplest test in java:
+
+proteus-> javac *.java
+proteus-> java IPAddrTest
+Hello Jeff
+Exception in thread "main" java.lang.UnsatisfiedLinkError: IPBV_ipaddrJNI.IPBV_is_valid(Ljava/lang/String;)I
+	at IPBV_ipaddrJNI.IPBV_is_valid(Native Method)
+	at IPBV_ipaddr.IPBV_is_valid(IPBV_ipaddr.java:16)
+	at IPAddrTest.main(IPAddrTest.java:13)
+
+this is because I forgot the _wrap.o in the dynamic link step above.
+
+This works:
+
+cd /w/ipval-0.1.0 && swig -java IPBV_ipaddr.i \
+ && gcc -c IPBV_ipaddr.c IPBV_ipaddr_wrap.c -I $(/usr/libexec/java_home)/include \
+ && gcc -dynamiclib -current_version 0.1 IPBV_ipaddr.o IPBV_ipaddr_wrap.o -o libIPBV_ipaddr.dylib \
+ && javac *.java \
+ && java IPAddrTest
+
+192.168.0.1/24 is valid
+192.168.0.1.1 is not valid

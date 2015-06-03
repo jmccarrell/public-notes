@@ -1,0 +1,21 @@
+A DomU guest is 3 things:
+ -- a guest image that contains a set of files comprising a complete root filesystem
+ -- a kernel; for paravirtualization, a modified kernel
+ -- a config file
+
+Store DomU guest configuration files in /etc/xen
+
+Fedora / RHEL defaults to /var/lib/xen, not /xen/images for images
+
+xm create first looks in . then in /etc/xen for xen config files
+
+guest config files in /etc/xen/auto are started at system boot time
+symlink there to the config files
+
+start them up by hand with
+
+/etc/init.d/xendomains start
+
+xm shutdown -a
+  shutdowns all DomUs
+            -wa waits for the DomUs to shutdown

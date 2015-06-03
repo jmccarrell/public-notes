@@ -1,0 +1,338 @@
+To build mod_perl from scratch, I need an apache and perl build.
+mod_perl needs the path the apxs executable, which is normally installed where httpd
+is installed.
+
+So I am going to need to build apache on my ubuntu distro.
+
+----------------------------------------------------------------
+
+so I want to use apt to go fetch an apache for ubuntu.
+the apt repositories are configured in
+/etc/apt/sources.list
+on atacama, these are: {
+
+#deb cdrom:[Ubuntu 9.10 _Karmic Koala_ - Release i386 (20091028.5)]/ karmic main restricted
+# See http://help.ubuntu.com/community/UpgradeNotes for how to upgrade to
+# newer versions of the distribution.
+
+deb http://us.archive.ubuntu.com/ubuntu/ karmic main restricted
+deb-src http://us.archive.ubuntu.com/ubuntu/ karmic main restricted
+
+## Major bug fix updates produced after the final release of the
+## distribution.
+deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates main restricted
+deb-src http://us.archive.ubuntu.com/ubuntu/ karmic-updates main restricted
+
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu
+## team. Also, please note that software in universe WILL NOT receive any
+## review or updates from the Ubuntu security team.
+deb http://us.archive.ubuntu.com/ubuntu/ karmic universe
+deb-src http://us.archive.ubuntu.com/ubuntu/ karmic universe
+deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates universe
+deb-src http://us.archive.ubuntu.com/ubuntu/ karmic-updates universe
+
+## N.B. software from this repository is ENTIRELY UNSUPPORTED by the Ubuntu 
+## team, and may not be under a free licence. Please satisfy yourself as to 
+## your rights to use the software. Also, please note that software in 
+## multiverse WILL NOT receive any review or updates from the Ubuntu
+## security team.
+deb http://us.archive.ubuntu.com/ubuntu/ karmic multiverse
+deb-src http://us.archive.ubuntu.com/ubuntu/ karmic multiverse
+deb http://us.archive.ubuntu.com/ubuntu/ karmic-updates multiverse
+deb-src http://us.archive.ubuntu.com/ubuntu/ karmic-updates multiverse
+
+## Uncomment the following two lines to add software from the 'backports'
+## repository.
+## N.B. software from this repository may not have been tested as
+## extensively as that contained in the main release, although it includes
+## newer versions of some applications which may provide useful features.
+## Also, please note that software in backports WILL NOT receive any review
+## or updates from the Ubuntu security team.
+# deb http://us.archive.ubuntu.com/ubuntu/ karmic-backports main restricted universe multiverse
+# deb-src http://us.archive.ubuntu.com/ubuntu/ karmic-backports main restricted universe multiverse
+
+## Uncomment the following two lines to add software from Canonical's
+## 'partner' repository.
+## This software is not part of Ubuntu, but is offered by Canonical and the
+## respective vendors as a service to Ubuntu users.
+# deb http://archive.canonical.com/ubuntu karmic partner
+# deb-src http://archive.canonical.com/ubuntu karmic partner
+
+deb http://security.ubuntu.com/ubuntu karmic-security main restricted
+deb-src http://security.ubuntu.com/ubuntu karmic-security main restricted
+deb http://security.ubuntu.com/ubuntu karmic-security universe
+deb-src http://security.ubuntu.com/ubuntu karmic-security universe
+deb http://security.ubuntu.com/ubuntu karmic-security multiverse
+deb-src http://security.ubuntu.com/ubuntu karmic-security multiverse
+}
+
+apt-cache search apache2
+gives, among many others:
+apache2-mpm-prefork - Apache HTTP Server - traditional non-threaded model
+
+atacama-> apt-cache search apache2 | wc -l
+112
+
+----------------
+
+go get the apache2 prefork sources:
+
+atacama-> sudo apt-get source apache2-mpm-prefork
+
+fails with:
+
+sh: dpkg-source: not found
+Unpack command 'dpkg-source -x apache2_2.2.12-1ubuntu2.1.dsc' failed.
+Check if the 'dpkg-dev' package is installed.
+E: Child process failed
+
+so apparently I need to configure atacama as a dev machine.
+I probably want to install a group of packages.
+
+----------------
+
+dpkg-dev
+find out about this package.
+
+sudo apt-get install dpkg-dev
+installed it.
+dkpg-dev recommends installing some other pkgs, like gcc help pkgs.
+How do I see the recommends list again?
+maybe dpkg-cache show?
+yes, that works.
+
+installed gcc-doc.
+
+Now go back and get the apache2 sources:
+
+atacama-> sudo apt-get source apache2-mpm-prefork
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+NOTICE: 'apache2' packaging is maintained in the 'Svn' version control system at:
+svn://svn.debian.org/pkg-apache/trunk/apache2
+Skipping already downloaded file 'apache2_2.2.12-1ubuntu2.1.dsc'
+Skipping already downloaded file 'apache2_2.2.12.orig.tar.gz'
+Skipping already downloaded file 'apache2_2.2.12-1ubuntu2.1.diff.gz'
+Need to get 0B of source archives.
+gpgv: Signature made Thu 12 Nov 2009 01:56:15 PM PST using DSA key ID 174BF01A
+gpgv: Can't check signature: public key not found
+dpkg-source: warning: failed to verify signature on ./apache2_2.2.12-1ubuntu2.1.dsc
+dpkg-source: info: extracting apache2 in apache2-2.2.12
+dpkg-source: info: unpacking apache2_2.2.12.orig.tar.gz
+dpkg-source: info: applying apache2_2.2.12-1ubuntu2.1.diff.gz
+
+
+Ok, well that unpacked apache2 into the directory the command ran in,
+namely /j/notes.
+Not where I want it.  I want it in:
+
+hmmm.  my p4 layout does not specify a place for external pkgs like this.
+
+so choose for src:
+/j/proj/apache2
+and for installation:
+/j/apache2
+
+./configure --prefix=/j/apache2 && make
+sudo make install
+
+I have perl 5.10.0 on atacama.
+
+So I have both perl and apache2 installed.
+Try building mod_perl:
+
+first get it:
+
+atacama-> apt-get source libapache2-mod-perl2
+  ... gives
+/j/proj/mod_perl2/libapache2-mod-perl2-2.0.4
+
+follow the pattern from the mp2 users guide book:
+
+atacama-> ls -l /j/apache2/bin/apxs
+-rwxr-xr-x 1 jwm jwm 23K 2010-03-05 22:12 /j/apache2/bin/apxs*
+
+----------------
+
+atacama-> perl Makefile.PL MP_APXS=/j/apache2/bin/apxs
+  ...
+
+no conflicting prior mod_perl version found - good.
+************* WARNING *************
+
+  Your Perl is configured to link against libgdbm,
+  but libgdbm.so was not found.
+  You could just symlink it to /usr/lib/libgdbm.so.3.0.0
+
+
+************* WARNING *************
+Configuring Apache/2.2.12 mod_perl/2.0.4 Perl/v5.10.0
+
+  ...
+
+[warning] mod_perl dso library will be built as mod_perl.so
+[warning] You'll need to add the following to httpd.conf:
+[warning] 
+[warning]   LoadModule perl_module modules/mod_perl.so
+[warning] 
+[warning] depending on your build, mod_perl might not live in
+[warning] the modules/ directory.
+
+[warning] Check the results of
+[warning] 
+[warning]   $ /j/apache2/bin/apxs -q LIBEXECDIR
+[warning] 
+[warning] and adjust the LoadModule directive accordingly.
+
+done
+
+atacama-> make && make test
+  ...
+cc -shared -O2 -g -L/usr/local/lib \
+	 \
+	mod_perl.lo modperl_interp.lo modperl_tipool.lo modperl_log.lo modperl_config.lo modperl_cmd.lo modperl_options.lo modperl_callback.lo modperl_handler.lo modperl_gtop.lo modperl_util.lo modperl_io.lo modperl_io_apache.lo modperl_filter.lo modperl_bucket.lo modperl_mgv.lo modperl_pcw.lo modperl_global.lo modperl_env.lo modperl_cgi.lo modperl_perl.lo modperl_perl_global.lo modperl_perl_pp.lo modperl_sys.lo modperl_module.lo modperl_svptr_table.lo modperl_const.lo modperl_constants.lo modperl_apache_compat.lo modperl_error.lo modperl_debug.lo modperl_common_util.lo modperl_common_log.lo modperl_hooks.lo modperl_directives.lo modperl_flags.lo modperl_xsinit.lo modperl_exports.lo  -Wl,-E  -L/usr/local/lib  -L/usr/lib/perl/5.10/CORE -lperl -ldl -lm -lpthread -lc -lcrypt \
+	-o mod_perl.so
+/usr/bin/ld: cannot find -lperl
+collect2: ld returned 1 exit status
+make[1]: *** [mod_perl.so] Error 1
+make[1]: Leaving directory `/j/proj/mod_perl2/libapache2-mod-perl2-2.0.4/src/modules/perl'
+make: *** [modperl_lib] Error 2
+
+maybe the perl that debian installs doesn't leave the libraries lying around?
+
+ask debian what package owns
+/usr/lib/libperl.so.5.10
+/usr/lib/libperl.so.5.10.0
+
+look around for libperl.a
+ask debian what package owns
+/usr/lib/libperl.a
+
+next step:
+build perl 5.10 from sources.
+
+----------------------------------------------------------------
+
+there is a step by step procedure in 
+mod_perl 2 users guide, page 27 that shows one sequence
+to build a statically linked apache/perl/mp2
+
+it goes like this:
+
+cd ~/src
+tar -xzvf perl-5.8.x.tar.gz
+cd perl-5.8.x
+./Configure -des -Dprefix=$HOME/perl
+make install
+cd ..
+tar -xzvf httpd-2.x.x.tar.gz
+tar -xzvf mod_perl-2.x.x.tar.gz
+cd mod_perl-2.x.x
+$HOME/perl/bin/perl Makefile.PL \
+  MP_USE_STATIC=1 \
+  MP_AP_PREFIX="$HOME/src/httpd-2.x.x" \
+  MP_AP_CONFIGURE="--with-mpm=prefork"
+make
+make test
+make install
+./httpd -l | grep perl
+   mod_perl.c
+
+NB the book also recommends setting env var
+APACHE_TEST_COLOR
+as appropriate to help distinugish errors and warnings
+from the rest of the notifications.
+
+----------------
+
+Here are the perl packages as reported by apt-cache search:
+
+perl - Larry Wall's Practical Extraction and Report Language
+perl-base - minimal Perl system
+perl-debug - Debug-enabled Perl interpreter
+perl-doc - Perl documentation
+perl-modules - Core Perl modules
+perl-suid - Runs setuid Perl scripts
+
+I got perl with apt-get source
+put it in:
+/j/proj/perl510
+
+Next error was a missing zlib.h
+
+use dpkg -S to find what package supplies zlib.h:
+
+well, that fails -- it only lists linux-headers
+
+but I found it in:
+root@atacama:~# apt-get install zlib1g-dev
+
+root@atacama:~# find /usr/include -name zlib.h
+/usr/include/zlib.h
+
+ok, I was able to build a perl.
+
+/j/perl/bin/perl -V gives:
+
+Summary of my perl5 (revision 5 version 10 subversion 0) configuration:
+  Platform:
+    osname=linux, osvers=2.6.31-20-generic, archname=i686-linux
+    uname='linux atacama 2.6.31-20-generic #57-ubuntu smp mon feb 8 09:05:19 utc 2010 i686 gnulinux '
+    config_args='-des -Dprefix=/j/perl'
+    hint=recommended, useposix=true, d_sigaction=define
+    useithreads=undef, usemultiplicity=undef
+    useperlio=define, d_sfio=undef, uselargefiles=define, usesocks=undef
+    use64bitint=undef, use64bitall=undef, uselongdouble=undef
+    usemymalloc=n, bincompat5005=undef
+  Compiler:
+    cc='cc', ccflags ='-fno-strict-aliasing -pipe -I/usr/local/include -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64',
+    optimize='-O2',
+    cppflags='-fno-strict-aliasing -pipe -I/usr/local/include'
+    ccversion='', gccversion='4.4.1', gccosandvers=''
+    intsize=4, longsize=4, ptrsize=4, doublesize=8, byteorder=1234
+    d_longlong=define, longlongsize=8, d_longdbl=define, longdblsize=12
+    ivtype='long', ivsize=4, nvtype='double', nvsize=8, Off_t='off_t', lseeksize=8
+    alignbytes=4, prototype=define
+  Linker and Libraries:
+    ld='cc', ldflags =' -L/usr/local/lib'
+    libpth=/usr/local/lib /lib /usr/lib /usr/lib64
+    libs=-ldl -lm -lc -lcrypt
+    perllibs=-ldl -lm -lc -lcrypt
+    libc=/lib/libc-2.10.1.so, so=so, useshrplib=false, libperl=libperl.a
+    gnulibc_version='2.10.1'
+  Dynamic Linking:
+    dlsrc=dl_dlopen.xs, dlext=so, d_dlsymun=undef, ccdlflags='-Wl,-E'
+    cccdlflags='-fPIC', lddlflags='-shared -O2 -L/usr/local/lib'
+
+
+Characteristics of this binary (from libperl): 
+  Compile-time options: PERL_DONT_CREATE_GVSV PERL_MALLOC_WRAP
+                        USE_LARGE_FILES USE_PERLIO
+  Built under linux
+  Compiled at Mar  6 2010 22:46:13
+  @INC:
+    /j/perl/lib/5.10.0/i686-linux
+    /j/perl/lib/5.10.0
+    /j/perl/lib/site_perl/5.10.0/i686-linux
+    /j/perl/lib/site_perl/5.10.0
+    .
+
+
+/j/perl/bin/perl Makefile.PL \
+  MP_USE_STATIC=1 \
+  MP_AP_PREFIX="/j/proj/apache2/apache2-2.2.12" \
+  MP_AP_CONFIGURE="--with-mpm=prefork"
+
+this gives me an error:
+
+/j/proj/apache2/apache2-2.2.12/srclib/apr/include/apr.h:285: error: expected ‘=’, ‘,’, ‘;’, ‘asm’ or ‘__attribute__’ before ‘apr_off_t’
+
+which results from off64_t not being defined.
+ie. 64 bit file offsets for seek.
+so it seems like my apache and perl configs are not quite in sync.
+Probably my ubuntu apache is configured for 64 bit file offsets,
+while my perl is not.
+
+Next step is to go get the unpatched sources of all 3 in my trio
+and try building them from native sources with no platform changes.

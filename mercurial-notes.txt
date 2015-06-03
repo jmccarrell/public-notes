@@ -1,0 +1,15 @@
+Jeffs notes on mercurial
+
+http://mercurial.selenic.com/wiki/UnderstandingMercurial
+
+is a very good overview of how the distributed vcs works.
+
+take home points include:
+there is no central repository
+the version tree is a graph
+copies of the tree must be explicity synced together
+
+the verbs of mercurial are:
+
+push / pull / clone
+import / export

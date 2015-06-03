@@ -1,0 +1,264 @@
+results of: brew install mysql: {
+
+Set up databases with:
+    unset TMPDIR
+    mysql_install_db
+
+If this is your first install, automatically load on login with:
+    cp /usr/local/Cellar/mysql/5.1.54/com.mysql.mysqld.plist ~/Library/LaunchAgents
+    launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+
+If this is an upgrade and you already have the com.mysql.mysqld.plist loaded:
+    launchctl unload -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+    cp /usr/local/Cellar/mysql/5.1.54/com.mysql.mysqld.plist ~/Library/LaunchAgents
+    launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+
+Note on upgrading:
+    We overwrite any existing com.mysql.mysqld.plist in ~/Library/LaunchAgents
+    if we are upgrading because previous versions of this brew created the
+    plist with a version specific program argument.
+
+Or start manually with:
+    mysql.server start
+==> Summary
+/usr/local/Cellar/mysql/5.1.54: 220 files, 45M, built in 4.8 minutes
+}
+
+install_db: {
+capella->     unset TMPDIR
+capella->     mysql_install_db
+Installing MySQL system tables...
+OK
+Filling help tables...
+OK
+
+To start mysqld at boot time you have to copy
+support-files/mysql.server to the right place for your system
+
+PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !
+To do so, start the server, then issue the following commands:
+
+/usr/local/Cellar/mysql/5.1.54/bin/mysqladmin -u root password 'new-password'
+/usr/local/Cellar/mysql/5.1.54/bin/mysqladmin -u root -h capella.local password 'new-password'
+
+Alternatively you can run:
+/usr/local/Cellar/mysql/5.1.54/bin/mysql_secure_installation
+
+which will also give you the option of removing the test
+databases and anonymous user created by default.  This is
+strongly recommended for production servers.
+
+See the manual for more instructions.
+
+You can start the MySQL daemon with:
+cd /usr/local/Cellar/mysql/5.1.54 ; /usr/local/Cellar/mysql/5.1.54/bin/mysqld_safe &
+
+You can test the MySQL daemon with mysql-test-run.pl
+cd /usr/local/Cellar/mysql/5.1.54/mysql-test ; perl mysql-test-run.pl
+
+Please report any problems with the /usr/local/Cellar/mysql/5.1.54/bin/mysqlbug script!
+
+}
+
+start it up at login: {
+capella-> cp /usr/local/Cellar/mysql/5.1.54/com.mysql.mysqld.plist ~/Library/LaunchAgents
+capella->     launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+capella-> mysql.server status
+ SUCCESS! MySQL running (67651)
+}
+
+with mysql_secure:
+/usr/local/Cellar/mysql/5.1.54/bin/mysql_secure_installation
+
+Setup done.
+
+----------------------------------------------------------------
+
+Thu Feb 10 17:58:11 PST 2011
+
+Peter wants to use mysql 5.5 for this project.
+brew is installing 5.1.54, so need to upgrade to 5.5.
+
+mysql.com has .dmg for osx 10.6.
+Installed it, and the auto startup script, and preference pane.
+
+Now I need to secure the instance, set the root password etc.
+
+did this with mysql_secure_installation
+
+----
+
+figure out how to undo the effect of:
+capella-> ls ~/Library/LaunchAgents/com.mysql.mysqld.plist 
+/Users/jwm/Library/LaunchAgents/com.mysql.mysqld.plist
+
+----------------
+
+mysql 5.5 from mysql.com does ship with mysql.server, just not in the usual place.
+It is in:
+/usr/local/mysql/support-files:
+
+capella-> /usr/local/mysql/support-files/
+binary-configure       config.medium.ini      mysql-log-rotate       mysqld_multi.server
+config.huge.ini        config.small.ini       mysql.server           ndb-config-2-node.ini
+
+The generic installation instructions in the README say to use:
+     shell> sudo /Library/StartupItems/MySQLCOM/MySQLCOM start
+however, MySQLCOM is just a wrapper around mysql.server.
+So make a link to access mysql.server directly, so I get status ...
+
+sudo ln -s ../support-files/mysql.server .
+capella-> ls -l mysql.server 
+lrwxr-xr-x  1 root  wheel    29B Feb 11 19:02 mysql.server@ -> ../support-files/mysql.server
+
+Bottom line:
+start, stop, restart, status:
+sudo mysql.server cmd
+
+
+----------------------------------------------------------------
+Uninstalling my 5.5 from mysql.com, and reinstalling with brew.
+To uninstall, I found these instructions:
+
+http://akrabat.com/computing/uninstalling-mysql-on-mac-os-x-leopard/
+
+which contain: {
+
+    To uninstall MySQL and completely remove it (including all databases) from your Mac do
+    the following:
+
+    Use mysqldump to backup your databases to text files!
+    Stop the database server
+    sudo rm /usr/local/mysql
+    sudo rm -rf /usr/local/mysql*
+    sudo rm -rf /Library/StartupItems/MySQLCOM
+    sudo rm -rf /Library/PreferencePanes/My*
+    edit /etc/hostconfig and remove the line MYSQLCOM=-YES-
+    rm -rf ~/Library/PreferencePanes/My*
+    sudo rm -rf /Library/Receipts/mysql*
+    sudo rm -rf /Library/Receipts/MySQL*
+    sudo rm -rf /private/var/db/receipts/*mysql*
+
+    The last three lines are particularly important as otherwise, you can't install an
+    older version of MySQL even though you think that you've completely deleted the newer
+    version!
+}
+
+----------------
+Fri Sep  2 12:48:53 PDT 2011
+
+move to brew-managed mysql installation
+uninstall mysql.com native install:
+
+capella-> mysql.server status
+ ERROR! MySQL is not running
+capella-> which mysql.server
+/usr/local/bin/mysql.server
+
+I followed the recipe above; then:
+capella-> brew uninstall mysql
+Uninstalling /usr/local/Cellar/mysql/5.5.14...
+
+and reinstall:
+
+capella-> brew install mysql
+==> Downloading http://downloads.mysql.com/archives/mysql-5.5/mysql-5.5.14.tar.gz
+File already downloaded in /Users/jwm/Library/Caches/Homebrew
+==> Downloading patches
+==> Patching
+patching file scripts/mysqld_safe.sh
+Hunk #1 succeeded at 555 (offset 172 lines).
+patching file scripts/mysql_config.sh
+Hunk #1 succeeded at 137 (offset 5 lines).
+patching file configure.cmake
+==> cmake . -DCMAKE_INSTALL_PREFIX=/usr/local/Cellar/mysql/5.5.14 -DMYSQL_DATADIR=/usr/local/var/mys
+==> make
+==> make install
+==> Caveats
+Set up databases to run AS YOUR USER ACCOUNT with:
+    unset TMPDIR
+    mysql_install_db --verbose --user=`whoami` --basedir="$(brew --prefix mysql)" --datadir=/usr/local/var/mysql --tmpdir=/tmp
+
+To set up base tables in another folder, or use a different user to run
+mysqld, view the help for mysqld_install_db:
+    mysql_install_db --help
+
+and view the MySQL documentation:
+  * http://dev.mysql.com/doc/refman/5.5/en/mysql-install-db.html
+  * http://dev.mysql.com/doc/refman/5.5/en/default-privileges.html
+
+To run as, for instance, user "mysql", you may need to `sudo`:
+    sudo mysql_install_db ...options...
+
+Start mysqld manually with:
+    mysql.server start
+
+    Note: if this fails, you probably forgot to run the first two steps up above
+
+A "/etc/my.cnf" from another install may interfere with a Homebrew-built
+server starting up correctly.
+
+To connect:
+    mysql -uroot
+
+To launch on startup:
+* if this is your first install:
+    mkdir -p ~/Library/LaunchAgents
+    cp /usr/local/Cellar/mysql/5.5.14/com.mysql.mysqld.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+
+* if this is an upgrade and you already have the com.mysql.mysqld.plist loaded:
+    launchctl unload -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+    cp /usr/local/Cellar/mysql/5.5.14/com.mysql.mysqld.plist ~/Library/LaunchAgents/
+    launchctl load -w ~/Library/LaunchAgents/com.mysql.mysqld.plist
+
+You may also need to edit the plist to use the correct "UserName".
+
+Warning: m4 macros were installed to "share/aclocal".
+Homebrew does not append "/usr/local/share/aclocal"
+to "/usr/share/aclocal/dirlist". If an autoconf script you use
+requires these m4 macros, you'll need to add this path manually.
+==> Summary
+/usr/local/Cellar/mysql/5.5.14: 6274 files, 219M, built in 3.9 minutes
+
+
+capella-> mysql_install_db --verbose --user=`whoami` --basedir="$(brew --prefix mysql)" --datadir=/usr/local/var/mysql --tmpdir=/tmp
+Installing MySQL system tables...
+OK
+Filling help tables...
+OK
+
+To start mysqld at boot time you have to copy
+support-files/mysql.server to the right place for your system
+
+PLEASE REMEMBER TO SET A PASSWORD FOR THE MySQL root USER !
+To do so, start the server, then issue the following commands:
+
+/usr/local/Cellar/mysql/5.5.14/bin/mysqladmin -u root password 'new-password'
+/usr/local/Cellar/mysql/5.5.14/bin/mysqladmin -u root -h capella.local password 'new-password'
+
+Alternatively you can run:
+/usr/local/Cellar/mysql/5.5.14/bin/mysql_secure_installation
+
+which will also give you the option of removing the test
+databases and anonymous user created by default.  This is
+strongly recommended for production servers.
+
+See the manual for more instructions.
+
+You can start the MySQL daemon with:
+cd /usr/local/Cellar/mysql/5.5.14 ; /usr/local/Cellar/mysql/5.5.14/bin/mysqld_safe &
+
+You can test the MySQL daemon with mysql-test-run.pl
+cd /usr/local/Cellar/mysql/5.5.14/mysql-test ; perl mysql-test-run.pl
+
+Please report any problems with the /usr/local/Cellar/mysql/5.5.14/scripts/mysqlbug script!
+
+----------------
+
+mysql.server start
+
+mysql root password: stored in the usual place.
+
+drop user jeff@'%';
+create user jeff@'%' identified by password '*DFF4B664E934CA020422347DBA251849E2422B1B';

@@ -1,0 +1,226 @@
+java documentation API tree:   http://download.oracle.com/javase/6/docs/api/
+
+Constructors
+
+If no constructors are defined for a class, the compiler will make a default one,
+which takes no args.
+However, if any constructor is defined, the compiler will not create that default constructor.
+
+Methods
+A method declared static cannot access non-static members, because there is no guarantee
+an object has been instantiated at the time of the static call.
+
+A static variable represents class-wide state, so all instances share the same datum.
+
+JavaBeans 
+
+The beans specification says that every Bean should have a method to access and mutate
+each of an boject's fields, as well as a no-argument constructor.  It must also support
+either the Serialization or Externalization interfaces.
+
+Visibility Levels
+
+There are 4: public, private, protected and default
+
+Classes in the default package are not reachable from other packages.
+
+
+private: only members of this class can access it.
+
+Packages
+
+The package keyword must be the first keyword in a .java file, 
+or the code will be placed in the default package, which is bad form.
+
+Constants
+To create constants, use the final keyword.
+Convention is to use all UPPER_CASE to name them.
+
+final double TAX_RATE = 5.0;
+
+Constants are often public and static as in:
+class TaxConstants {
+    public final TAX_RATE = 5.0;
+    public final TAX_STATE = "California";
+}
+
+Enums
+Example:
+
+public enum UserType {
+    ADMIN, MANAGER, EMPLOYEE, GUEST;
+}
+
+Arrays
+An array is a fixed-length, indexed container of objects, or primitives of a single declared type.
+Once created, an arrays size cannot be changed.
+When created, all elements of the array are initialized to the types default value:
+  0 for numeric
+  false for boolean
+  null for Object
+
+The { } notation can be used for Array literals:
+String[] names = { "Enrico", "Fermi", "Doug", "Cutting" };
+
+The for-each looping construct doesn't require an explicit index:
+for (String n: names) {
+    System.out.println(n);
+}
+
+Array.length() gives the maximum number of elements, 
+independent of whether or not there have been that many elements stored or not.
+
+ArrayList
+in package java.util
+
+from the docs (http://download.oracle.com/javase/6/docs/api/java/util/ArrayList.html)
+
+  public class ArrayList<E>
+  extends AbstractList<E>
+  implements List<E>, RandomAccess, Cloneable, Serializable
+
+  Resizable-array implementation of the List interface. Implements all optional list
+  operations, and permits all elements, including null. In addition to implementing the
+  List interface, this class provides methods to manipulate the size of the array that is
+  used internally to store the list. (This class is roughly equivalent to Vector, except
+  that it is unsynchronized.)
+
+It is likely to be based on a realloc scheme underneath, although this is not guaranteed.
+Call ensureCapacity() early to possibly reduce realloc costs.
+
+An example of use:
+
+ArrayList<BankAccount> baList = new ArrayList<BankAccount>
+BankAccount ba1 = new BankAccount();
+BankAccount ba2 = new BankAccount();
+baList.add(ba1);
+baList.add(ba2);
+baList.add(new BankAccount);
+
+iterate over the list:
+
+for (BankAccount ba: baList) {
+    System.out.println(ba.name);
+}
+
+Lists always contain Objects, never primitive types.
+java will autobox a primitive type when it is put into a list, 
+so this code will work:
+
+ArrayList<Integer> il = new ArrayList<Integer>();
+il.add(new Integer(42));
+il.add(900);
+
+the int 900 will be autoboxed into an Integer.
+
+----------------
+
+Exceptions
+
+There are 3 branches of the exception family:
+(Throwable) Errors
+Runtime Exceptions
+Checked Exceptions
+
+Throwable
+java class
+Parent of: Error, Exception
+Only Throwable (or subclasses) will be thrown by Java VM, or can be caught
+as an argument of the catch clause.
+
+A throwable contains a snapshot of the stack at the time it was created.
+and optionally, a message
+and optionally, a cause -- another throwable that caused this throwable to tet thrown.
+cause is new in 1.4, and is aka chained exception facility.
+
+A cause can be associated to a throwable via a constructor, or the initCause(Throwable) method.
+
+Here is some idiomatic cause-aware exception handling:
+
+     try {
+         lowLevelOp();
+     } catch (LowLevelException le) {
+         throw new HighLevelException(le);  // Chaining-aware constructor
+     }
+
+
+Official java documentation tutorials:
+
+http://download.oracle.com/javase/tutorial/java/index.html
+
+Interfaces and Inheritance
+
+An interface is a reference type, similiar to a class, that can _only_
+contain constants, method signatures, and nested types.
+There are no method bodies.
+Interfaces cannot be instantiated; they can only be implemented by classes
+or extended by other interfaces.
+
+Interfaces are not part of the class hierarchy, although they work in conjunction with classes.
+Java does not support multiple inheritance, but interfaces provide an alternative.
+A java class may only inherit from a single parent, but it can implement more than one interface.
+In this way, a java object can have multiple types: the class type itself, and the types of all
+of the interfaces the class implements.
+This means that if a variable is declared to be the type of an interface,
+then its value can reference any object that is instantiated from any class that implements
+the interface.
+
+
+An example interface declaration: 
+
+public interface OperateCar {
+  // constants, if any
+
+  // method signatures
+  boolean startEngine();
+  int turn(Direction dir);
+}
+
+to use an interface, write a class with the implements clause:
+
+public class OperateBMW750il implements OperateCar {
+  boolean startEngine() {
+    // ...
+  }
+}
+
+An interface declaration consists of modifiers, the keyword 'interface',
+the interface name, a comma-separated list of parent interfaces (if any),
+and the interface body.
+
+public interface exampleInterface extends SuperFace1, SuperFace2 {
+  // constants and method sigs
+}
+
+Without the public modifier, the interface is only available to classes defined in the same package.
+While a class may only extend 1 other class, an interface may extend any number of interfaces.
+
+All methods declared in an interface are implicitly public, so no public modifier is needed.
+All constants in an interface are implicitly public, static and final.
+
+Implementing an interface
+
+An implementation of an interace must implement all methods in the interface.
+
+By convention, the implements clause appears after any extends clause in the class declaration.
+
+When you define an interface, you are defining a new reference type.
+You can use interface names anywhere you can use any other data type name.
+If you define a reference variable whose type is an interface,
+any object you assign to it must be an instance of a class that implements the interface.
+
+Interfaces define a contract, and thus changing an interface by adding more methods to it,
+changes the interface.
+So try to be definitive when specifying the interface.
+If ultimately the interface must change, extend it with a new interface to allow other
+consumers of that interface to continue to work.
+
+questions and exercises:
+http://download.oracle.com/javase/tutorial/java/IandI/QandE/interfaces-questions.html
+
+1.  char charAt(int index);
+    int length();
+    CharSequence subSequence(int start, int end);
+    String toString();
+
+

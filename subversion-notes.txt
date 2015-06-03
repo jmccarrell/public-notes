@@ -1,0 +1,139 @@
+I have svn client version 1.6.5 on proteus from homebrew.
+
+svn checkout
+
+commit changes to file
+svn commit button.c -m "Fixed a typo in button.c"
+
+merge in changes others have made to my private copy
+svn update
+
+each commit creates a separate revision, named by a natural number.
+  the revision is across the entire repository, not per file.
+
+svn status .
+  will show the states a file can be in:
+
+M   locally modified
+C   conflicts; changes from server overlap
+?   not under rev control
+A   scheduled for addition
+D                 deletion
+
+these states are displayed by svn help update.
+
+svn status --verbose -v
+  shows revision numbers
+
+subversion supports the notion that pushes and pulls from the repository are separate.
+
+directories themselves are versioned in svn.  so we have: svn mkdir
+
+you cannot commit a deletion of a file that is not fully up to date
+  to prevent you from deleting changes you have not seen at all.
+
+svn import
+  copies trees of unversioned files to the repository.
+  the files are immediately committed.
+
+the svnbook recommends a top level structure of
+/trunk
+/branches
+/tags
+
+for the main line, branches and 'tag copies' respectively.
+
+there is nothing special about the trees of files created by checkout.
+From the svnbook:
+
+    Your working copy is just like any other col- lection of files and directories on your
+    system. You can edit and change it, move it around, even delete the entire working
+    copy and forget about it.
+
+however, you have to tell svn about every structural change, using, e.g.
+svn copy or svn move.
+
+svn can version symbolic links.
+
+svn add foo
+  if foo is a directory, everything under foo will be added, unless --depth empty
+
+svn copy foo bar
+  does not create intermediate directories unless --parents
+
+svn move foo bar
+  same as
+    svn copy foo bar; svn delete foo
+
+svn mkdir blort
+
+no network needed for svn status, diff and revert:
+  svn keeps a cached verison of the base of the files in your working copy.
+  this cached copy is called the 'text-base'.
+
+svn diff > patchfile
+  is a recipe to create a patch file for all of the change made.
+
+svn diff uses its internal diff engine.
+to see, e.g., context diffs, specify an external diff engine and pass args to it:
+  svn diff --diff-cmd /usr/bin/diff -x "-i" foo.c.
+
+when there is a conflict, svn update will give options:
+
+  (p) postpone
+      Leave the file in a conflicted state for you to resolve after your update is
+      complete.
+  (df) diff-full
+       Display the differences between the base revision and the conflicted file itself in
+       unified diff format.
+  (e) edit
+      Open the file in conflict with your favorite editor, as set in the environment
+      variable EDITOR.
+  (r) resolved
+      After editing a file, tell svn that you've resolved the conflicts in the file and
+      that it should accept the current con- tents—basically that you've “resolved” the
+      conflict.
+  (mf) mine-full
+       Discard the newly received changes from the server and use only your local changes
+       for the file under review.
+  (tf) theirs-full
+       Discard your local changes to the file under review and use only the newly received
+       changes from the server.
+  (l) launch
+      Launch an external program to perform the conflict resolution. This requires a bit
+      of preparation beforehand.
+
+Examining History
+
+svn log -r 5:18             shows logs 5 - 19 in chronological order
+        -r 18:5                                  reverse
+        -r 8                just 8
+
+to compare 2 repository revisions, use -r range with diff:
+  svn diff -r 2:3 rules.txt
+or see the 'change' from 2-3 with:
+  svn diff -c 3 rules.txt
+
+svn cat -r 2 rules.txt
+  will show revision 2 of rules.txt
+
+svn list shows what files are in a repository directory:
+
+svn list http://svn.collab.net/repos/svn
+
+Go Back in Time
+svn checkout -r 1739
+or 
+svn update -r 1739
+
+svn export 
+  produces a tree without .svn directories; nice for creating tarballs.
+
+Cleaning Up
+
+    Subversion doesn't track either the state or the existence of working copies on the
+    server, so there's no server overhead to keeping working copies around. Likewise,
+    there's no need to let the server know that you're going to delete a working copy.
+
+just an svn update is all that is needed to refresh a long dormant working copy.
+

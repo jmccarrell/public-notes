@@ -1,0 +1,803 @@
+Sun Feb 21 14:49:42 PST 2010
+
+home p4 storage goals:
+  1) enable sharing of my notes across home and work computers
+  *) decouple home dir ~ files that have platform / architecture dependencies
+     from notes and projects that I want everywhere
+     A: create installable packages for the software I want moved to my machines
+        make home directory just dot files and emacs
+  *) decouple home passwords from my home directory.
+     My password data is private, and I want it never to be on a work machine;
+     get backed up on work machine.
+     A: move personal stuff to usb flash drive
+  2) support partitioning of work notes from home notes?
+     how many of my existing akamai notes do I consider home useful?
+     what would I do with this info later?
+       A: search it for useful patterns
+       so it is sufficient to have a repository
+     I could migrate / rewrite notes into my home area that I found useful over time.
+     A: make a home notes area not in my home directory;
+        map that onto anywhere I want
+  3) make it relatively easy to map my environment to a new machine
+    quantify this further:
+      what elements of my environment do I want everywhere?
+        my .emacs env, plus supporting files
+        ack
+        commify
+        url{en,de}code
+        sample
+
+new p4 layout  (all below jwm-depot)
+
+/homes/MAIN                  # mainline
+                             # seeded from /homes/proteus
+                             # the model here being that all of these machines
+                             # share enough *nix heritage to be in common
+/homes/<machine_name>
+
+/notes/
+       MAIN
+       2010
+       ...
+       jwm                   # my current 
+
+/www/
+
+/private/personal/
+
+/proj/books/
+            learnsql
+            apue
+            hop
+/proj/cratedb
+      
+where is negheb home dir?
+  A: I guess it is /jwm/.  yes:
+	//jwm-depot/jwm/... //jwm-jwm-negheb/jwm/...
+
+On each client machine make /j which holds that portion of the tree appropriate
+for that client machine
+
+TODO  TODO  TODO  TODO  TODO  TODO  TODO  TODO  TODO  TODO  TODO  TODO
+DONE create /homes/MAIN/... from /homes/proteus/ {
+
+how do I map only some of the files in /homes/proteus to /homes/main?
+A: do the integ command, then delete the files from the changelist I don't want.
+
+make a MAIN client for proteus
+client name?
+I have jwm-home-proteus
+  so   jwm-home-MAIN
+
+proteus-> p4 integ //jwm-depot/homes/proteus/... //jwm-depot/homes/MAIN/...
+  started things off.
+  then lots of edits of the change list
+
+After all of the edits, here is the list: {
+proteus-> p4 opened
+//jwm-depot/homes/MAIN/.bash_profile#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.bashrc#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.cvsrc#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.emacs#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.emacs-custom-21.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.emacs-custom-22.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.emacs-custom-23.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/.emacs-custom-future.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/bin/commify#1 - branch default change (xtext)
+//jwm-depot/homes/MAIN/bin/sample#1 - branch default change (xtext)
+//jwm-depot/homes/MAIN/bin/urldecode#1 - branch default change (xtext)
+//jwm-depot/homes/MAIN/bin/urlencode#1 - branch default change (xtext)
+//jwm-depot/homes/MAIN/src/emacs/c-m-supl.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/src/emacs/jc_ctags.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/src/emacs/jc_misc.el#1 - branch default change (text)
+//jwm-depot/homes/MAIN/src/emacs/p4.el#1 - branch default change (text)
+}
+
+I'm not really that good with the .bash files --
+but one step at a time.
+}
+
+DONE create /homes/atacama  from /homes/MAIN
+store the hierarchy in my www machine html page
+
+DONE Need to install p4 browser on atacama; p4v works
+
+
+atacama
+  partition p4 repository
+    need to write down my goals for this partitioning to drive the decision
+    home directory contents
+    /jwm/notes
+    partition //homes.../proteus/notes?
+      make a list of the files; make the call
+
+
+  a simple strategy would be to partition ~jmccarre/notes/ into 2:
+  move / copy data as needed between the 2.
+  /w/notes
+    stored in aka p4
+  /j/notes
+    stored in jwm p4
+  downside: publishes my notes to the entire akamai community
+  alternative: store aka notes in jwm p4 depot.
+  not under a home directory, but under a project directory.
+
+  idea: consider moving ~/bin to something, e.g. /jwmbin
+  taking binaries out of ~/bin moves it from binary compatibility to source level
+    compatibility; a simpler job to manage.
+    presumably I could have a single home directory mapping across all *nixes
+                                                    or branch tree of mappings
+
+  idea: buy/reuse a flash device to act as the repository for my local password stuff.
+    use physical access to manage privacy.
+    not a bad idea
+    maps nicely to projects; no need to build an encryption layer.
+    q: how do I handle the /absolute/path to the device?
+      where does it get mapped on proteus?
+      maybe I would need to mount it?
+
+  idea: make package(s) containing my environment, at least the binaries.
+    install these pkgs where and when I want them.
+
+akamai note analysis:
+171 notes total
+categories:
+akamai only
+mixed use
+home only
+not useful; delete this 
+
+/Users/jmccarre/tmp/notes-analysis
+
+     447 Aug  5 23:09 apache-building.txt
+     719 Aug  5 23:09 apache-flash-detect.txt
+    4019 Aug  5 23:09 apache-logging-notes.txt
+    2473 Aug  5 23:09 apache-mcchome-config-work.txt
+    4143 Aug  5 23:09 apache-modules-book-notes.txt
+    2534 Aug  5 23:09 apache-session-mgmt-notes.txt
+    1913 Aug  5 23:09 apache-session-tracking-notes.txt
+    1027 Aug  5 23:09 apachecon2008-schedule.txt
+     505 Aug  5 23:09 aster-training-session.txt
+     140 Aug  5 23:09 book-art-multiprocessor-programming.txt
+   41288 Aug  5 23:09 bug-355041-notes.txt
+     465 Dec  8 10:33 cee-team-meeting-notes.txt
+    1951 Nov 11 13:54 coremetrics-mluciano-talk.txt
+   22063 Aug  5 23:09 cvs-p4-conversion.txt
+     533 Aug  5 23:09 cvs-surprise.txt
+     562 Aug  5 23:09 danner-ghost-testing.txt
+    2409 Aug  5 23:09 danner-talk.txt
+    1232 Aug  5 23:09 data-architecture-cerno-discussion.txt
+    5647 Dec 10 15:28 data-model-notes.txt
+     384 Aug  5 23:09 data-model-toc.txt
+     260 Aug  5 23:09 discern-28-dev-notes.txt
+     911 Aug  4 10:47 emacs-notes.txt
+    1127 Aug  5 23:09 entourage-calendar-config.txt
+    1402 Aug 13 09:20 entourage-config.txt
+    1995 Aug  5 23:09 exclude-lineitem-notes.txt
+   31474 Aug  5 23:09 feed-specific-passback-dev.txt
+     306 Aug  5 23:09 fiddler-notes.txt
+    2896 Aug  5 23:09 fink-notes.txt
+    2900 Aug  5 23:09 flash-cookie-notes.txt
+    2662 Aug  8 15:15 freq-cap-enforced-at-vt-and-adopt.txt
+    1115 Aug  5 23:09 ftc-cookie-aol-response.txt
+     431 Aug  5 23:09 gnupg-notes.txt
+    2024 Aug  5 23:09 histogram-generation.txt
+    2107 Aug  5 23:09 hjksolutions-meeting.txt
+    2631 Aug  8 14:45 insight-header-data-flow.txt
+     978 Jan 29 15:16 ken-eaton-qa-architecture-tools-meeting-notes.txt
+   28108 Jan 30 13:07 ken-talk.txt
+     330 Aug  5 23:09 keynote-diagrams-michael.txt
+    5645 Aug  5 23:09 knowledge-tree-notes.txt
+   32495 Dec  2 23:08 lab-ops-setup-notes.txt
+    1100 Oct 27 17:00 labops-clearview-scrubservers-plan.txt
+     770 Nov  1 09:04 labops-scrubservers-deployment.txt
+   19462 Aug  5 23:09 lineitem-exclusions-working-notes.txt
+     668 Aug  5 23:09 lineitem-exclusions.txt
+    1853 Jan 17 15:40 load-balancer-how-to.txt
+     591 Aug  5 23:09 mac-os-x-server-admin-notes.txt
+    1852 Aug  5 23:09 memcache-hackathon-2008-10.txt
+     969 Aug 17 10:26 memcached-memory-usage.txt
+   18766 Jan  5 14:09 mocklb-dev-notes.txt
+   37154 Aug  5 23:09 mod-perl-1.99-upgrade-notes.txt
+     490 Nov 28 16:46 mod-perl2-users-guide-notes.txt
+     611 Aug  5 23:09 monitoring-web-tier.txt
+     604 Aug  5 23:09 ms-office-2008-issue.txt
+    5791 Dec 13 15:57 mysql-startup.txt
+     955 Jan 28 11:55 netops-engineer-interview-questions.txt
+   12076 Aug  5 23:09 nomachine-nx-install.txt
+     415 Aug  5 23:09 p3p-notes.txt
+    3135 Aug  5 23:09 p4-akamai-conversion.txt
+    2932 Aug  5 23:09 p4-setup2-notes.txt
+    3335 Aug  5 23:09 p4-training.txt
+    6372 Aug  5 23:09 pd-522-dev-notes.txt
+   15087 Aug  5 23:09 pd-530-dev-notes.txt
+    9681 Oct  6 17:44 pd-540-implementation-plan.txt
+    1416 Sep 24 14:27 pd-540-unit-tests-needed.txt
+   46521 Oct 15 20:09 pd-600-summary-requirements.txt
+   38496 Aug 31 19:02 pd-issue-2009-08-31.txt
+    2108 Oct  6 16:11 pd-schema-review.txt
+    1122 Oct  6 16:55 pd-tagging-heirarchy-diff-requirments.txt
+    5885 Aug  5 23:09 perl-critic-dev-notes.txt
+    2753 Aug  5 23:09 perl-critic-teamcity-install-proposal.txt
+    3623 Aug  5 23:09 perl-debug-build.txt
+    2021 Aug  5 23:09 perl-my-decl-hoisting-effect.txt
+    3845 Dec 19 13:55 perl-threads.txt
+    4449 Nov 19 15:25 peter-acerno-architecture-meeting.txt
+    1193 Aug  5 23:09 peter-coming-attractions.txt
+   23100 Aug 20 16:30 peter-talk.txt
+     745 Aug  5 23:09 pro-apache-book-notes.txt
+   19532 Aug  5 23:09 projects.txt
+    7968 Sep 28 22:54 proteus-mysql-install.txt
+    3596 Aug  5 23:09 puppet-notes.txt
+    1232 Aug  5 23:09 reliable-distributed-systems-notes.txt
+    1922 Aug  5 23:09 ruby-notes.txt
+   35857 Jan 19 19:01 scrub-gtm-dev-notes.txt
+    1733 Nov 13 17:59 scrubservers-firstpoint-integration-notes.txt
+    7332 Nov  1 14:10 scrubservers-sym-link-test.txt
+    1320 Aug  5 23:09 ssh-book-notes.txt
+    1697 Nov 15 08:39 ssh-key-work.txt
+   22956 Aug  5 23:09 vt-250-dev-notes.txt
+   15290 Aug  5 23:09 vt-code-spelunking.txt
+    6785 Aug  5 23:09 vt-cookies.txt
+  734775 Jan 26 14:37 web-tier-exploitation-dev-notes.txt
+    1496 Aug  5 23:09 wiki-review.txt
+     861 Aug  5 23:09 wiki-setup-notes.txt
+   32431 Jan 31 15:50 work-todo.txt
+    2898 Dec  1 20:02 wte-cookie-transform-test-case-design.txt
+    5503 Nov 20 12:35 wte-prio-order-bucket-test-case-design.txt
+    2699 Aug  5 23:09 xen-notes.txt
+   10111 Oct 23 22:14 yield-manager.txt
+    3820 Nov 16 18:59 yigong-talk.txt
+
+
+
+Mon Jan 18 20:22:16 PST 2010
+
+I want to rearrange my p4 depot to better support the various environments
+I have and that I want to manage going forward.
+
+The environments I want to support, circa Jan 2010, are:
+
+now
+
+personal
+ubuntu linux
+windows csh shell legacy
+mac os x home
+
+akamai
+mac os x akamai
+centos 4 dev
+centos 4 production
+
+future
+
+akamai
+ubuntu desktop
+alsi-6
+alsi-5
+
+I want to arrange the data into home directories,
+and projects.
+I need a platform tag in my home directory project hierarchy:
+
+//jwm-depot/homes/main-branch/platform-tag/.dotfiles
+                                           bin/cross-platform
+                                           bin/platform-tag/compiled binaries
+
+
+The list of files from my akamai mac home directory at the time of this writing is:
+
+//jwm-depot/homes/proteus/.bash_profile#12 - edit change 1831 (text)
+//jwm-depot/homes/proteus/.bashrc#10 - edit change 1838 (text)
+//jwm-depot/homes/proteus/.cvsrc#2 - edit change 1631 (text)
+//jwm-depot/homes/proteus/.emacs#12 - edit change 1788 (text)
+//jwm-depot/homes/proteus/.emacs-custom-21.el#1 - add change 1663 (text)
+//jwm-depot/homes/proteus/.emacs-custom-22.el#1 - add change 1663 (text)
+//jwm-depot/homes/proteus/.emacs-custom-23.el#3 - edit change 1832 (text)
+//jwm-depot/homes/proteus/.emacs-custom-future.el#1 - add change 1663 (text)
+//jwm-depot/homes/proteus/.ssh/id_dsa.pub#1 - add change 1786 (text)
+//jwm-depot/homes/proteus/.ssh/id_rsa.pub#1 - add change 1786 (text)
+//jwm-depot/homes/proteus/atwiki/Adopt271PerformanceIssue#1 - add change 1727 (text)
+//jwm-depot/homes/proteus/atwiki/AdoptRelease27#7 - edit change 1703 (text)
+//jwm-depot/homes/proteus/atwiki/AdoptRelease271#7 - edit change 1712 (text)
+//jwm-depot/homes/proteus/atwiki/DiscernDev#4 - edit change 1710 (text)
+//jwm-depot/homes/proteus/atwiki/DiscernPerformanceHome#4 - edit change 1712 (text)
+//jwm-depot/homes/proteus/atwiki/DiscernReleaseTemplate#1 - add change 1679 (text)
+//jwm-depot/homes/proteus/atwiki/FeedSpecificPassbackDev#4 - edit change 1703 (text)
+//jwm-depot/homes/proteus/atwiki/JeffHome#4 - edit change 1712 (text)
+//jwm-depot/homes/proteus/atwiki/ProjectNewBox#6 - edit change 1704 (text)
+//jwm-depot/homes/proteus/atwiki/VueTabulatorDev#1 - add change 1712 (text)
+//jwm-depot/homes/proteus/atwiki/VueTabulatorSpec#1 - add change 1727 (text)
+//jwm-depot/homes/proteus/bin/commify#1 - add change 1648 (xtext)
+//jwm-depot/homes/proteus/bin/mount-dis-1.3#6 - edit change 1849 (xtext)
+//jwm-depot/homes/proteus/bin/osxp4merge#1 - add change 1777 (xtext)
+//jwm-depot/homes/proteus/bin/pd1ut#1 - add change 1814 (xtext)
+//jwm-depot/homes/proteus/bin/pdut#3 - edit change 1821 (xtext)
+//jwm-depot/homes/proteus/bin/pmdesc#1 - add change 1700 (xtext)
+//jwm-depot/homes/proteus/bin/sample#2 - edit change 1744 (xtext)
+//jwm-depot/homes/proteus/bin/track_mocklb#1 - add change 1848 (xtext)
+//jwm-depot/homes/proteus/bin/umount-dis-1.3#6 - edit change 1849 (xtext)
+//jwm-depot/homes/proteus/bin/urldecode#1 - add change 1811 (xtext)
+//jwm-depot/homes/proteus/bin/urlencode#1 - add change 1811 (xtext)
+//jwm-depot/homes/proteus/etc/acerno/employment.txt#3 - edit change 1802 (text)
+//jwm-depot/homes/proteus/etc/acerno/passwords.txt#57 - edit change 1826 (text)
+//jwm-depot/homes/proteus/etc/acerno/receipts/omnigraffle-receipt.txt#1 - add change 1641 (text)
+//jwm-depot/homes/proteus/inwiki/ADS_Netops_Clearview_Lab_Host_Files#1 - add change 1850 (text)
+//jwm-depot/homes/proteus/inwiki/AD_Cookie_Processing#1 - add change 1782 (text)
+//jwm-depot/homes/proteus/inwiki/Acerno_ESI_Web_Tier_Cookie_Spec#1 - add change 1765 (text)
+//jwm-depot/homes/proteus/inwiki/Acerno_Web_Tier_Cookie_Spec#1 - add change 1756 (text)
+//jwm-depot/homes/proteus/inwiki/Acerno_Web_Tier_ESI_Transition#7 - edit change 1799 (text)
+//jwm-depot/homes/proteus/inwiki/Acerno_Web_Tier_Header#4 - edit change 1841 (text)
+//jwm-depot/homes/proteus/inwiki/Adopt_ESI_Implementation#4 - edit change 1782 (text)
+//jwm-depot/homes/proteus/inwiki/Adopt_Origin_Error_Investigation#2 - edit change 1785 (text)
+//jwm-depot/homes/proteus/inwiki/Adopt_Release_2.7.2#3 - edit change 1742 (text)
+//jwm-depot/homes/proteus/inwiki/Adopt_Release_2.7.4#1 - add change 1742 (text)
+//jwm-depot/homes/proteus/inwiki/Adopt_Release_2.7.6#4 - edit change 1782 (text)
+//jwm-depot/homes/proteus/inwiki/Adopt_Release_2.8.0#6 - edit change 1809 (text)
+//jwm-depot/homes/proteus/inwiki/AmberFreqUi.png#1 - add change 1765 (binary)
+//jwm-depot/homes/proteus/inwiki/Coremetrics_Integration#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/inwiki/Discern_Release_1.3.0#7 - edit change 1841 (text)
+//jwm-depot/homes/proteus/inwiki/Discern_Release_1.3.2#2 - edit change 1845 (text)
+//jwm-depot/homes/proteus/inwiki/Feed_Specific_Passback_Dev#1 - add change 1727 (text)
+//jwm-depot/homes/proteus/inwiki/Frequency_Caps_in_Amber_and_Adopt#2 - edit change 1788 (text)
+//jwm-depot/homes/proteus/inwiki/IMI_Data_Model#1 - add change 1819 (text)
+//jwm-depot/homes/proteus/inwiki/IMI_Replacement_with_AKID#1 - add change 1789 (text)
+//jwm-depot/homes/proteus/inwiki/JeffMcCarrell#16 - edit change 1847 (text)
+//jwm-depot/homes/proteus/inwiki/PFATM/ADS2911_Acceptance_Test#1 - add change 1833 (text)
+//jwm-depot/homes/proteus/inwiki/PFATM/WebTierExploitation#1 - add change 1796 (text)
+//jwm-depot/homes/proteus/inwiki/PFATM/Web_Tier_Exploitation_Design#20 - edit change 1849 (text)
+//jwm-depot/homes/proteus/inwiki/Pixel_Duster_Release_5.2.2#2 - edit change 1782 (text)
+//jwm-depot/homes/proteus/inwiki/Pixel_Duster_Release_5.3.0#1 - add change 1795 (text)
+//jwm-depot/homes/proteus/inwiki/Project_Plans_Jeff#1 - add change 1755 (text)
+//jwm-depot/homes/proteus/inwiki/Releases/ADS-3093#1 - add change 1850 (text)
+//jwm-depot/homes/proteus/inwiki/Target_Lists_In_DN_review#1 - add change 1772 (text)
+//jwm-depot/homes/proteus/inwiki/Transition_Sequence#1 - add change 1772 (text)
+//jwm-depot/homes/proteus/inwiki/User_Count_Incident#1 - add change 1822 (text)
+//jwm-depot/homes/proteus/inwiki/Vue_Tabulator_Release_2.4.2#3 - edit change 1782 (text)
+//jwm-depot/homes/proteus/inwiki/Vue_Tabulator_Release_2.5.0#4 - edit change 1795 (text)
+//jwm-depot/homes/proteus/inwiki/Vuetabulator_URI_Handler#1 - add change 1795 (text)
+//jwm-depot/homes/proteus/notes/R-notes.txt#2 - edit change 1712 (text)
+//jwm-depot/homes/proteus/notes/acerno-branching-strategy.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/acerno-client-cancellation.txt#1 - add change 1819 (text)
+//jwm-depot/homes/proteus/notes/acerno-data-model.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/acerno-follow-the-data.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/acerno-ops-structure-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/ad274-perf-measurement.txt#1 - add change 1780 (text)
+//jwm-depot/homes/proteus/notes/adopt-27-dev-notes.txt#17 - edit change 1744 (text)
+//jwm-depot/homes/proteus/notes/adopt-27-performance.txt#3 - edit change 1713 (text)
+//jwm-depot/homes/proteus/notes/adopt-271-performance.txt#1 - add change 1711 (text)
+//jwm-depot/homes/proteus/notes/adopt-271-production-performance-issue.txt#2 - edit change 1720 (text)
+//jwm-depot/homes/proteus/notes/adopt-273-perf-issue.txt#2 - edit change 1744 (text)
+//jwm-depot/homes/proteus/notes/adopt-28-dev-notes.txt#6 - edit change 1760 (text)
+//jwm-depot/homes/proteus/notes/adopt-280-dev-notes.txt#2 - edit change 1792 (text)
+//jwm-depot/homes/proteus/notes/adopt-280-performance.txt#4 - edit change 1792 (text)
+//jwm-depot/homes/proteus/notes/adopt-281-dev-notes.txt#2 - edit change 1799 (text)
+//jwm-depot/homes/proteus/notes/adopt-Header-lines.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-alison-qa-meeting.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-cache-control-headers.txt#3 - edit change 1698 (text)
+//jwm-depot/homes/proteus/notes/adopt-campaign-dev-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-catch-all-design-review-notes.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/adopt-cookie-spiff.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-create-qa-instance.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-esi-cookie-danner-call-2009-02-11.txt#1 - add change 1764 (text)
+//jwm-depot/homes/proteus/notes/adopt-esi-dev-notes.txt#13 - edit change 1772 (text)
+//jwm-depot/homes/proteus/notes/adopt-esi-working-meeting-2009-01-02.txt#1 - add change 1737 (text)
+//jwm-depot/homes/proteus/notes/adopt-esi-working-meeting-2009-01-06.txt#1 - add change 1737 (text)
+//jwm-depot/homes/proteus/notes/adopt-exclusion-test.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-load-imi-db.txt#1 - add change 1671 (text)
+//jwm-depot/homes/proteus/notes/adopt-machine-specs.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-memcache-speedup.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-performance-characterization.txt#2 - edit change 1669 (text)
+//jwm-depot/homes/proteus/notes/adopt-performance-issue-2009-04-09.txt#3 - edit change 1782 (text)
+//jwm-depot/homes/proteus/notes/adopt-platform-2009-05.txt#2 - edit change 1789 (text)
+//jwm-depot/homes/proteus/notes/adopt-qa-suite-setup.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt-runtime-meeting.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/adopt2-server-architecture-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-ad-vt-system-test.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-adopt-qa-install-notes.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-one-pd-600-plan.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-production-roll-out-notes.txt#2 - edit change 1837 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-qa-exit-plan.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-vt-roll-out-plan.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/ads-2911-wte-lift-measurement-notes.txt#2 - edit change 1840 (text)
+//jwm-depot/homes/proteus/notes/ads-3093-pd-result-comparison-danner-test.txt#1 - add change 1841 (text)
+//jwm-depot/homes/proteus/notes/ads-3093-planning.txt#1 - add change 1837 (text)
+//jwm-depot/homes/proteus/notes/ads-3093-schedule-work.txt#2 - edit change 1839 (text)
+//jwm-depot/homes/proteus/notes/ads-3093-stretch-goal-plan.txt#1 - add change 1841 (text)
+//jwm-depot/homes/proteus/notes/ads-web-transition.txt#13 - edit change 1795 (text)
+//jwm-depot/homes/proteus/notes/akamai-log-diving.txt#1 - add change 1805 (text)
+//jwm-depot/homes/proteus/notes/akamai-netstorage-notes.txt#1 - add change 1764 (text)
+//jwm-depot/homes/proteus/notes/akamai-password-change.txt#1 - add change 1727 (text)
+//jwm-depot/homes/proteus/notes/akamake-notes.txt#1 - add change 1819 (text)
+//jwm-depot/homes/proteus/notes/akid-encoding-details.txt#1 - add change 1812 (text)
+//jwm-depot/homes/proteus/notes/amazon-dev-proposal.txt#1 - add change 1713 (text)
+//jwm-depot/homes/proteus/notes/amazon-ec2-notes.txt#2 - edit change 1720 (text)
+//jwm-depot/homes/proteus/notes/amber-3-7-to-3-8-upgrade.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/amber-how-to-michael.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/amber-test-run.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/apache-building.txt#1 - add change 1710 (text)
+//jwm-depot/homes/proteus/notes/apache-flash-detect.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/apache-logging-notes.txt#1 - add change 1693 (text)
+//jwm-depot/homes/proteus/notes/apache-mcchome-config-work.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/apache-modules-book-notes.txt#1 - add change 1671 (text)
+//jwm-depot/homes/proteus/notes/apache-session-mgmt-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/apache-session-tracking-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/apachecon2008-schedule.txt#1 - add change 1713 (text)
+//jwm-depot/homes/proteus/notes/aster-training-session.txt#1 - add change 1720 (text)
+//jwm-depot/homes/proteus/notes/book-art-multiprocessor-programming.txt#1 - add change 1713 (text)
+//jwm-depot/homes/proteus/notes/bug-355041-notes.txt#1 - add change 1809 (text)
+//jwm-depot/homes/proteus/notes/build-counter.txt#1 - add change 1711 (text)
+//jwm-depot/homes/proteus/notes/cambridge-staff-notes.txt#1 - add change 1795 (text)
+//jwm-depot/homes/proteus/notes/cee-team-meeting-notes.txt#1 - add change 1841 (text)
+//jwm-depot/homes/proteus/notes/commute-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/coremetrics-mluciano-talk.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/cvs-p4-conversion.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/cvs-surprise.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/danner-ghost-testing.txt#1 - add change 1751 (text)
+//jwm-depot/homes/proteus/notes/danner-talk.txt#1 - add change 1795 (text)
+//jwm-depot/homes/proteus/notes/data-architecture-cerno-discussion.txt#1 - add change 1711 (text)
+//jwm-depot/homes/proteus/notes/data-model-notes.txt#3 - edit change 1841 (text)
+//jwm-depot/homes/proteus/notes/data-model-toc.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/discern-28-dev-notes.txt#1 - add change 1686 (text)
+//jwm-depot/homes/proteus/notes/emacs-notes.txt#1 - add change 1810 (text)
+//jwm-depot/homes/proteus/notes/entourage-calendar-config.txt#2 - edit change 1669 (text)
+//jwm-depot/homes/proteus/notes/entourage-config.txt#2 - edit change 1815 (text)
+//jwm-depot/homes/proteus/notes/exclude-lineitem-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/feed-specific-passback-dev.txt#3 - edit change 1690 (text)
+//jwm-depot/homes/proteus/notes/fiddler-notes.txt#1 - add change 1730 (text)
+//jwm-depot/homes/proteus/notes/fink-notes.txt#1 - add change 1669 (text)
+//jwm-depot/homes/proteus/notes/flash-cookie-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/freq-cap-enforced-at-vt-and-adopt.txt#1 - add change 1812 (text)
+//jwm-depot/homes/proteus/notes/ftc-cookie-aol-response.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/gnupg-notes.txt#2 - edit change 1730 (text)
+//jwm-depot/homes/proteus/notes/google-euro-privacy-response.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/hadoop-training.txt#2 - edit change 1720 (text)
+//jwm-depot/homes/proteus/notes/histogram-generation.txt#1 - add change 1669 (text)
+//jwm-depot/homes/proteus/notes/hjksolutions-meeting.txt#1 - add change 1669 (text)
+//jwm-depot/homes/proteus/notes/insight-header-data-flow.txt#1 - add change 1819 (text)
+//jwm-depot/homes/proteus/notes/jack-talk.txt#1 - add change 1795 (text)
+//jwm-depot/homes/proteus/notes/ken-talk.txt#15 - edit change 1847 (text)
+//jwm-depot/homes/proteus/notes/keynote-diagrams-michael.txt#1 - add change 1669 (text)
+//jwm-depot/homes/proteus/notes/knowledge-tree-notes.txt#1 - add change 1690 (text)
+//jwm-depot/homes/proteus/notes/lab-ops-setup-notes.txt#1 - add change 1840 (text)
+//jwm-depot/homes/proteus/notes/labops-clearview-scrubservers-plan.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/labops-scrubservers-deployment.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/lineitem-exclusions-working-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/lineitem-exclusions.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/load-balancer-how-to.txt#5 - edit change 1850 (text)
+//jwm-depot/homes/proteus/notes/mac-os-x-server-admin-notes.txt#1 - add change 1744 (text)
+//jwm-depot/homes/proteus/notes/memcache-hackathon-2008-10.txt#1 - add change 1720 (text)
+//jwm-depot/homes/proteus/notes/memcached-memory-usage.txt#1 - add change 1819 (text)
+//jwm-depot/homes/proteus/notes/mocklb-dev-notes.txt#2 - edit change 1849 (text)
+//jwm-depot/homes/proteus/notes/mod-perl-1.99-upgrade-notes.txt#2 - edit change 1799 (text)
+//jwm-depot/homes/proteus/notes/mod-perl2-users-guide-notes.txt#1 - add change 1839 (text)
+//jwm-depot/homes/proteus/notes/monitoring-web-tier.txt#1 - add change 1809 (text)
+//jwm-depot/homes/proteus/notes/ms-office-2008-issue.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/mysql-startup.txt#2 - edit change 1845 (text)
+//jwm-depot/homes/proteus/notes/nomachine-nx-install.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/p3p-notes.txt#1 - add change 1805 (text)
+//jwm-depot/homes/proteus/notes/p4-akamai-conversion.txt#1 - add change 1772 (text)
+//jwm-depot/homes/proteus/notes/p4-setup2-notes.txt#1 - add change 1688 (text)
+//jwm-depot/homes/proteus/notes/p4-training.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/parallels-notes.txt#1 - add change 1730 (text)
+//jwm-depot/homes/proteus/notes/pd-522-dev-notes.txt#2 - edit change 1780 (text)
+//jwm-depot/homes/proteus/notes/pd-530-dev-notes.txt#2 - edit change 1796 (text)
+//jwm-depot/homes/proteus/notes/pd-540-implementation-plan.txt#4 - edit change 1832 (text)
+//jwm-depot/homes/proteus/notes/pd-540-unit-tests-needed.txt#1 - add change 1833 (text)
+//jwm-depot/homes/proteus/notes/pd-600-acceptance-review-mtg.txt#1 - add change 1833 (text)
+//jwm-depot/homes/proteus/notes/pd-600-summary-requirements.txt#2 - edit change 1835 (text)
+//jwm-depot/homes/proteus/notes/pd-issue-2009-08-31.txt#1 - add change 1822 (text)
+//jwm-depot/homes/proteus/notes/pd-schema-review.txt#1 - add change 1833 (text)
+//jwm-depot/homes/proteus/notes/pd-tagging-heirarchy-diff-requirments.txt#1 - add change 1833 (text)
+//jwm-depot/homes/proteus/notes/perl-critic-dev-notes.txt#2 - edit change 1748 (text)
+//jwm-depot/homes/proteus/notes/perl-critic-teamcity-install-proposal.txt#1 - add change 1748 (text)
+//jwm-depot/homes/proteus/notes/perl-debug-build.txt#1 - add change 1720 (text)
+//jwm-depot/homes/proteus/notes/perl-my-decl-hoisting-effect.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/perl-threads.txt#3 - edit change 1845 (text)
+//jwm-depot/homes/proteus/notes/peter-acerno-architecture-meeting.txt#1 - add change 1837 (text)
+//jwm-depot/homes/proteus/notes/peter-coming-attractions.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/peter-talk.txt#24 - edit change 1835 (text)
+//jwm-depot/homes/proteus/notes/pro-apache-book-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/projects.txt#20 - edit change 1730 (text)
+//jwm-depot/homes/proteus/notes/proteus-mysql-install.txt#1 - add change 1832 (text)
+//jwm-depot/homes/proteus/notes/puppet-notes.txt#1 - add change 1670 (text)
+//jwm-depot/homes/proteus/notes/qa-triage-notes.txt#1 - add change 1780 (text)
+//jwm-depot/homes/proteus/notes/reliable-distributed-systems-notes.txt#1 - add change 1720 (text)
+//jwm-depot/homes/proteus/notes/ruby-notes.txt#2 - edit change 1686 (text)
+//jwm-depot/homes/proteus/notes/scrub-gtm-dev-notes.txt#4 - edit change 1850 (text)
+//jwm-depot/homes/proteus/notes/scrubservers-firstpoint-integration-notes.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/scrubservers-sym-link-test.txt#1 - add change 1835 (text)
+//jwm-depot/homes/proteus/notes/ssh-book-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/ssh-key-work.txt#1 - add change 1837 (text)
+//jwm-depot/homes/proteus/notes/testing-meeting-alison-yigong.txt#1 - add change 1711 (text)
+//jwm-depot/homes/proteus/notes/vt-250-dev-notes.txt#1 - add change 1795 (text)
+//jwm-depot/homes/proteus/notes/vt-code-spelunking.txt#3 - edit change 1727 (text)
+//jwm-depot/homes/proteus/notes/vt-cookies.txt#3 - edit change 1703 (text)
+//jwm-depot/homes/proteus/notes/wayne-talk.txt#1 - add change 1678 (text)
+//jwm-depot/homes/proteus/notes/web-tier-exploitation-dev-notes.txt#29 - edit change 1845 (text)
+//jwm-depot/homes/proteus/notes/wiki-review.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/wiki-setup-notes.txt#1 - branch change 1665 (text)
+//jwm-depot/homes/proteus/notes/work-todo.txt#10 - edit change 1852 (text)
+//jwm-depot/homes/proteus/notes/wte-cookie-transform-test-case-design.txt#1 - add change 1840 (text)
+//jwm-depot/homes/proteus/notes/wte-prio-order-bucket-test-case-design.txt#1 - add change 1837 (text)
+//jwm-depot/homes/proteus/notes/xen-notes.txt#1 - add change 1690 (text)
+//jwm-depot/homes/proteus/notes/yield-manager.txt#2 - edit change 1835 (text)
+//jwm-depot/homes/proteus/notes/yigong-talk.txt#3 - edit change 1837 (text)
+//jwm-depot/homes/proteus/notes/yum-notes.txt#3 - edit change 1849 (text)
+//jwm-depot/homes/proteus/src/acerno/slam/Build.PL#2 - edit change 1789 (text)
+//jwm-depot/homes/proteus/src/acerno/slam/bin/filter_adlogs#2 - edit change 1789 (xtext)
+//jwm-depot/homes/proteus/src/acerno/slam/bin/slamad#2 - edit change 1789 (xtext)
+//jwm-depot/homes/proteus/src/acerno/slam/t/test_log#2 - edit change 1789 (text)
+//jwm-depot/homes/proteus/src/emacs/c-m-supl.el#1 - add change 1592 (text)
+//jwm-depot/homes/proteus/src/emacs/jc_ctags.el#1 - add change 1592 (text)
+//jwm-depot/homes/proteus/src/emacs/jc_misc.el#1 - add change 1592 (text)
+//jwm-depot/homes/proteus/src/emacs/p4.el#2 - edit change 1727 (text)
+
+Thu Dec  8 19:04:18 PST 2011
+
+figure out how manage some notes on my work mac proteus, and some on capella.
+Specifically, my oracle notes.
+I want an oracle-concepts-notes.txt and one for the oracle book.
+
+capella-> for f in $(p4 clients | grep notes | perl -ne 's/^Client\s+([\w-]+)\s.*$/\1/; print $_;'); do echo $f; p4 client -o $f | grep //jwm-depot/; done
+jwm-notes-MAIN-capella
+	//jwm-depot/notes/MAIN/... //jwm-notes-MAIN-capella/...
+jwm-notes-capella
+	//jwm-depot/notes/capella/... //jwm-notes-capella/...
+jwm-notes-proteus
+	//jwm-depot/notes/public/... //jwm-notes-proteus/...
+
+Where is jwm-notes-proteus?
+It looks like I have it publishing to /j/notes on proteus.
+So I can just add to /j/notes on capella;
+merge through notes-MAIN into notes/public and everything should be good.
+
+Wed Dec 14 13:04:25 PST 2011
+
+Merge capella notes to notes-MAIN to publish those I want public: {
+
+NB: this is a 2 step process:
+first push (all) changes to MAIN:            //jwm-depot/notes/MAIN/...
+then push just those I want made public into //jwm-depot/notes/public/...
+
+p4 integ: {
+capella-> p4 integ //jwm-depot/notes/capella/... //jwm-depot/notes/MAIN/...
+//jwm-depot/notes/MAIN/bikes.txt#1 - integrate from //jwm-depot/notes/capella/bikes.txt#2
+//jwm-depot/notes/MAIN/blackbelt-factory-java-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/blackbelt-factory-java-notes.txt#1
+//jwm-depot/notes/MAIN/boost-test-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/boost-test-notes.txt#1
+//jwm-depot/notes/MAIN/emacs-notes.txt#2 - integrate from //jwm-depot/notes/capella/emacs-notes.txt#4,#5
+//jwm-depot/notes/MAIN/git-notes.txt#2 - integrate from //jwm-depot/notes/capella/git-notes.txt#6
+//jwm-depot/notes/MAIN/mac-os-x-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/mac-os-x-notes.txt#1
+//jwm-depot/notes/MAIN/mail-dkim-setup-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/mail-dkim-setup-notes.txt#1,#2
+//jwm-depot/notes/MAIN/maintenance-log.txt#1 - integrate from //jwm-depot/notes/capella/maintenance-log.txt#2,#4
+//jwm-depot/notes/MAIN/mysql-capella-setup.txt#1 - integrate from //jwm-depot/notes/capella/mysql-capella-setup.txt#2
+//jwm-depot/notes/MAIN/oracle-concepts-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/oracle-concepts-notes.txt#1
+//jwm-depot/notes/MAIN/p4-depot-layout-plan.txt#1 - integrate from //jwm-depot/notes/capella/p4-depot-layout-plan.txt#2
+//jwm-depot/notes/MAIN/perl-build-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/perl-build-notes.txt#1
+//jwm-depot/notes/MAIN/perl-mmapdb-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/perl-mmapdb-notes.txt#1
+//jwm-depot/notes/MAIN/today-todo.txt#3 - integrate from //jwm-depot/notes/capella/today-todo.txt#7,#14
+//jwm-depot/notes/MAIN/xcode-project-mgmt-guide-notes.txt#1 - branch/sync from //jwm-depot/notes/capella/xcode-project-mgmt-guide-notes.txt#1
+
+}
+
+Follow the recipe in _Practical Perforce_ pg 96: Integrating Changes from Branch to Branch
+
+The advocates using p4 interchanges to see the changelists, and then to integrate
+changelist by changelist going forward.
+
+capella-> p4 interchanges //jwm-depot/notes/capella/... //jwm-depot/notes/MAIN/...
+Change 2084 on 2011/06/15 by jwm@jwm-notes-capella 'notes check point. '
+Change 2098 on 2011/07/12 by jwm@jwm-notes-capella 'check point.  latest trophy mai'
+Change 2100 on 2011/07/18 by jwm@jwm-notes-capella 'check point. '
+Change 2112 on 2011/08/07 by jwm@jwm-notes-capella 'check point. '
+Change 2125 on 2011/08/18 by jwm@jwm-notes-capella 'check point. '
+Change 2127 on 2011/08/21 by jwm@jwm-notes-capella 'check point. '
+Change 2140 on 2011/09/21 by jwm@jwm-notes-capella 'check point. '
+Change 2154 on 2011/12/14 by jwm@jwm-notes-capella 'check point. '
+Change 2155 on 2011/12/14 by jwm@jwm-notes-capella 'check point my notes. '
+
+Then, for each changelist, a sequence of:
+
+capella-> p4 integ //jwm-depot/notes/capella/...@2125 //jwm-depot/notes/MAIN/...
+  ...
+capella-> p4 resolve -as
+capella-> p4 submit
+
+So now all of the changes are pushed to MAIN.
+
+Next, I want to push just the changes I want to share with the public into
+//jwm-depot/notes/public/...
+
+and to do that, I use the recipe at _Practical Perforce_ 
+'Keeping added files from being propogated' and use a branch view.
+
+This branch view:
+
+capella-> p4 branches
+Branch notes-MAIN-to-public 2011/05/20 'Branch specification used to exclude files from the MAIN line of my notes directory to flow into my more public clients. '
+
+p4 branch -o notes-MAIN-to-public > ~/tmp/foo
+{
+# A Perforce Branch Specification.
+#
+#  Branch:      The branch name.
+#  Update:      The date this specification was last modified.
+#  Access:      The date of the last 'integrate' using this branch.
+#  Owner:       The user who created this branch.
+#  Description: A short description of the branch (optional).
+#  Options:     Branch update options: [un]locked.
+#  View:        Lines to map source depot files to target depot files.
+#
+# Use 'p4 help branch' to see more about branch views.
+
+Branch:	notes-MAIN-to-public
+
+Update:	2011/05/20 14:58:37
+
+Access:	2011/05/20 14:58:44
+
+Owner:	jwm
+
+Description:
+	Branch specification used to exclude files from the MAIN line
+	of my notes directory to flow into my more public clients.
+
+Options:	unlocked
+
+View:
+	//jwm-depot/notes/MAIN/... //jwm-depot/notes/public/...
+	-//jwm-depot/notes/MAIN/1password-notes.txt //jwm-depot/notes/public/1password-notes.txt
+	-//jwm-depot/notes/MAIN/21530-propane-costs.txt //jwm-depot/notes/public/21530-propane-costs.txt
+	-//jwm-depot/notes/MAIN/bikes.txt //jwm-depot/notes/public/bikes.txt
+	-//jwm-depot/notes/MAIN/car-search-2011.txt //jwm-depot/notes/public/car-search-2011.txt
+	-//jwm-depot/notes/MAIN/chris-foreman-application.txt //jwm-depot/notes/public/chris-foreman-application.txt
+	-//jwm-depot/notes/MAIN/crate-db-notes.txt //jwm-depot/notes/public/crate-db-notes.txt
+	-//jwm-depot/notes/MAIN/crf450-carb-notes.txt //jwm-depot/notes/public/crf450-carb-notes.txt
+	-//jwm-depot/notes/MAIN/emptech-migration.txt //jwm-depot/notes/public/emptech-migration.txt
+	-//jwm-depot/notes/MAIN/johns-repair-biz-notes.txt //jwm-depot/notes/public/johns-repair-biz-notes.txt
+	-//jwm-depot/notes/MAIN/los-angeles-trip-2010-aug-notes.txt //jwm-depot/notes/public/los-angeles-trip-2010-aug-notes.txt
+	-//jwm-depot/notes/MAIN/mom-fios-notes.txt //jwm-depot/notes/public/mom-fios-notes.txt
+	-//jwm-depot/notes/MAIN/mysql-capella-setup.txt //jwm-depot/notes/public/mysql-capella-setup.txt
+	-//jwm-depot/notes/MAIN/orr-home-network.txt //jwm-depot/notes/public/orr-home-network.txt
+	-//jwm-depot/notes/MAIN/p4-upgrade-notes.txt //jwm-depot/notes/public/p4-upgrade-notes.txt
+	-//jwm-depot/notes/MAIN/peninsulams-mdkuser-proj-notes.txt //jwm-depot/notes/public/peninsulams-mdkuser-proj-notes.txt
+	-//jwm-depot/notes/MAIN/peter-talk.txt //jwm-depot/notes/public/peter-talk.txt
+	-//jwm-depot/notes/MAIN/rd400-notes.txt //jwm-depot/notes/public/rd400-notes.txt
+	-//jwm-depot/notes/MAIN/sayar-legal.txt //jwm-depot/notes/public/sayar-legal.txt
+	-//jwm-depot/notes/MAIN/storage-space-notes.txt //jwm-depot/notes/public/storage-space-notes.txt
+	-//jwm-depot/notes/MAIN/stuff-I-want.txt //jwm-depot/notes/public/stuff-I-want.txt
+	-//jwm-depot/notes/MAIN/today-todo.txt //jwm-depot/notes/public/today-todo.txt
+
+
+}
+
+so integrate through this branch view notes-MAIN-to-public into public
+on which client?  A: jwm-notes-public-capella
+
+capella-> p4 interchanges -b notes-MAIN-to-public: {
+Change 2156 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes change into MAIN '
+Change 2157 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+Change 2158 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+Change 2159 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+Change 2160 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+Change 2162 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+Change 2163 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+Change 2164 on 2011/12/14 by jwm@jwm-notes-MAIN-capella 'merge notes through MAIN '
+}
+
+capella-> p4 integ -b notes-MAIN-to-public {
+//jwm-depot/notes/public/blackbelt-factory-java-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/blackbelt-factory-java-notes.txt#1
+//jwm-depot/notes/public/boost-test-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/boost-test-notes.txt#1
+//jwm-depot/notes/public/emacs-notes.txt#1 - integrate from //jwm-depot/notes/MAIN/emacs-notes.txt#3,#4
+//jwm-depot/notes/public/git-notes.txt#1 - integrate from //jwm-depot/notes/MAIN/git-notes.txt#3
+//jwm-depot/notes/public/mac-os-x-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/mac-os-x-notes.txt#1
+//jwm-depot/notes/public/mail-dkim-setup-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/mail-dkim-setup-notes.txt#1,#2
+//jwm-depot/notes/public/maintenance-log.txt#1 - integrate from //jwm-depot/notes/MAIN/maintenance-log.txt#2,#4
+//jwm-depot/notes/public/oracle-concepts-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/oracle-concepts-notes.txt#1
+//jwm-depot/notes/public/p4-depot-layout-plan.txt#1 - integrate from //jwm-depot/notes/MAIN/p4-depot-layout-plan.txt#2
+//jwm-depot/notes/public/perl-build-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/perl-build-notes.txt#1
+//jwm-depot/notes/public/perl-mmapdb-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/perl-mmapdb-notes.txt#1
+//jwm-depot/notes/public/xcode-project-mgmt-guide-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/xcode-project-mgmt-guide-notes.txt#1
+}
+}
+
+Next, merge public changes from proteus back through MAIN and onto capella {
+create a MAIN client on proteus:  jwm-notes-MAIN-proteus
+
+submit changes in public notes:
+Change 2166 submitted.
+
+use the branch view to find changes back to MAIN:
+proteus-> pwd && p4 interchanges -r -b notes-MAIN-to-public
+/j/MAIN-notes
+Change 2166 on 2011/12/14 by jwm@jwm-notes-proteus 'add from proteus public notes. '
+
+I want all of those, so just integrate and resolve: {
+proteus-> p4 integ -n -r -b notes-MAIN-to-public
+//jwm-depot/notes/MAIN/git-notes.txt#3 - integrate from //jwm-depot/notes/public/git-notes.txt#3
+//jwm-depot/notes/MAIN/hadoop-in-action-book.txt#1 - branch/sync from //jwm-depot/notes/public/hadoop-in-action-book.txt#1
+//jwm-depot/notes/MAIN/text-processing-map-reduce-book.txt#1 - branch/sync from //jwm-depot/notes/public/text-processing-map-reduce-book.txt#1
+//jwm-depot/notes/MAIN/xcode-notes.txt#1 - branch/sync from //jwm-depot/notes/public/xcode-notes.txt#1
+
+proteus-> p4 resolve -as
+/j/MAIN-notes/git-notes.txt - merging //jwm-depot/notes/public/git-notes.txt#3
+Diff chunks: 0 yours + 2 theirs + 0 both + 0 conflicting
+//jwm-notes-MAIN-proteus/git-notes.txt - copy from //jwm-depot/notes/public/git-notes.txt
+proteus-> p4 opened
+//jwm-depot/notes/MAIN/git-notes.txt#3 - integrate default change (text)
+//jwm-depot/notes/MAIN/hadoop-in-action-book.txt#1 - branch default change (text)
+//jwm-depot/notes/MAIN/text-processing-map-reduce-book.txt#1 - branch default change (text)
+//jwm-depot/notes/MAIN/xcode-notes.txt#1 - branch default change (text)
+proteus-> p4 submit
+Change 2167 created with 4 open file(s).
+Submitting change 2167.
+Locking 4 files ...
+integrate //jwm-depot/notes/MAIN/git-notes.txt#4
+branch //jwm-depot/notes/MAIN/hadoop-in-action-book.txt#1
+branch //jwm-depot/notes/MAIN/text-processing-map-reduce-book.txt#1
+branch //jwm-depot/notes/MAIN/xcode-notes.txt#1
+Change 2167 submitted.
+
+Now merge from main into capella notes:
+
+capella-> pwd && p4 integ -n //jwm-depot/notes/MAIN/... //jwm-depot/notes/capella/...
+/j/notes
+//jwm-depot/notes/capella/git-notes.txt#6 - integrate from //jwm-depot/notes/MAIN/git-notes.txt#4
+//jwm-depot/notes/capella/hadoop-in-action-book.txt#1 - branch/sync from //jwm-depot/notes/MAIN/hadoop-in-action-book.txt#1
+//jwm-depot/notes/capella/text-processing-map-reduce-book.txt#1 - branch/sync from //jwm-depot/notes/MAIN/text-processing-map-reduce-book.txt#1
+//jwm-depot/notes/capella/xcode-notes.txt#1 - branch/sync from //jwm-depot/notes/MAIN/xcode-notes.txt#1
+
+capella-> p4 resolve -as
+/j/notes/git-notes.txt - merging //jwm-depot/notes/MAIN/git-notes.txt#4
+Diff chunks: 0 yours + 2 theirs + 0 both + 0 conflicting
+//jwm-notes-capella/git-notes.txt - copy from //jwm-depot/notes/MAIN/git-notes.txt
+
+and submit:
+capella-> p4 submit
+Change 2168 created with 4 open file(s).
+Submitting change 2168.
+Locking 4 files ...
+integrate //jwm-depot/notes/capella/git-notes.txt#7
+branch //jwm-depot/notes/capella/hadoop-in-action-book.txt#1
+branch //jwm-depot/notes/capella/text-processing-map-reduce-book.txt#1
+branch //jwm-depot/notes/capella/xcode-notes.txt#1
+Change 2168 submitted.
+
+}
+
+----------------
+
+Consulting client trees are stored under:
+
+//jwm-depot/clients/...
+by client.
+
+Invino will be rooted at:
+
+//jwm-depot/clients/invino/...
+
+----
+
+invino jwm user:
+  branched from //jwm-depot/homes/MAIN/... //jwm-depot/homes/dev2-invino/...
+  accessed via client: jwm-home-dev2-invino
+
+jeffs public notes
+
+----------------
+Sun May 27 10:12:18 IDT 2012
+
+Merge my notes updated on proteus back through the public view so they are shared everywhere.
+This means merging from the public view in the client on proteus: 
+jwm-notes-proteus
+	//jwm-depot/notes/public/... //jwm-notes-proteus/...
+back to MAIN
+I have a client with the MAIN on proteus:
+	//jwm-depot/notes/MAIN/... //jwm-notes-MAIN-proteus/...
+so that is just an integ:
+sfo-mp8n0-> p4 integ //jwm-depot/notes/public/... //jwm-depot/notes/MAIN/...
+
+Now I need to merge them from MAIN to the capella branch where I do most of my work:
+p4 integ //jwm-depot/notes/MAIN/... //jwm-depot/notes/capella/...
+

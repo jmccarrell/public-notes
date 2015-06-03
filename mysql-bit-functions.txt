@@ -1,0 +1,28 @@
+----
+
+mysql notes on bit functions.
+We have:
+
+bit_and
+bit_count
+bit_length
+bit_or
+bit_xor
+
+default()       return the default value for a column.
+
+so if the default value sets every bit, then we can write expressions that compute
+if every bit is set in a generic way.
+
+<=>             null-safe equal to operator
+
+export_set()    Return a string such that for every bit set in the value bits, you get an on
+                string and for every unset bit, you get an off string
+
+field()
+find_in_set()   Return the index position of the first argument within the second argument
+
+make_set()
+
+group_concat()  what does this do?
+name_const()    internal function

@@ -1,0 +1,994 @@
+variables must start with an initial capital letter to distinguish them from atoms.
+variables in erlang are immutable; once they have a value; no other value can be assigned.
+
+1> X=45.
+45
+2> X=26.
+** exception error: no match of right hand side value 26
+
+integers are represented to arbitray precision.
+There is no notion of size of integer, etc.
+
+atoms spring into existence as needed.
+  these are interned constants, like lisp
+1> jeff.
+jeff
+2> X = jeff.
+jeff
+
+
+tuples
+  fixed number of items; analogous to structs in C
+  anonymous; there is no 'naming' of a tuple like a typedef in C
+  by convention, contain an atom as the first element to identify the data
+  pattern matching over tuples must match in the number of elements.
+
+5> F = {firstname, jeff}.
+{firstname,jeff}
+6> L = {lastname, mccarrell}.
+{lastname,mccarrell}
+7> P = {person, F, L}.
+{person,{firstname,jeff},{lastname,mccarrell}}
+
+% extract the first name of P
+8> {_,{_,Who},{_,_}} = P.
+{person,{firstname,jeff},{lastname,mccarrell}}
+9> Who.
+jeff
+
+_ here is an 'anonyous variable'.
+anonymous variables are allowed to bind to several values in a pattern.
+
+lists
+
+the list literal syntax uses [ ].
+lists look a little lisp-ish here as well.
+There is a form of the list literal syntax that explicitly references
+the head and tail of the list, using | as syntax.
+
+[] is the empty list. 
+
+a_list = [ <one or more items in the head> | T ]
+where T is the tail of the list.
+a footnote in Armstrong's book calls out the car, cdr, cons'tness of this construct.
+
+one gets things out of the list by applying a pattern and unbound variables to it.
+
+If L is a list and X and Y are unbound variables, then 
+[X|Y] = L
+will extract the head of L into X and the tail of L into Y.
+
+Just as in the list literal, several elements of L can be bound in a single pattern:
+[E1,E2|Y] = L
+extracts the first 2 element of L.
+
+Strings
+
+  "Strictly speaking, there are no strings in Erlang.
+   Strings are just lists of integers."
+
+The usual encoding these lists are assumed to be in is Latin-1:
+
+3> [74,101,102,102].
+"Jeff"
+
+"Dollar syntax" gives the integer (in Latin-1) of the value:
+4> [74,101,$f,102].
+"Jeff"
+
+Pattern Matching Redux
+
+Pattern          Term            Result
+{X, abc}         {123, abc}      X gets bound to 123, if X was unbound, else error
+
+{X,Y,Z}          {222, def, "cat"}
+                                 X gets integer 222
+                                 Y gets atom def
+                                 Z gets list [ $c, $a, $t ]
+
+{X,Y}            {333, ghi, "cat"}
+                                 fails; tuples have different cardinality;
+                                 Armstrong says: tuples have different shape
+
+X                true            X gets bound to the atom true
+
+{X,Y,X}          {{abc,12},42,{abc,12}}
+                                 Succeeds; X is evaluated twice, but to the same
+                                 tuple (but to the same storage?)
+                                 X gets {abc,12}
+                                 Y gets 42
+
+so how about this
+
+Z={abc,12}.
+{X,X} = {{abc,12},Z}.
+
+Succeeds.  So the evaluation is on the values, not the storage locations.
+4> Z={abc,12}.
+{abc,12}
+5> {X,X} = {{abc,12},Z}.
+{{abc,12},{abc,12}}
+6> X.
+{abc,12}
+
+{X,Y,X}          {{abc,12},42,true}
+                                fails.  X cannot be bound to true and {abc,12} at the same time.
+                                ** exception error: no match of right hand side value {{abc,12},42,true}
+
+[H|T]            [1,2,3,4,5]    succeeds. H => 1; T => [2,3,4,5]
+
+[H|T]            "cat"          succeeds.  H => $c; T => [ $a, $t ]
+1> [H|T] = "cat".
+"cat"
+2> H.
+99
+3> T.
+"at"
+
+[A,B,C|T]        [a,b,c,d,e,f]
+                                succeeds. A => a; B => b; C => c; T => [ d, e, f]
+
+
+N.B. The shell command
+
+f()
+
+tells the shell to forget any bindings it has:
+3> T.
+"at"
+4> f().
+ok
+5> T.
+* 1: variable 'T' is unbound
+
+----------------
+
+ch3 sequential programming, aka functions
+functions
+
+polymorphism is implemented in erlang functions as 'clauses'
+separated by ;
+which are declared with distinct, mutually exclusive formal arguments.
+then the pattern matcher at runtime matches actual parameters
+against those and picks the best match.
+the ordering of the clauses in the function declaration,
+while semantically mutually exclusive and thus order independent,
+is significant as the erlang pattern matching algorithm tries
+each clause in the order presented in the function.
+So more recently 'hit' clauses should be ordered higher in the list.
+
+----
+
+punctuation
+
+there are 3 types of punctuation in erlang:
+
+Commas separate arguments in function calls, data constructors, and patterns.
+
+Periods (followed by whitespace) separate entire functions and expressions in the shell.
+
+Semicolons separate clauses.  We find clauses in several contexts:
+- in function definitions
+- in case, if, try..catch and receive expressions
+
+Whenever we see sets of patterns followed by expressions,
+we will see semicolons as separators:
+
+Pattern1 ->
+  Expression1;
+Pattern2 ->
+  Expression2;
+...
+
+----
+
+functions over lists
+
+in pattern matching to invoke list functions, there are 2 cases:
+-- the empty list
+-- the non-empty list
+
+so list processing functions oftne have 2 clauses
+
+list_func([H|T]) -> compute_head(H) + list_func(T);
+list_func([]) -> 0.
+
+for tail recursion.
+Given the ordering of pattern match attempts, it makes sense to
+put the empty list case last in the clauses.
+
+----
+
+funs
+
+functions in erlang with the same name and different argment arity
+are completely separate functions and have nothing in common, except the name.
+They represent completely separate functions.
+However, erlang programmers leverage this knowledge to group related fucntions.
+
+To wit:
+
+sum(L) -> sum(L, 0).
+
+sum([H|T], N) -> H+N + sum(T);
+sum([], N) -> N.
+
+here sum/1 and sum/2 are distinct;
+the sum/2 function could have been called anything at all and semantically
+it would have worked just fine.
+
+funs are anonymous functions
+
+anonyous functions syntactically are connoted with 
+fun()
+
+this defines an anonymous function, then stores it to Z:
+1> Z = fun(X) -> 2 * X end.
+#Fun<erl_eval.6.13229925>
+
+functions that take functions as arguments,
+or that return functions
+are called 'higher-order' functions.
+
+the standard module lists exports several higher order functions,
+prominent among them being:
+
+lists:map(F,L)
+
+which applys the function F to every element of L returning a new list.
+
+lists:filter(P,L)
+
+which returns the list for which P(E) is true over L.
+
+higher order functions that do something to every element of the list
+are called 'list-at-a-time' functions.
+
+Of course, anonymous functions can be used to create other functions.
+As an example, consider creating a function that knows the contents of some
+static list, and thus creates at run time a functional interface to list
+membership of those data:
+
+lists:member(X, L)
+returns true if X is a member of list L
+
+Fruit = [ apple, pear, banana ].
+
+% return a function that takes a scalar
+%  bind the list at function creation time into the function definition
+MakeCheckFruit = fun(L) -> fun(X) -> lists:member(X, L) end end.
+
+23> T = MakeCheckFruit(Fruit).
+#Fun<erl_eval.6.13229925>
+24> T(apple).
+true
+25> T(pear). 
+true
+26> T(shoe).
+false
+
+----------------
+
+control structures
+
+a for loop in erlang (from lib_misc.erl)
+
+for(Max, Max, F) -> [F(Max)];
+for(I,   Max, F) -> [F(I)|for(I+1, Max, F)].
+
+Note that I cannot get this definition to work:
+
+4> for(Max, Max, F) -> [F(Max)];
+4> for(I,   Max, F) -> [F(I)|for(I+1, Max, F)].
+* 1: syntax error before: '->'
+
+Nor is there a lib_misc.erl in my distribution:
+4> lib_misc:for(1,10,fun(X)->X end).
+** exception error: undefined function lib_misc:for/3
+
+that is because lib_misc is probably in the erlang book distribution.
+
+----
+
+redux over sum and map, stored in shop2.erl
+
+recall the defintion of the shopping list:
+
+Buy = [{oranges, 4}, {newspaper, 1}, {apples, 10}, {pears, 6}, {milk, 3}]
+
+----------------
+
+List Comprehension
+
+A list comprehension is a mechanism to create lists without using map, filters, or funs
+(aka anonymous functions).
+
+List comprehensions shorted programs making them easier to understand.
+
+Notationally:
+
+  [ F(X) || X <- L ]
+  
+means
+  the list of F(X) where each X comes from L
+
+L = [1, 2, 3, 4, 5]. 
+
+So [ 2 * X || X <- L ] gives:
+
+16> [ 2 * X || X <- L].
+[2,4,6,8,10]
+
+%% double the qtys in Buy
+[{Name, 2 * Qty} || {Name, Qty} <- Buy]
+
+18> [{Name, 2 * Qty} || {Name, Qty} <- Buy].
+[{oranges,8},{newspaper,2},{apples,20},{pears,12},{milk,6}]
+
+{Name, Qty}
+  is a pattern that matches each element of the list Buy.
+{Name, 2 * Qty}
+  here is called a 'constructor'
+
+now use list comprehensions to compute the total of our shopping list
+
+replace the name with its cost
+
+[ {shop:cost(A), B} || {A, B} <- Buy ]
+
+create the per item extended cost
+
+[ shop:cost(A) * B || {A, B} <- Buy ]
+
+22> [ shop:cost(A) * B || {A, B} <- Buy ].
+[20,8,20,54,21]
+
+then sum that expression:
+23> lists:sum([ shop:cost(A) * B || {A, B} <- Buy ]).
+123
+
+give this function a name:
+
+total(L) ->
+  lists:sum([ shop:cost(A) * B || {A, B} <- L]).
+
+The most general form of list comprehensions is:
+
+[X || Qualifier1, Qualifier2, ...]
+
+X is an arbitrary expression
+each qualifier is either a generator or a filter.
+
+Generators are written as:
+  Pattern <- ListExpr
+where ListExpr must be an expression that evaluates to a list of terms.
+Filters are either predicates or boolean expressions
+
+One way to define qsort (not efficient, and thus not recommended) is:
+
+-module(lib_misc).
+% -compile(export_all).
+-export([qsort/1]).
+
+qsort([Pivot|T]) ->
+  qsort([X || X <- T, X < Pivot])
+  ++ [Pivot] ++
+  qsort([X || X <- T, X >= Pivot]);
+qsort([]) -> [].
+
+L = [23, 6, 2, 9, 27, 400, 78, 45, 61, 82, 14]
+
+36> lib_misc:qsort(L).
+[2,6,9,14,23,27,45,61,78,82,400]
+
+----
+
+Pythagorean triplets
+Generate all pythagorean triplets
+A pythagorean triplet is a set of integers A, B, C such that
+ A^2 + B^2 == C^2
+
+pythag(N) ->
+  [ {A,B,C} ||
+    A <- lists:seq(1, N),
+    B <- lists:seq(1, N),
+    C <- lists:seq(1, N),
+    A + B + C =< N,
+    A*A + B*B =:= C*C
+  ].
+
+----------------
+
+Arithmetic Expressions and Precedence Table
+
+Number means integer or floating point
+
+OP        DESC                                                        ARG TYPE      PRECEDENCE
+--        ----                                                        --------      ----------
++ X       + X                                                         Number        1
+- X       - X                                                         Number        1
+
+X * Y     X * Y                                                       Number        2
+X / Y     X / Y                                                       Number        2
+bnot X    bitwise not of X                                            Integer       2
+X div Y   integer division of X and Y                                 Integer       2
+X rem Y   integer remainder of X and Y                                Integer       2
+X band Y  bitwise and of X and Y                                      Integer       2
+
+X + Y     X + Y                                                       Number        3
+X - Y     X - Y                                                       Number        3
+X bor Y   bitwise or of X and Y                                       Integer       3
+X bxor Y  bitwise xor of X and Y                                      Integer       3
+X bsl N   bitwise shift left of X by N bits                           Integer       3
+X bsr N   bitwise shift right of X by N bits                          Integer       3
+
+----------------
+
+Guards
+
+Guards are used to increase the power of pattern matching by
+allowing simple tests and comparisons on the variables in the patterns.
+
+Guards can be used in the heads of functions when introduced by the when keyword,
+or any place where an expression is allowed.
+When used as expressions, each guard evals to the atom true or false.
+
+A guard sequence is either a single guard, or a series of guards, separated by ;
+The sequence is true if at least one guard in the series is true.
+
+A guard is a series of guard expressions, separated by ,
+A guard is true when all of the guard expressions are true.
+
+Guards cannot have side effects, so the set of legal guard expressions
+is a subset of legal erlang expressions.
+
+These syntactic forms are legal in guards:
+
+-- the atom true
+-- other constants; these all evaluate to false in a guard expression
+-- calls to guard predicates and to the BIFs (built in functions)
+-- term comparisons
+-- arithmetic expressions
+-- boolean expressions
+-- short circuit boolean expressions
+
+When evaluating guard expressions, Operator Precedence rules are used.
+
+Guard Predicates
+
+PREDICATE                          MEANING
+---------                          -------
+is_atom(X)                         X is an atom
+is_binary(X)                       X is a binary
+is_constant(X)                     X is a constant
+is_float(X)                        X is a float
+is_function(X)                     X is a fun
+is_function(X, N)                  X is a fun with N arguments
+is_integer(X)                      X is an integer
+is_list(X)                         X is a list
+is_number(X)                       X is a number
+is_pid(X)                          X is a process identifier
+is_port(X)                         X is a port
+is_reference(X)                    X is a reference
+is_tuple(X)                        X is a tuple
+is_record(X, Tag)                  X is a record of type Tag
+is_record(X, Tag, N)               X is a record of type Tag and size N
+
+The 'true' guard is used as a catch all at the end of ifs:
+
+if
+  Guard -> Expressions;
+  Guard -> Expressions;
+    ...
+  true  -> Expressions
+end
+
+Guard Built-in Functions
+
+FUNCTION                           MEANING
+--------                           -------
+abs(X)                             absolute value of X
+element(N, X)                      element N of X.  NB X must be a tuple
+float(X)                           convert X, which must be a number, to a float
+hd(X)                              the head of list X
+length(X)                          the length of list X
+node()                             the current node
+node(X)                            the node on which X was created.
+                                   X can be a process, an identifier, a reference or a port
+round(X)                           converts X, which must be a number, to an integer
+self()                             the process identifier of the current process
+size(X)                            the size of X, which can be a tuple or a binary
+trunc(X)                           truncates X, which must be a number, to an integer
+tl(X)                              the tail of list X
+
+Records
+
+When tuples get too large, the positions of the arguments gets unwieldy,
+so another mechanism to name structures is the 'record'.
+Records can define key / value pairs that are shared across functions,
+and across compilation units in .hrl files.
+
+rr  "read record"
+is used in the shell to load in record definitions
+
+3> rr("records.hrl").
+[todo]
+
+
+Exceptions
+
+an exception can be raised by 
+
+throw(Exception)
+exit(Exception)
+erlang:error(Exception)
+
+Exceptions are caught with:
+
+try .. catch
+or
+catch
+
+----------------------------------------------------------------
+
+emacs erlang mode
+installed.
+
+How do I insert a template, like the standard module template?
+  use the Emacs menu item
+
+----------------------------------------------------------------
+
+Chapter 5: Advanced Sequential Programming
+
+Misc
+
+apply: call a function whose module or name is not known until run time
+
+attributes: module attributes
+  2 types: predefined; user defined.
+  these module attrs must be placed before any function defs
+
+Predefined Attributes
+-module(modname)
+  must be first attr in the file
+  by convention, code for modname is stored in modname.erl
+    if not, dynamic code loading wont work
+-import(Mod, [Name1/Arity1, Name2/Arity2...])
+-export([Name1/Arity1, Name2/Arity2...])
+  only exported functions can be called from outside the module
+-compile(Options)
+  -compile(export_all) is often used during debugging
+-vsn(Version)
+  Version is any literal term.  No convention is defined for it.
+
+User defined Attributes
+The values are compiled into the module and stored;
+they can be accessed at run time.
+Assuming a module: attrs.erl,
+attrs:module_info()
+will produce a list of all module attributes.
+
+block expressions
+
+
+begin ... end
+(no period)
+can be used anywhere a single expression is expected.
+
+boolean expressions
+There is no explicit boolean type.
+Instead, the atoms true and false are given special interpretation.
+
+Character set
+All erlang programs are assumed to encoded in IS0-8859-1 (Latin-1).
+
+    "Internally Erlang has no character data type.  Strings don't really exist but instead
+    are represented by lists of integers.  Unicode strings can be represented by lists of
+    integers without any problems, though there is limited support for parsing and
+    generating Unicode files from the Erlang lists of integers."
+
+epp  Erlang pre-processor
+  expands macros and includes files.
+
+one can look at the output of epp with:
+
+compile:file(M, ['P'])
+where M.erl is the code and M.P will be produced post-expansion.
+
+
+Epp
+
+epp is the macro expander, the analog of m4.
+To see expanded output use:
+-compile:file(M,['P']).
+this compiles module M.erl and produces an expanded listing in M.P.
+
+
+Expression Sequence
+
+the equivalent to lisp's progn is comma separated expressions.
+
+
+----------------
+
+How do I read the local documentation for erlang?
+e.g. what is documented for lists:map?
+
+the pattern:
+
+erl -man io
+
+doesn't work on protues.
+The manual says this means the docs are not installed in ascii;
+I guess I need to read the html version.
+
+As I have version R13B04, this means I want to look at:
+http://www.erlang.org/documentation/doc-5.7.5/doc/index.html
+
+Then I can get to the documentation.
+
+----------------
+
+
+Function References
+
+one can refer to a function by name using notation:
+
+fun LocalFunc/Arity
+in the current module
+
+or
+fun Mod:RemoteFunc/Arity
+in module Mod.
+
+
+Include Files
+Files can be included with syntax:
+
+-include(Filename).
+
+the convention is that include files have extension .hrl
+Filename can be relative or absolute.
+
+-include_lib("kernel/include/file.hrl").
+will search the installation for the file.
+
+List Ops ++ and --
+
+list addition and subtraction
+
+A ++ B appends B to A.
+A -- B removes elements of B in A.
+  each symbol K in B is removed from A by count
+  If there are 4 K's in B, then 4 K's will be removed from A.
+
+++ patterns can be used in strings.
+(jwm: huh?)
+f("begin" ++ T) -> ...
+f("end"   ++ T) -> ...
+
+the first clause expands into
+[$b,$e,$g,$i,$n|T]
+
+
+Macros
+
+epp expands macros.  See epp above for how view the expanded macros.
+
+-define(Constant, Replacement)
+-define(Func(Var1, Var2..., Varn), Replacement)
+
+Expanded when an expression of the form
+?MacroName
+is found.  Vars in the macro definition match complete forms in the corresponding
+site of the macro call.
+
+Predefined macros:
+?FILE   -> current filename
+?MODULE -> current module
+?LINE   -> current line number
+
+Control flow in macros
+-undef(Macro).
+-ifdef(Macro).    eval only if Macro has been defined
+-ifndef(Macro).
+-else
+-endif
+
+A TRACE macro
+
+
+{
+-module(m1).
+-export([start/0]).
+
+-ifdef(debug).
+-define(TRACE(X), io:format("TRACE ~p:~p ~p:~n",[?MODULE, ?LINE, X])).
+-else.
+-define(TRACE(X), void).
+-endif.
+
+start() -> loop(5).
+
+loop(0) ->
+    void;
+loop(N) ->
+    ?TRACE(N),
+    loop(N - 1).
+}
+
+To compile this with tracing, use c/2 like this:
+c(m1, {d, debug}).
+
+2> c(m1, {d, debug}).
+{ok,m1}
+3> m1:start().
+TRACE m1:15 5:
+TRACE m1:15 4:
+TRACE m1:15 3:
+TRACE m1:15 2:
+TRACE m1:15 1:
+void
+
+
+Match Operator in Patterns
+
+Consider this code fragment:
+
+func1([{tag1, A, B}|T]) ->
+    ...
+    ... f(..., {tag1, A, B}, ...),
+    ...
+
+The run time system will rebuild the term {tag1, A, B} in the call to f.
+A much more efficient way is to store the match in a variable:
+
+func1([{tag1, A, B}=Z|T]) ->
+    ...
+    ... f(..., Z, ...),
+    ...
+
+This also works when some regrouping is necessary, e.g.:
+
+func1([{tag, {one, A}=Z1, B}=Z2]) ->
+    ...
+    ... f(..., Z2, ...),
+    ... g(..., Z1, ...),
+    ...
+
+
+Numbers
+
+integers are arbitrary precision and are limited only to the size of physical memory.
+
+Integer syntaxes (3)
+
+1. Conventional: -1, 256 ...
+2. Base K Integers: written  K#Digits.  So 2#0101000 or 16#deef
+   up to base 36; characters: 1-10, then a-z represent digits.
+3. $Syntax  $C represents the integer code for ascii character C.
+   $ syntax can also use escape sequences; so $\n == newline, $^c == control-C, etc.
+
+Floating point numbers: IEEE 754 64-bit format.
+
+
+Operator Precedence
+
+Operators                                        Associativity
+
+:
+#
+(unary) +, (unary) -, bnot, not
+/, *, div, rem, band, and                        Left associative
++, -, bor, bxor, bsl, bsr, or, xor               Left associative
+++, --                                           Right associative
+==, /=, =<, <, >=, >, =:=, =/=
+andalso
+orelse
+
+
+The Process Dictionary
+
+A per-process global hash, manipulable by the built-in functions / BIFs:
+
+@spec put(Key, Value) -> OldValue.
+  returns undefined on initial set
+
+@spec get(Key) -> Value.
+  return Value or undefined
+
+@spec get() -> [{Key, Value}].
+  return the entire dictionary
+
+@spec get_keys(Value) -> [Key].
+  return the list of keys that have value Value
+
+@spec erase(Key) -> Value.
+  return the value assoicated with Key, and then delete Key/Value association.
+
+@spec erase() -> [{Key, Value}].
+  erase all keys in the dictionary.
+
+Using the process dictionary implies giving up all of the benefits of side-effect free
+programming.  Thus Armstrong advises caution.  One hesitant although approved usage
+pattern is so-called 'write-once' variables:
+
+    If a key acquires a value exactly once and does not change the value, then storing it
+    in the process dictionary is sometimes acceptable.
+
+
+References
+
+Globally unique erlang terms, made with BIF erlang:make_ref().
+
+  3> erlang:make_ref().
+  #Ref<0.0.0.33>
+
+
+Short Circuit Boolean Expressions
+
+the separate operators:
+andalso
+orelse
+will perform short circuit evaluation of their terms.
+a and b as well as  a or b will both evaluate both a and b in all cases.
+
+
+Term Comparisons
+
+There is a total ordering defined on all erlang terms such that:
+
+number < atom < reference < fun < port < pid < tuple < list < binary
+
+Operator                   Meaning
+X >   Y                    X is greater than Y
+X <   Y                         less
+X =<  Y                         equal or less than
+X >=  Y                         greater or equal
+X ==  Y                         equal
+X /=  Y                         not equal
+X =:= Y                         identical to
+X =/= Y                         not identical to
+
+
+Armstrong advises that =:= is preferred to == in almost all cases.
+Likewise,              =/=    over         /=
+
+
+_ Variables
+
+The compiler warns for variables that are defined but not used.
+Naming vars _Var will suppress that warning.
+
+----------------------------------------------------------------
+
+Ch 6  Compiling and Running
+
+3 ways to stop the erlang vm:
+
+^c quit
+erlang:halt().          immediate stop; nothing is given a chance to shut down
+                        Armstrong uses this most often
+q().                    controlled shutdown
+                        q() is a shell alias for init:stop().
+                        flushes all open files, shuts down the db if running,
+                        closes all OTP apps.
+
+Adding to the erlang search path:
+
+code:get_path().
+
+@spec code:add_patha(Dir) -> true | {error, bad_directory}
+               pathz
+  prepend / append Dir to the load path
+
+By convention, path modifications are stored in ~/.erlang.
+or start erl with:
+
+  erl -pa Dir1 -pa Dir2 ... -pz Dir3 -pz Dir4
+
+show what erlang thinks is your home directory
+  9> init:get_argument(home).
+  {ok,[["/Users/jmccarre"]]}
+
+a .erlang file in cwd will override ~/.erlang
+
+To look at the process state, issue the 'user switch command'
+
+control-G:
+
+then you get a prompt to list jobs, etc.
+I guess you continue back.
+
+self() is the PID of the sending process.
+
+----------------------------------------------------------------
+
+Concurrent Programming
+
+Concurrent Primitives
+
+Pid = spawn(Fun)
+  create a new concurrent process
+
+Pid ! Msg
+  send process Pid a message.  Asynchronous.
+  Returns Msg enabling the form:
+    Pid1 ! Pid2 ! Pid3 ! Msg
+
+receive
+  Pattern1 [when Guard1] ->
+    Expression1;
+  Pattern2 [when Guard2] ->
+    Expression2;
+  ...
+end
+
+when there is no match for a message, it is queued for later processing.
+
+To add a timeout
+
+receive
+  Pattern1 [when Guard1] ->
+    Expression1;
+  Pattern2 [when Guard2] ->
+    Expression2;
+  ...
+after Timeout ->
+  TimeoutExpressions
+end
+
+Timeout is in milliseconds
+
+----------------
+
+Detailed semantics of send/receive
+
+send delivers a message to the mailbox of the process, where it is queued.
+The mailbox is examined only when receive is evaluated.
+
+receive works like this:
+- when receive is evalated a timer is started if an 'after' clause exists
+- try to match the first message against Pattern1, Pattern2 ...
+  if a match is found, the expressions are evaluated.  Done.
+- if no patterns match, the first msg is removed from the mailbox and queued in the 'save queue'.
+  the subsequent messages in the mailbox are tried in order.
+- if none of the messages in the mailbox match,
+  the process is suspended pending receipt of the next new message.
+  when that new message arrives, msgs in the save queue are not re-matched;
+  only the new msg is matched.
+- when a msg gets matched, all the msgs in the save queue are put back in the mailbox in order.
+  and the timer, if any, gets cleared.
+- if the timer goes off while waiting for a message,
+  the timeout expressions are evaluated
+  and any msgs in the save queue are put back in order to the mailbox.
+
+----------------
+
+Registered Processes
+
+A mechanism to publish process identifiers.
+The BIFs for registered processes are:
+
+register(AnAtom, Pid)
+  register Pid under the name AnAtom.
+  Fails if AnAtom is already registered.
+
+unregister(AnAtom)
+  NB. If a registered process dies, it is automatically unregistered.
+
+whereis(AnAtom) -> Pid | undefined
+  query whether an atom is registered or not.
+
+registered() -> [AnAtom::atom()]
+  return a list of all registered processes in the system.
+
+The other way to call spawn is with an MFA (module, function, arg list) like this:
+
+spawn(Mod, FuncName, Args)
+  where Args is a list of arguments of the form [Arg1, Arg2, ... ArgN].
+  This allows the system to evolve as new definitions for Mod:FuncName are loaded
+  into the VM via Dynamic Code Loading.
+
+

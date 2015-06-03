@@ -1,0 +1,111 @@
+Matlab tutorials to work through:
+http://www.mathworks.com/academia/student_center/tutorials/launchpad.html
+
+from the university tutorials:
+
+
+Matlab sponsored tutorials
+  I registered for them, and thus I have access to:
+  http://www.mathworks.com/academia/student_center/tutorials/mltutorial_launchpad.html
+
+  DONE Navigating the Matlab Desktop
+  Matlab Fundamentals
+  
+
+
+MIT
+  http://web.mit.edu/afs/.athena/astaff/project/logos/olh/Math/Matlab/TOC.html
+  looks Ok, but is a text (HTML) description of various commands.
+
+Southern Illinois
+  http://www.math.siu.edu/matlab/tutorials.html
+  talks about Matlab in context of various math courses, including Linear Algebra (tutorial 3).
+  Looks useful.
+
+
+there is a matlab search path which is where matlab will look for files.
+
+doc in the command window brings up a documentation browser
+
+all variables are arrays
+  fundamental data type is therefore a matrix
+  the number of dimensions, and the length of each dimension is part of the variable
+
+there are types as well; double is the most common
+
+format long
+format short
+extends the display precision
+
+whos
+in command window shows the data workspace, precisely as is shown in a separate window in the GUI
+
+double clicking on a variable in the workspace browser brings up an editor for that variable.
+
+evaluating a variable in the command window shows a readonly display of that variable.
+
+CREATING VECTORS
+
+two methods of creating an evenly spaced row vector:
+
+colon operator:
+  x = low: dx: hi, eg.   x = 0:2:6
+linspace
+  x = linspace(low, hi, n_segments)
+
+transpose to a column vector:
+  x = x'
+
+semi colon in the command window suppresses the print at the end of the eval.
+useful for commands that generate large output, like
+
+ t = 0:0.1:100;
+
+CREATING MATRICES
+
+column separator:  , or space
+row    separator:  ; or enter
+
+A = [ 1, 2, 3; 4, 5, 6; 7, 8, 9]
+
+ones(3)
+zeros(2, 4)
+rand(2)
+eye(3)
+
+given dimensions of the matrix desired, create matrices of
+all ones, all zeros, or randomly distributed values.
+eye gives the identity matrix.
+
+Array Indexing
+
+indexing is notated with ( )
+column and row numbers start with 1
+
+A = [1 2 3; 4 5 6; 7 8 9]
+k = A(2, 3)
+block1 = A(2, [1 2])
+block1 is [4 5]
+
+syntactically one can do the same with :
+block2 = A(2, 1:2)
+
+One can name an entire row with a :
+row2 = A(2, :)
+
+More on indexing is available in section:
+"Importing and Extracting Data"
+of "Matlab for Problem Solving" tutorial
+
+Concatenate matrices with [ ]
+
+B = [A; A]
+
+transpose works for matrices
+
+Atrans = A'
+
+ternary conditional expressions are not available in matlab.
+
+MATRIX OPERATIONS
+

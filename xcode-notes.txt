@@ -1,0 +1,9 @@
+control-click in any of the main user interface areas to see a list of help articles
+
+code completion in the text editor
+  tab  completes
+  esc  lists alternatives
+  when the completion includes parameters, Control-/ moves to the next placeholder
+
+To view the reference documentation for any symbol, Option-double-click it.
+quick help will close when you start typing again.

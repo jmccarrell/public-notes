@@ -1,0 +1,981 @@
+Notes from the yii guide 1.1.6
+
+Yii Installation
+
+1. Download Yii Framework from yiiframework.com.
+2. Unpack the Yii release file to a Web-accessible directory.
+
+You can do so by accessing the requirement checker script at the following URL in a Web browser:
+http://hostname/path/to/yii/requirements/index.php
+
+Guide to enabling apache / php on os x:
+http://www.procata.com/blog/archives/2007/10/28/working-with-php-5-in-mac-os-x-105/
+{
+turn on web sharing in the "Sharing" preference pane
+comment in the php5_module line in /etc/apache2/httpd.conf
+sudo apachectl restart
+
+open http://localhost/manual/
+now shows the apache manual
+
+NB: error location
+ErrorLog "/private/var/log/apache2/error_log"                                                       
+
+additional apache configuration can be dropped here:
+Include /private/etc/apache2/other/*.conf                                                           
+
+}
+
+----------------
+
+The docs assume:
+
+YiiRoot:  the directory where Yii is installed
+WebRoot:  document root of the web server
+
+----------------
+
+Creating a sample application:
+
+% YiiRoot/framework/yiic webapp WebRoot/testdrive
+
+capella-> /c/usg/yii/framework/yiic webapp /c/usg/www/testdrive
+Create a Web application under '/c/usg/www/testdrive'? [Yes|No] Yes
+  ...
+Your application has been created successfully under /c/usg/www/testdrive.
+
+This worked just fine, except I got a date exception:
+
+  date() [<a href='function.date'>function.date</a>]: It is not safe to rely on the system's timezone settings. You are *required* to use the date.timezone setting or the date_default_timezone_set() function
+
+I find php.ini at:
+/private/etc/php.ini.default
+
+which is ignored by php.  So:
+sudo cp php.ini.default php.ini
+
+then edit php.ini and assign a value to date.timezone, even though
+the comment says it needs no value.
+
+Once I did this, I had a working yii app at:
+
+http://localhost/testdrive/
+
+----------------------------------------------------------------
+
+Attempt to get mysql access working on capella through yii:
+
+Docs say:
+     Note: To use Yii’s database feature, we need to enable PHP PDO extension and the
+     driver-specific PDO extension. For the test-drive application, we need to turn on
+     both the php pdo and php pdo sqlite extensions.
+
+     If you want to try a MySQL database instead, you may use the included MySQL schema
+     file WebRoot/testdrive/protected/data/schema.mysql.sql to create the database.
+
+All of these drivers are installed on capella; verified with php -i
+
+----------------
+
+DONE Get native mysql working on capella.
+  brew install mysql
+
+----------------------------------------------------------------
+
+Implementing CRUD operations
+
+yii-guide section 4.2.1 gives a recipe for defining a DB connection
+that will be activated as needed and shared: 
+
+    We can then access the DB connection via Yii::app()->db which is already activated au-
+    tomatically, unless we explictly configure CDbConnection::autoConnect to be
+    false. Using this approach, the single DB connection can be shared in multiple places
+    in our code.
+
+Common CDbCommand methods for fetching data:
+
+  $rowCount=$command->execute();         // execute the non-query SQL
+  $dataReader=$command->query();         // execute a query SQL
+  $rows=$command->queryAll();            // query and return all rows of result
+  $row=$command->queryRow();             // query and return the first row of result
+  $column=$command->queryColumn();       // query and return the first column of result
+  $value=$command->queryScalar();        // query and return the first field in the first row
+
+
+NB: named SQL parameters:
+
+    // an SQL with two placeholders ":username" and ":email"
+    $sql="INSERT INTO tbl user (username, email) VALUES(:username,:email)";
+    $command=$connection->createCommand($sql);
+
+    // replace the placeholder ":username" with the actual username value 
+    $command->bindParam(":username",$username,PDO::PARAM STR);
+
+    // replace the placeholder ":email" with the actual email value
+    $command->bindParam(":email",$email,PDO::PARAM STR);
+    $command->execute();
+
+    // insert another row with a new set of parameters
+    $command->bindParam(":username",$username2,PDO::PARAM STR);
+    $command->bindParam(":email",$email2,PDO::PARAM STR);
+    $command->execute();
+
+bindParam binds with a PHP variable reference
+bindValue binds with a literal
+
+docs: http://www.php.net/manual/en/pdostatement.bindparam.php
+
+Binding columns
+
+$sql="SELECT username, email FROM tbl user";
+$dataReader=$connection->createCommand($sql)->query(); 
+// bind the 1st column (username) with the $username variable
+$dataReader->bindColumn(1,$username);
+// bind the 2nd column (email) with the $email variable
+$dataReader->bindColumn(2,$email);
+
+while($dataReader->read()!==false) {
+    // $username and $email contain the username and email in the current row
+}
+
+----------------------------------------------------------------
+
+Testing
+
+to get PHPUnit and pear installed, I followed these instructions:
+http://www.newmediacampaigns.com/page/install-pear-phpunit-xdebug-on-macosx-snow-leopard
+
+but that failed
+curl http://pear.php.net/go-pear | sudo php
+  ...
+PHP Fatal error:  Cannot redeclare _PEAR_call_destructors() (previously declared in /usr/local/temp/PEAR.php:765) in /usr/local/temp/temp/PEAR.php on line 777
+
+read the Selenium docs:
+  http://seleniumhq.org/docs/
+and the php unit docs
+
+----------------------------------------------------------------
+
+Special Topics
+
+URL rewriting
+there is a recipe for hiding index.php in section 8.2.6
+
+Authentication and Authorization
+--------------------------------
+
+    The central piece in the Yii auth framework is a pre-declared user application
+    component which is an object implementing the [IWebUser] interface. The user component
+    represents the persistent identity information for the current user. We can access it
+    at any place using Yii::app()->user.
+
+PHP session as persistent storage
+  pursue this notion
+  http://www.php.net/manual/en/session.configuration.php
+  http://www.php.net/manual/en/refs.basic.session.php
+
+read the wiki article about role based access control: 
+  http://en.wikipedia.org/wiki/Role-based_access_control
+
+----------------------------------------------------------------
+
+Logging
+
+2 primitives:
+
+  Yii::log($message, $level, $category);
+  Yii::trace($message, $category);
+
+category is a string of the form xxx.yyy.zzz
+message level is one of:
+  trace
+  info
+  profile
+  warning
+  error
+
+log messages get routed with CLogRouter, which is configured to route msgs to persistent
+storage.  CLogRouter manages a set of "log routes".  Each log route represents a single
+log destination. Messages sent along a log route can be filtered according to their levels
+and categories.
+
+     Info: Message routing occurs at the end of the current request cycle when the
+     onEndRequest event is raised. To explicitly terminate the processing of the current
+     request, call CApplication::end() instead of die() or exit(), because CApplica-
+     tion::end() will raise the onEndRequest event so that the messages can be properly
+     logged.
+
+code can be profiled by inserting 
+
+Yii::beginProfile('blockID');
+  ... code to profile
+Yii::endProfile('blockID');
+
+all sql code can be profiled with:
+
+CDbConnection::enableProfiling set to true
+
+----------------------------------------------------------------
+
+Error Handling
+
+an application registers both a handleError method for PHP warnings and notices,
+as well as a handleException method for uncaught exceptions.
+
+----------------------------------------------------------------
+
+Alternative syntax
+
+The user guide hints that the Prado templating engine is fast.
+Maybe we should use it.
+
+----------------------------------------------------------------
+
+Console apps
+
+the console framework supports limit option parsing, and little else.
+It doesn't seem to provide a lot of value to me.
+
+----------------------------------------------------------------
+
+Security
+
+Cross site scripting: XSS
+  Prevent users from injecting malicious html/javascript/flash ...
+  Yii incorporates HTML purifier:
+    http://htmlpurifier.org/
+  which is encapsulated by the CHtmlPurifier yii class.
+  CHtmlPurifier can be used either as a filter, or as a widget.
+
+Cross site request forgery (CSRF)
+  http://en.wikipedia.org/wiki/Cross-site_request_forgery
+  http://www.cgisecurity.com/csrf-faq.html
+  pronounced 'sea-surf'
+  CSRF can be prevented by requiring all state-changing operations (not GETs)
+  to contain a secret that is associated with the user, and preferably, is limited
+  in validity over time.
+
+  Yii's CSRF protection generates a random cookie value and compares that value
+  on each POST.  To use it, we need CHtml::form to generate the HTML form tags.
+  And we have to enable this feature.
+
+Cookie Attacks
+  yii provides cookie validation via HMAC.
+  Have to enable this feature.
+  And use yii's cookies collection, rather than parsing $_COOKIES ourselves.
+
+----------------------------------------------------------------
+
+Performance Tuning
+
+enable APC
+disable debugging
+use yiilite.php instead of yii.php
+  merges some commonly used classes
+  strips comments, trace stmts
+
+caching techniques:
+  data caching
+  page fragment caching
+
+Active Record parses the DB schema, so if we use that, turn on schema caching.
+
+combining javascript
+  yii's scriptMap feature can be used to alias many disparate files (like jQuery files)
+  to a single resource, so it gets loaded exactly once.
+
+load jquery from google servers: there is a recipe for this in section 8.12.6
+
+----------------------------------------------------------------
+
+figure out how to get a debugging environment set up without pear to install xdebug
+
+
+http://stackoverflow.com/questions/80351/php-debugging-on-os-x-hopeless
+  describes copying the xdebug.so from activestate
+http://speedtech.it/blog/2009/05/10/debugging-a-codeigniter-application-with-firephp/
+
+----------------------------------------------------------------
+
+Sat Jan 29 17:26:45 PST 2011
+
+Completing the installation of pear, phpunit and xdebug.
+After returning to this task, go-pear.php was updated so it worked.
+I then followed the directions to validate that pear was installed correctly: {
+capella-> pear version
+PEAR Version: 1.9.1
+PHP Version: 5.3.3
+Zend Engine Version: 2.3.0
+Running on: Darwin capella.local 10.6.0 Darwin Kernel Version 10.6.0: Wed Nov 10 18:13:17 PST 2010; root:xnu-1504.9.26~3/RELEASE_I386 i386
+capella-> pear config-get php_dir
+/usr/local/PEAR
+capella-> php --ini | more 
+Configuration File (php.ini) Path: /etc
+Loaded Configuration File:         /private/etc/php.ini
+Scan for additional .ini files in: (none)
+Additional .ini files parsed:      (none)
+capella-> php -c /etc/php.ini -r 'echo get_include_path()."\n";'
+.:/usr/local/PEAR
+capella-> cat > /tmp/check_pear.php
+<?php
+require_once 'System.php';
+var_dump(class_exists('System'));
+?>
+capella-> php < !$
+php < /tmp/check_pear.php
+bool(true)
+}
+
+
+directions to install these are at
+http://www.newmediacampaigns.com/page/install-pear-phpunit-xdebug-on-macosx-snow-leopard
+and
+http://superkibitz.com/node/127
+
+I followed superkibitz:
+
+A question arises as to use PhpUnit or PhpUnit2.
+Try googling for a recommendation:
+Ok, it looks like Unit2 was an old name that is now subsumed by Unit.
+According to http://pear.phpunit.de/  PhpUnit is recommended for php 5.
+
+pear.phpunit.de says: {
+
+Registering the channel:
+pear channel-discover pear.phpunit.de
+
+Listing available packages:
+pear remote-list -c phpunit
+
+Installing a package:
+pear install phpunit/package_name
+
+Installing a specific version/stability:
+pear install phpunit/package_name-1.0.0
+pear install phpunit/package_name-beta
+
+Receiving updates via a feed:
+http://pear.phpunit.de/feed.xml
+
+}
+
+remote-list gives: {
+capella-> pear remote-list -c phpunit
+Channel phpunit Available packages:
+===================================
+Package            Version
+DbUnit             1.0.0
+File_Iterator      1.2.3
+Object_Freezer     1.0.0
+PHPUnit            3.5.10
+PHPUnit_MockObject 1.0.6
+PHPUnit_Selenium   1.0.2
+PHP_CodeBrowser    1.0.0
+PHP_CodeCoverage   1.0.3
+PHP_Timer          1.0.0
+PHP_TokenStream    1.0.1
+Text_Template      1.1.0
+bytekit            1.1.1
+phpUnderControl    -n/a-
+phpcpd             1.3.2
+phpdcd             -n/a-
+phploc             1.6.1
+test_helpers       1.1.0
+}
+
+
+Looks like the initial install fails because of dependencies required from other channels: {
+
+capella-> sudo pear install phpunit/PHPUnit
+Unknown remote channel: pear.symfony-project.com
+Unknown remote channel: pear.symfony-project.com
+Unknown remote channel: components.ez.no
+Unknown remote channel: components.ez.no
+phpunit/PHPUnit requires package "channel://pear.symfony-project.com/YAML" (version >= 1.0.2)
+phpunit/PHPUnit can optionally use PHP extension "dbus"
+phpunit/DbUnit requires package "channel://pear.symfony-project.com/YAML" (version >= 1.0.2)
+phpunit/PHP_CodeCoverage requires package "channel://components.ez.no/ConsoleTools" (version >= 1.6)
+phpunit/PHP_CodeCoverage can optionally use PHP extension "xdebug" (version >= 2.0.5)
+phpunit/PHP_TokenStream requires package "channel://components.ez.no/ConsoleTools" (version >= 1.6)
+  ...
+install ok: channel://pear.phpunit.de/File_Iterator-1.2.3
+install ok: channel://pear.phpunit.de/Text_Template-1.1.0
+install ok: channel://pear.phpunit.de/PHP_Timer-1.0.0
+install ok: channel://pear.phpunit.de/PHPUnit_Selenium-1.0.2
+install ok: channel://pear.phpunit.de/PHPUnit_MockObject-1.0.6
+
+capella-> pear list -a
+Installed packages, channel __uri:
+==================================
+(no packages installed)
+
+Installed packages, channel doc.php.net:
+========================================
+(no packages installed)
+
+Installed packages, channel pear.php.net:
+=========================================
+Package          Version State
+Archive_Tar      1.3.7   stable
+Console_Getopt   1.3.0   stable
+PEAR             1.9.1   stable
+Structures_Graph 1.0.4   stable
+
+Installed packages, channel pear.phpunit.de:
+============================================
+Package            Version State
+File_Iterator      1.2.3   stable
+PHPUnit_MockObject 1.0.6   stable
+PHPUnit_Selenium   1.0.2   stable
+PHP_Timer          1.0.0   stable
+Text_Template      1.1.0   stable
+
+Installed packages, channel pecl.php.net:
+=========================================
+(no packages installed)
+
+}
+
+so add the symfony channel and try again:
+
+sudo pear channel-discover pear.symfony-project.com
+this worked, so add components.ez.no {
+capella-> sudo pear channel-discover components.ez.no
+Adding Channel "components.ez.no" succeeded
+Discovery of channel "components.ez.no" succeeded
+capella-> sudo pear install phpunit/PHPUnit
+phpunit/PHPUnit can optionally use PHP extension "dbus"
+phpunit/PHP_CodeCoverage can optionally use PHP extension "xdebug" (version >= 2.0.5)
+downloading PHPUnit-3.5.10.tgz ...
+Starting to download PHPUnit-3.5.10.tgz (117,454 bytes)
+.........................done: 117,454 bytes
+downloading PHP_CodeCoverage-1.0.3.tgz ...
+Starting to download PHP_CodeCoverage-1.0.3.tgz (114,232 bytes)
+...done: 114,232 bytes
+downloading ConsoleTools-1.6.1.tgz ...
+Starting to download ConsoleTools-1.6.1.tgz (869,994 bytes)
+...done: 869,994 bytes
+downloading PHP_TokenStream-1.0.1.tgz ...
+Starting to download PHP_TokenStream-1.0.1.tgz (7,250 bytes)
+...done: 7,250 bytes
+downloading Base-1.8.tgz ...
+Starting to download Base-1.8.tgz (236,357 bytes)
+...done: 236,357 bytes
+install ok: channel://components.ez.no/Base-1.8
+install ok: channel://components.ez.no/ConsoleTools-1.6.1
+install ok: channel://pear.phpunit.de/PHP_TokenStream-1.0.1
+install ok: channel://pear.phpunit.de/PHP_CodeCoverage-1.0.3
+install ok: channel://pear.phpunit.de/PHPUnit-3.5.10
+}
+
+Now install XDebug from ActiveState
+
+copy the .so, and restart apache:
+capella-> sudo /usr/sbin/apachectl restart
+
+Then check installation with:
+
+php -i | grep -i xdebug
+or
+php --re xdebug
+
+So I have now fully installed phpunit and xdebug it appears.
+
+Go back to the testing section of the yii guide and follow through now.
+
+yii testing also recommends installing Selenium Remote Control:
+but I defer this goal until I am ready to do functional testing.
+
+I need to read about phpunit:
+http://www.phpunit.de/manual/current/en/index.html
+
+PhpUnit notes:
+
+Conventions:
+
+- the test for Class X is named XTest
+- XTest inherits (most of the time) from PHPUnit_Framework_TestCase
+- the tests are public methods of XTest named 'test*'
+  or alternatively, use @test in the docblock
+- assertion methods validate things inside the test methods
+
+We have the notion of test dependencies, and the notation of test producers
+and test consumers to create orderings of tests.
+We can use @depends in the docblock to create these orderings.
+
+A data provider can supply sets of data, either as an array of arrays,
+or as an object that implements the Iterator interface.
+@dataProvider
+http://www.phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.data-providers
+
+There are ordering rules between @dataProvider and @depends
+
+exceptions can be tested with @expectedException, 
+by calling setExpectedException, 
+or by catching the exception with try / catch and failing if not caught.
+
+By default, PHPUnit converts php errors, warnings, and notices that are triggered during
+the test into exceptions.
+http://www.phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.errors
+
+Assertions:
+
+assertArrayHasKey(mixed $key, array $array[, string $message = ''])
+assertClassHasAttribute(string $attributeName, string $className[, string $message = ''])
+assertClassHasStaticAttribute(string $attributeName, string $className[, string $message = ''])
+assertContains(mixed $needle, Iterator|array $haystack[, string $message = ''])
+  and assertNotContains(), assertAttributeContains(), assertAttributeNotContains()
+assertContainsOnly(string $type,
+                   Iterator|array $haystack
+                   [, boolean $isNativeType = NULL, string $message = ''])
+  test if each element of the collection is of type $type
+  and Not and Attribute variants
+assertEmpty(mixed $actual[, string $message = ''])
+  and Not and Attribute variants
+assertEqualXMLStructure(DOMNode $expectedNode,
+                        DOMNode $actualNode
+                        [, boolean $checkAttributes = FALSE, string $message = ''])
+assertEquals(mixed $expected, mixed $actual[, string $message = ''])
+  and Not and Attribute variants
+assertEquals(float $expected, float $actual[, string $message = '', float $delta = 0])
+  ensures the 2 floats are within delta of each other.
+assertFalse(bool $condition[, string $message = ''])
+assertFileEquals(string $expected, string $actual[, string $message = ''])
+  and Not variant
+assertFileExists(string $filename[, string $message = ''])
+  and Not variant
+assertGreaterThan(mixed $expected, mixed $actual[, string $message = ''])
+assertGreaterThanOrEqual(mixed $expected, mixed $actual[, string $message = ''])
+  and Attribute variant
+assertInstanceOf($expected, $actual[, $message = ''])
+  and Not and Attribute variants
+assertInternalType($expected, $actual[, $message = ''])
+  and Not and Attribute variants
+assertLessThan(mixed $expected, mixed $actual[, string $message = ''])
+assertLessThanOrEqual(mixed $expected, mixed $actual[, string $message = ''])
+  and Attribute variant
+assertNull(mixed $variable[, string $message = ''])
+  and NotNull
+assertObjectHasAttribute(string $attributeName, object $object[, string $message = ''])
+  and Not variant
+assertRegExp(string $pattern, string $string[, string $message = ''])
+  and Not
+assertStringMatchesFormat(string $format, string $string[, string $message = ''])
+  and Not
+assertStringMatchesFormatFile(string $formatFile, string $string[, string $message = ''])
+  and Not
+assertSame(mixed $expected, mixed $actual[, string $message = ''])
+  same type and value
+  and Not
+assertSelectCount(array $selector,
+                  integer $count,
+                  mixed $actual
+                  [, string $message = '', boolean $isHtml = TRUE])
+assertSelectEquals(array $selector,
+                   string $content,
+                   integer $count,
+                   mixed $actual
+                   [, string $message = '', boolean $isHtml = TRUE])
+assertSelectRegExp(array $selector,
+                   string $pattern,
+                   integer $count,
+                   mixed $actual
+                   [, string $message = '', boolean $isHtml = TRUE])
+assertStringEndsWith(string $suffix, string $string[, string $message = ''])
+  and Not
+assertStringEqualsFile(string $expectedFile, string $actualString[, string $message = ''])
+  and Not
+assertStringStartsWith(string $prefix, string $string[, string $message = ''])
+  and Not
+assertTag(array $matcher, string $actual[, string $message = '', boolean $isHtml = TRUE])
+  assert attributes of HTML tags
+assertThat()
+  formulate more complex assertions
+assertTrue()
+DEPRECATED for assertInternalType: assertType()
+assertXmlFileEqualsXmlFile(string $expectedFile, string $actualFile[, string $message = ''])
+  and Not
+assertXmlStringEqualsXmlFile(string $expectedFile, string $actualXml[, string $message = ''])
+  and Not
+
+----------------
+
+Command line test runner
+
+phpunit TestClass
+or 
+phpunit TestClass TestClass.php
+
+----------------
+
+Fixtures
+
+Before each test method is run, and template method called setup() is invoked.
+After the test method, tearDown() is called.
+setupBeforeClass() and tearDownAfterClass are run on either side of the class instanciation.
+and assert{Pre,Post}Conditions()
+and onNotSuccessfulTest().
+
+PhpUnit takes a lot of pains to backup and restore global variables:
+
+    By default, PHPUnit runs your tests in a way where changes to global and super-global
+    variables ($GLOBALS, $_ENV, $_POST, $_GET, $_COOKIE, $_SERVER, $_FILES, $_REQUEST) do
+    not affect other tests. Optionally, this isolation can be extended to static
+    attributes of classes.
+
+This behavior can be overridden with blacklists:
+
+class MyTest extends PHPUnit_Framework_TestCase
+{
+    protected $backupGlobalsBlacklist = array('globalVariable');
+
+    protected $backupStaticAttributesBlacklist = array(
+      'className' => array('attributeName')
+    );
+
+    // ...
+}
+
+If phpunit is given a directory, it will run all tests matching *Test.php
+in the entire directory tree.
+
+with this approach, there is no defined ordering the tests will be run in.
+An order can be imposed by creating an XML configuration:
+http://www.phpunit.de/manual/current/en/organizing-tests.html#organizing-tests.xml-configuration
+
+The class PHPUnit_Extensions_OutputTestCase can test the output of php scripts.
+There is also: PHPUnit_Extensions_Database_TestCase
+
+One can mark a test incomplete with: void markTestIncomplete(string $message)
+Or one can skip a test with: void markTestSkipped(string $message)
+
+----------------
+
+Test mocking
+
+getMock($className)
+will return a mock object that will return NULL for every public method in $className.
+Use the
+will($this->returnValue())
+method to configure these dummy implementations to return a value.
+
+getMock and the Mock Builder API can be used to change the default behavior above.
+One can set the mock class name, disable the original class' constructor call etc.
+
+configure a callback to be fired to compute the stubbed out value with: returnCallback()
+
+onConsecutiveCalls() stores a list of values to be iterated through.
+
+or the stub can raise an exception via throwException()
+
+----
+
+There are constraint methods to validate calls against objects.
+Seems like a fair amount of power is available here.
+
+----
+
+getMockFromWsdl() will create a mock from the WSDL.
+
+----------------
+
+the skeleton test case generator can read @assert annotations to create test cases:
+<?php
+class Calculator
+{
+    /**
+     * @assert (0, 0) == 0
+     * @assert (0, 1) == 1
+     * @assert (1, 0) == 1
+     * @assert (1, 1) == 2
+     */
+    public function add($a, $b)
+    {
+        return $a + $b;
+    }
+}
+?>
+
+The supported variants of @assert are:
+  Annotation              Transformed to
+@assert (...) == X      assertEquals(X, method(...))
+@assert (...) != X      assertNotEquals(X, method(...))
+@assert (...) === X     assertSame(X, method(...))
+@assert (...) !== X     assertNotSame(X, method(...))
+@assert (...) > X       assertGreaterThan(X, method(...))
+@assert (...) >= X      assertGreaterThanOrEqual(X, method(...))
+@assert (...) < X       assertLessThan(X, method(...))
+@assert (...) <= X      assertLessThanOrEqual(X, method(...))
+@assert (...) throws X  @expectedException X
+
+it can even generate a stub class, given a TDD already created test class.
+
+----------------
+Selenium support
+
+----------------------------------------------------------------
+
+Mon Jan 31 19:12:19 PST 2011
+
+re-read yii guide:
+  Fundamentals
+
+----------------
+
+the model contains the data and the biz rules
+    view           elements of the UI, like text, form inputs
+    controller manages state changes and updates
+
+along with MVC, yii introduces a "front-controller" called application,
+which represents the execution context of request processing.
+The appliction resolves the user request and dispatches it to a controller
+for handling.
+
+The application gets instantiated on every request.
+It can be extended by subclassing (less common) or configuration (more common)
+
+To apply the configuration, we usually store the config pairs in a separate script,
+e.g. protected/config/main.php.  This simply returns the array(...) with the config.
+Then we pass that file to the constructor like this:
+$app=Yii::createWebApplication($configFile);
+
+The application base directory: protected
+
+The core Yii application components are:
+
+CAssetManager: manages the publishing of private asset files
+CAuthManager: manages RBAC
+CCache: data caching functionality, via subclasses CMemCache, CDbCache
+CClientScript: manages javascript and CSS
+CPhpMessageSource: provides i18n of core msgs
+CDbConnection: db connections
+CErrorHandler: handles uncaught PHP errors and exceptions
+CFormatter: formats data for display
+CHttpRequest: accessor to the request
+CSecurityManager: hashing, encryption
+CHttpSession: sessions
+CStatePersister: serializer/deserializer I guess
+CUrlManager: url parsing and creation
+CWebUser: represents the current user
+CThemeManager: themes
+
+----------------
+
+Request life cycle:
+
+- Pre-initialize the application with CApplication::preinit();
+- Setup class autoloader and error handling
+- Register core application components
+- Load application configuration
+- Initialize the application via CApplication::init();
+-- register application behaviors
+-- load static application components
+- Raise onBeginRequest event
+- Process the user request
+-- resolve the request
+-- create the controller
+-- run the controller
+- Raise onEndRequest event
+
+----------------------------------------------------------------
+
+Controller
+
+The controller brings in the needed models and renders an appropriate view.
+An action, at its simplest, is just a controller whose name starts with 'action'.
+
+Every controller has a default action.
+
+Route
+
+Users request a particular controller and action in terms of a 'route'.
+A route is formed by concatenating a controller id, '/', and an action id.
+So 'post/edit' refers to the PostController::actionEdit method.
+Thus this URL
+http://localhost/.../index.php?r=post/edit
+would name the edit action.
+
+Routes are case sensitive.
+
+Modules are a naming convention used for grouping third party extensions.
+So then the route becomes:  module/post/edit
+
+Controller Instantiation
+
+A controller instance is created to handle each request.
+Given an id of a controller, the app finds the controller class with:
+
+- if CWebApplication::catchAllRequest is specified, a controller will be created
+  from this property, and the user-given controller id will be ignored.
+  This is typically used for maintenance mode to display a static notice page.
+- if the id is found in CWebApplication::controllerMap, then that controller is used
+- if the id is of the form 'path/to/xyz' the contoller class name is assumed to be,
+  with class file protected/contollers/path/to/XyzController.php.
+  If this file does not exist, a 404 results.
+
+When modules are involved, the app will look first for the module, and instantiate
+the contoller within the module when appropriate.
+
+Action
+
+besides methods named with prefix 'action', an action can be defined by a class,
+and instantiated by the contoller.
+This allows actions to be reused.
+
+To do this, we have to override the actions() method of the controller class:
+
+class PostController extends CController {
+    public function actions() {
+        return array('edit'=>'application.controllers.post.UpdateAction',
+                     );
+    }
+}
+
+Writing class-based actions, we can organize the app in a modular fashion.
+E.g. for the sample netnews like posting application, we separate functionality like this:
+
+protected/
+    controllers/
+        PostController.php
+        UserController.php
+        post/
+            CreateAction.php
+            ReadAction.php
+            UpdateAction.php
+        user/
+            CreateAction.php
+            ListAction.php
+            ProfileAction.php
+            UpdateAction.php
+
+Binding GET parameters to Actions
+
+class PostController extends CController {
+    public function actionCreate($category, $language="en") {
+        //                       ^^^^^^^^^  ^^^^^^^^^^^^^^
+        $category=(int)$category;
+
+        // ... fun code starts here ...
+    }
+}
+
+Filter
+
+Filters operate before and/or after a controller action fires.
+Filters are executed in the order that they appear in the filter list.
+
+
+Model
+
+A model represents a single data object.
+Yii implements 2 kinds of models out of the box: form model and active record.
+They both extend base class CModel.
+
+CFormModel: used to collect data from user inputs.
+CActiveRecord: we likely wont use this.
+
+
+View
+
+A view is a PHP script consisting mainly of user interface elements.
+So the Home page could be mostly a view.
+
+A view has a name, which identifies the view script file to render with.
+To render a view, call CController::render($nameOfView).
+This will look for file: protected/views/ControllerId/nameOfView.php
+
+Inside the view script, $this names the controller.
+We can also 'push' data to the view by passing an array as the second arg of render:
+
+$this->render("edit", 
+              array("var1"=>$value1,
+                    "var2"=>$value2,
+));
+
+so in the view, we will have $var1 and $var2.
+
+Layout
+
+A layout is a special view used to decorate views.
+It usually contains portions of the user interface that are common among several views.
+E.g. a layout may contain header and footer portions, and embed the content in between.
+
+......header here......
+<?php echo $content; ?>
+......footer here......
+
+where $content stores the rendering result of the content view.
+
+Layout is implicitly applied by render().
+By default, the view script protected/views/layouts/main.php is used as the layout.
+(A singleton).
+This can be customized with either CWebApplication::layout or CController::layout.
+
+To render a veiw with no layout, call renderPartial() instead of render().
+
+Widget
+
+A widget is reusable chunk of UI functionality, like a calendar, or a cart.
+
+Component
+
+A component appears to be a higher level of functionality that encapuslates behaviors and events.
+
+----------------------------------------------------------------
+
+read the docs for CClientScript to figure out how to include CSS
+  http://www.yiiframework.com/doc/api/1.1/CClientScript
+
+Nope, dont need this.  Instead, read the docs for zii.widgets CMenu which already
+implements the menu I need.
+  http://www.yiiframework.com/doc/api/1.1/CMenu
+
+----------------------------------------------------------------
+
+Sat Feb 26 14:10:30 PST 2011
+
+re-read yii session handling in light of understanding the PHP support under it.
+
+http://www.yiiframework.com/doc/api/1.1/CHttpSession/
+is the basic functionality built on top of the PHP session stuff.
+
+the yii auth model centers around CWebUser.
+By default, yiic creates and configures a CWebUser component in /protected/config/main.php:
+
+'user' => array(
+    // enable cookie-based authentication
+    'allowAutoLogin' => true,
+),
+
+The default settings wind up generating the PHPSESSID cookie:
+    name: PHPSESSID
+ content: e288ojqnpdoihq88cqovlu5937
+  domain: ec2-50-16-166-147.compute-1.amazonaws.com
+    path: /
+send for: any kind of connection
+ created: Sunday, February 20, 2011 4:31:34 PM
+ expires: When I quit my browser
+
+deleting this cookie gets it reset on subsequent page views, which seems perfect.
+Seems like the only changes I want to see are:
+PHPSESSID -> UWWSESSID  (php ini file setting)
+age out cookie in 30mins (php ini file setting)
+
+yii authentication defines the IUserIdentity interface.
+CUserIdentity is the class that implements IUserIdentity.
+UserIdentity is the yiic generated class the framework produces for us.
+  which is where the demo/demo admin/admin semantics are implemented.
+
+So to build my own model for identity, I start by replacing 
+protected/components/UserIdentity.php
+
+The yii book has an example of storing additional state in the UserIdentity object, 
+which will get serialized to the cookie.
+Seems like all the pieces are in place for me.
+
+I need to see if CWebApplication exposes the session ini properties.
+CWebApplication contains session -- an instance of CHttpSession
+
+This may be of use when logging the session_id to the access log:
+http://www.yiiframework.com/wiki/34/how-to-log-context-information-to-logger-session-id-user
+
