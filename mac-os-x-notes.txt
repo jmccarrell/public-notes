@@ -21,5 +21,22 @@ sudo mkdir /Users/oracle
 sudo chown oracle:dba /Users/oracle
 sudo defaults write /Library/Preferences/com.apple.loginwindow HiddenUsersList -array-add oracle
 sudo passwd oracle
+}
 
+To flush the dns cache, which can be helpful in VPN situations: {
+dscacheutil -flushcache
+}
+
+To see the DNS servers for a given network service: {
+    proteus-> networksetup -getdnsservers Wi-Fi
+    There aren't any DNS Servers set on Wi-Fi.
+
+to see all of the network services:
+    proteus-> networksetup -listallnetworkservices
+    An asterisk (*) denotes that a network service is disabled.
+    Bluetooth DUN
+    Ethernet
+    USB Ethernet
+    FireWire
+    Wi-Fi
 }
