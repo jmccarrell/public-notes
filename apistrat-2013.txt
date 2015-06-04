@@ -1,0 +1,65 @@
+Keynote 
+
+Mailchimp
+Developer-support-handbook.org
+Pamela Fox.org
+
+@pengwynn
+Dotfiles.github.com
+Oktokit
+
+Dog fooding it
+Boxen
+Mac wrapper for packages
+
+The noun project 
+
+Box as a good model for engaging developers
+
+Peter Rexer
+
+Good API enterprise
+
+Twilio
+Box 
+
+Another hit on the noun project 
+
+3 consistent structure 
+Input = output 
+Make inputs symmetric with your outputs. Json in means json out
+
+4 hide advanced functionality 
+
+5 no hateoas. Or just be consistent
+
+Daniel Jacobson Netflix
+
+The API Strategy Guide
+Book DJ wrote
+
+Netflix open source projects 
+Asgard?
+Zuul proxy
+
+Shift toward open source projects
+Away from REST 
+Deprecation of HATEOAS
+
+The need for orchestration layers
+Odata
+Qlio
+
+Programmable web. Why REST keeps me up at night?  A blog post to read. 
+
+
+------
+Jsonapi.org
+As an example of HATEOAS in action
+
+Foxy cart
+HAL
+
+GLYF RPC
+
+Bitballoon the small content provider

@@ -1,0 +1,183 @@
+# Chapter 1: Set up #
+
+## pkg-config ##
+
+used to give the cflags and link flags needed to build with a given named library.
+
+    proteus-> pkg-config --libs libxml-2.0
+    -lxml2
+    proteus-> pkg-config --cflags libxml-2.0
+    -I/usr/include/libxml2
+
+## Runtime Linking ##
+
+When compiling the program with gcc, Clang, or icc based on a library in lib- path, add:
+
+    LDADD=-Llibpath -Wl,-Rlibpath
+
+to the subsequent makefile. The -L flag tells the compiler where to search for libraries to resolve symbols; the -Wl flag passes its flags through from gcc/Clang/icc to the linker, and the linker embeds the given -R into the runtime search path for libraries to link to. Unfortunately, pkg-config often doesn't know about runtime paths, so you may need to enter these things manually.
+
+
+## make ##
+
+to see the rules make uses (from make man page):
+
+    make -p -f /dev/null
+
+and thus to see the various compile rules:
+
+    proteus-> make -p -f /dev/null 2>/dev/null | grep -e '^COMPILE' | sort
+    COMPILE.C = $(COMPILE.cc)
+    COMPILE.F = $(FC) $(FFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+    COMPILE.S = $(CC) $(ASFLAGS) $(CPPFLAGS) $(TARGET_MACH) -c
+    COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+    COMPILE.cc = $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+    COMPILE.cpp = $(COMPILE.cc)
+    COMPILE.def = $(M2C) $(M2FLAGS) $(DEFFLAGS) $(TARGET_ARCH)
+    COMPILE.f = $(FC) $(FFLAGS) $(TARGET_ARCH) -c
+    COMPILE.m = $(COMPILE.c)
+    COMPILE.mod = $(M2C) $(M2FLAGS) $(MODFLAGS) $(TARGET_ARCH)
+    COMPILE.p = $(PC) $(PFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -c
+    COMPILE.r = $(FC) $(FFLAGS) $(RFLAGS) $(TARGET_ARCH) -c
+    COMPILE.s = $(AS) $(ASFLAGS) $(TARGET_MACH)
+
+To see the default rule to turn a .c into a .o:
+
+    jmccarre@secdv01:~$ make -p -f /dev/null 2>/dev/null | grep -A 2 -E '^%\.o:[[:space:]]+%\.c$'
+    %.o: %.c
+    #  commands to execute (built-in):
+            $(COMPILE.c) $(OUTPUT_OPTION) $<
+
+where OUTPUT_OPTION is defined as:
+
+    proteus-> make -p -f /dev/null 2>/dev/null | grep -E '^OUTPUT_OPTION'
+    OUTPUT_OPTION = -o $@
+
+## Include Header Files from the Command Line ##
+
+gcc and clang support `-include`: which is the same as `#include <stdio.h>`
+
+thus hello.c can be written in 1 line:
+
+    int main(){ printf("Hello world!\n"); }
+
+and compiled with no Makefile being involved like this:
+
+    proteus-> CFLAGS='-g -Wall -include stdio.h' make -e -f /dev/null hello
+    cc -g -Wall -include stdio.h    hello.c   -o hello
+    proteus-> ./hello
+    Hello world!
+
+I have created my standard headers in `~/src/c/jwm-std-headers.h` for common include files.
+
+## Compiling C from Here Documents ##
+
+I have defined shell aliases:
+
+* go_cflags
+* go_libs
+* go_c
+
+that can compile a here document into a.out:
+
+    proteus-> go_c <<EOF
+    > int main() {printf("foo bar baz\n");}
+    > EOF
+    proteus-> ./a.out
+    foo bar baz
+
+# Chapter 2: Debug, Test and Document #
+
+## gdb ##
+
+Consider this implementation of a binary search method with bug(s):
+
+     1	    int A[100];
+     2
+     3	    // return position of v in A, or -1 if not found
+     4	    int lookup(int v) {
+     5	        int hi = sizeof(A) / sizeof(int) - 1;
+     6	        int lo = 0;
+     7	        int mid = hi + lo / 2;
+     8	        while (lo <= hi) {
+     9	            if (A[mid] == v) {
+    10	                return(mid);
+    11	            } else if (A[mid] < v) {
+    12	                lo = mid + 1;
+    13	            } else {
+    14	                hi = mid - 1;
+    15	            }
+    16	            mid = hi + lo / 2;
+    17	        }
+    18	        return(-1);
+    19	    }
+    20
+    21
+    22	    int main() {
+    23	        for (int j = 0, i = 0; i < 100; i++, j+= 4) {
+    24	            A[i] = j;
+    25	        }
+    26
+    27	        printf("A[4]: %d; A[50]: %d\n", A[4], A[50]);
+    28	        printf("l(43): %d\n", lookup(43));
+    29	        printf("l(0): %d\n", lookup(0));
+    30	        printf("l(99 * 4): %d\n", lookup(99 * 4));
+    31	    }
+
+what we would like is to use gdb to step through `lookup`
+showing us the values of hi, lo, and mid each time they are computed; thus at line 8:
+
+    (gdb) b 8
+    Breakpoint 1 at 0x100000da6: file bin-search.c, line 8.
+    (gdb) r
+    Starting program: /Users/jmccarre/tmp/bin-search
+    Reading symbols for shared libraries +........................ done
+    A[4]: 16; A[50]: 200
+
+    Breakpoint 1, lookup (v=43) at bin-search.c:8
+    8	    while (lo <= hi) {
+    (gdb) display hi
+    1: hi = 99
+    (gdb) display lo
+    2: lo = 0
+    (gdb) display mid
+    3: mid = 99
+    (gdb) c
+    Continuing.
+
+    Breakpoint 1, lookup (v=43) at bin-search.c:8
+    8	    while (lo <= hi) {
+    3: mid = 98
+    2: lo = 0
+    1: hi = 98
+    (gdb) c
+    Continuing.
+
+    Breakpoint 1, lookup (v=43) at bin-search.c:8
+    8	    while (lo <= hi) {
+    3: mid = 97
+    2: lo = 0
+    1: hi = 97
+
+which clearly shows the problem.
+
+So I fix the precedence problem in the evaluation of the mid point on lines 7 and 16:
+
+     7	        int mid = (hi + lo) / 2;
+
+and then the function works better; that is it turns from linear search to binary search.
+
+N.B. the multiple calls to `printf ... lookup(val)` on lines 28 - 30 are not needed;
+gdb lets us call any linked method:
+
+    (gdb) call lookup(3)
+
+    Breakpoint 1, lookup (v=3) at bin-search.c:8
+    8	    while (lo <= hi) {
+    3: mid = 49
+    2: lo = 0
+    1: hi = 99
+    The program being debugged stopped while in a function called from GDB.
+    When the function (lookup) is done executing, GDB will silently
+    stop (instead of continuing to evaluate the expression containing
+    the function call).

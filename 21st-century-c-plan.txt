@@ -1,0 +1,31 @@
+Project: 21st Century C: {
+  store notes in: ~/Dropbox/notesy/21st-Century-C-notes.mmd
+        code  in: /j/proj/books/21st-century-c
+
+  run the gdb examples on flowstat -X
+
+  Chapter 2:
+    Debugger: gdb
+    Testing:
+    Documenting:
+
+  DONE go through ch 1 again: extract the relevant nuggets
+    DONE make jwm-std-headers.h in ~/src/c
+    DONE put the go_c alias on
+      proteus
+      capella
+
+  make a daemon program that installs where it should on rhel and starts up
+
+
+  DONE Intro
+  Part I: the Environment
+    DONE 1. Set yourself up for easy compilation
+       DONE Which way to the library?
+         Runtime Linking
+       DONE Using Makefiles
+       DONE Using Libraries from Source
+       DONE Using Libraries from Source install them into HOME
+       DONE Compiling C Programs from Here Documents
+}
+
