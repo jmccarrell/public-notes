@@ -250,9 +250,11 @@ I want this
 
 - √ add a package to emacs to take advantage of editorconfig
 - √ drill into ssh-copy-id
-- fix up the selection-color green of .osx
-- set up the javascript REPL
-- drill into [iterm2 tmux](https://gitlab.com/gnachman/iterm2/wikis/TmuxIntegration)
+- √ fix up the selection-color green of .osx
+- √ set up the javascript REPL
+    - use `jsc`
+    - defined in aliases
+- IN PROGRESS drill into [iterm2 tmux](https://gitlab.com/gnachman/iterm2/wikis/TmuxIntegration)
 - find an use someone elses tmux config files
 
 - figure out how to leverage the hot corners set up in .osx
@@ -656,3 +658,39 @@ brew output
 ### emacs package managers
 
 - [ELPA Emacs Lisp Package Archive](launchctl load ~/Library/LaunchAgents/homebrew.mxcl.emacs.plist)
+
+### tmux work
+
+            Example configurations have been installed to:
+              /usr/local/Cellar/tmux/2.0/share/tmux/examples
+
+
+              /usr/local/Cellar/tmux/2.0/share/tmux/examples:
+              -rw-r--r--   1 jeff  admin   913 Apr 29 10:42 h-boetes.conf
+              -rw-r--r--   1 jeff  admin  2338 Apr 29 10:42 n-marriott.conf
+              -rw-r--r--   1 jeff  admin  1805 Apr 29 10:42 screen-keys.conf
+              -rw-r--r--   1 jeff  admin  2789 Apr 29 10:42 t-williams.conf
+              -rw-r--r--   1 jeff  admin  5456 Apr 29 10:42 tmux.vim
+              -rw-r--r--   1 jeff  admin  2513 Apr 29 10:42 tmux_backup.sh
+              -rw-r--r--   1 jeff  admin  1088 Apr 29 10:42 vim-keys.conf
+              -rw-r--r--   1 jeff  admin  1291 Apr 29 10:42 xterm-keys.vim
+
+- [iterm2 tmux](https://gitlab.com/gnachman/iterm2/wikis/TmuxIntegration)
+- √ read the tmux man page
+
+- recommends tmux -CC which is "control mode".
+
+----
+
+## √ test dotfiles on new ubuntu host
+
+- my dotfiles are in the branch jwm-dotfiles.
+- so push that:
+
+        $ git push origin jwm-dotfiles
+          ...
+        To git@github.com:jmccarrell/dotfiles.git
+         * [new branch]      jwm-dotfiles -> jwm-dotfiles
+
+- and stand up a new digital ocean box and test.
+- √ it works
