@@ -694,3 +694,14 @@ brew output
 
 - and stand up a new digital ocean box and test.
 - √ it works
+
+----
+
+- DONE make settitle work in new setup.
+    - .bash_prompt sets it to \w, aka cwd.
+    - use that as the default, but allow title to be overriden by setting an
+      environment variable, and re-sourcing .bash_prompt
+    - DONE: termtitle
+- NO DELETE THIS: set up gnu locate, et al
+    - use `mdfind -name` as an alias for locate
+- set up editorconfig for emacs
