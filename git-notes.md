@@ -701,3 +701,22 @@ git has no native fork command; this is a github-created concept.
 So it follows that using forks when working with github is likely a good idea.
 
 And, in fact, the github help recommends exactly that: [fork a repo](https://help.github.com/articles/fork-a-repo/)
+
+----
+
+**Mon Jun 22 12:17:06 PDT 2015**
+
+# Sharing git repos on github / bitbucket / gitlab
+
+- A common pattern I have is to start a new git repo, then push it up to a shared repository.
+- so I do:
+    - git init
+    - create the repo on github / bitbucket / gitlab
+    - then push
+
+- the instructions from bitbucket are helpful
+
+        cd /path/to/my/repo
+        git remote add origin git@bitbucket.org:jmccarrell/jwm-ansible.git
+        git push -u origin --all # pushes up the repo and its refs for the first time
+        git push -u origin --tags # pushes up any tags
