@@ -342,3 +342,15 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 
 - Investigate auto-highlight-mode as a productivity enhancer:
     - c.f.: [rainbow identifiers solarized issue](https://github.com/bbatsov/solarized-emacs/issues/133) about comment 5 or so
+
+----
+
+## elisp references
+
+- Steve Yegge has written his [emergency elisp](http://steve-yegge.blogspot.com/2008/01/emergency-elisp.html) blog entry
+    - it is written for programmers who don't know elisp.  good stuff.  Coverge includes:
+    - lexical stuff
+    - operators
+    - statements
+    - classes
+    - with some nice elisp / java side by side comparisons
