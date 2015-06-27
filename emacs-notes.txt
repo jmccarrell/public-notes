@@ -239,3 +239,99 @@ from lisp/progmodes/sql.el
 ;; `imenu-add-menubar-index'.
 }
 
+----
+
+## solarized emacs
+
+- [code and instructions](https://github.com/sellout/emacs-color-theme-solarized) from github
+
+### precursor
+
+- I want my emacs library files brought along in my environment so I can have a
+  consistent env.  These files:
+    - c-m-supl.el
+    - jc_ctags.el
+    - jc_misc.el
+    - p4.el
+    - ps-ccrypt.el
+    - yaml-mode.el
+
+- so the first question is: can I use  `$HOME/.emacs.d` provisioned under jwm-dotfiles
+  for this purpose?
+
+----
+
+Other data:
+
+- [solarized theme](https://github.com/bbatsov/solarized-emacs) available as a package loaded by a package manager
+    - works from emacs 24 on.
+    - some support for emacs 23.
+    - recommends [MELPA](http://melpa.org/) emacs package manager
+
+----
+
+## Other packages I want
+
+- editorconfig
+    - there is an editorconfig package available in MELPA.
+
+- yaml-mode
+    - yes, available on MELPA
+
+----
+
+- discover the idiomatic usage of multiple emacs packages
+    - how does this work?
+    - gnu ELPA vs MELPA vs Marmalade
+- could I write a ansible playbook to update my emacs environment on a given machine?
+    - what would that look like?
+
+----
+
+**Fri Jun 26 16:04:40 PDT 2015**
+
+
+- Jack Repenning doesn't use any of the package managers.
+
+- I guess the next thing to do is to explore the mechanisms:
+
+    - will ~/.emacs.d/elisp
+      be searched and autoloaded?
+
+    - try installing and using yaml-mode via melpa.  What does it look like?
+
+## √ el-get
+
+- looks like [el-get](http://www.emacswiki.org/emacs/el-get) is the equivalent
+  to apt-get for emacs packages
+
+- the [lazy installer](https://github.com/dimitri/el-get#the-lazy-installer)
+
+- Ok, then I did
+
+        M-x el-get-install solarized-emacs
+
+so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bbatsov/solarized-emacs) on or off?
+
+        M-x load-theme <solarized-{dark,light}>
+
+- where does el-get put the packages it downloads?
+    - A: `~/.emacs.d/el-get/<package-name>`
+
+- el-get [recommends](https://github.com/dimitri/el-get#package-setup) customizing a given package by putting the customization code into
+  `init-<package-name>.el` in the directory named by `el-get-user-package-directory`,
+  which has to be given a value.
+
+## √ solarized
+
+- I like solarized-dark
+
+### next steps
+
+- leave .emacs.d to emacs for transitory things.
+- put Jeffs emacs stuff into .emacs-jwm.d
+    - version control this in jwm-dotfiles
+    - put my customizations to packages in there
+    - convert my font and color settings in .emacs to a theme
+        - .emacs-jwm.d/themes
+        - follow [the conventions](https://github.com/bbatsov/solarized-emacs#stand-alone-manual-installation)
