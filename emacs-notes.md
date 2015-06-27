@@ -337,3 +337,8 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
     - convert my font and color settings in .emacs to a theme
         - .emacs-jwm.d/themes
         - follow [the conventions](https://github.com/bbatsov/solarized-emacs#stand-alone-manual-installation)
+
+----
+
+- Investigate auto-highlight-mode as a productivity enhancer:
+    - c.f.: [rainbow identifiers solarized issue](https://github.com/bbatsov/solarized-emacs/issues/133) about comment 5 or so
