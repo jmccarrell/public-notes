@@ -354,3 +354,25 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
     - statements
     - classes
     - with some nice elisp / java side by side comparisons
+
+----
+
+## use solarized foreground and background colors
+
+- NO SEE BELOW change references from ~ to $HOME so I can use the
+    - HOME=/j/proj/jwm-dotfiles emacs -i $HOME/.emacs
+    - convention to ease testing of color changes
+    - yes, but that has the effect of creating a whole new
+        - /j//proj/jwm-dotfiles/.emacs.d
+    - populated by el-get
+    - which I do not want ever revision controlled.
+    - so abandon this idea.
+- √ drop support for emacs-21 and 22 in my customization functions
+- √ merge solarized foreground and background colors into my standard frame definition.
+
+----
+
+## better find-files
+
+- emacs wiki [Locate Files Anywhere](http://www.emacswiki.org/emacs/LocateFilesAnywhere)
+- precursor [Emacs: Helm for finding files](http://amitp.blogspot.com/2012/10/emacs-helm-for-finding-files.html)
