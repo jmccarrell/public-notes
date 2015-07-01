@@ -343,6 +343,12 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 - Investigate auto-highlight-mode as a productivity enhancer:
     - c.f.: [rainbow identifiers solarized issue](https://github.com/bbatsov/solarized-emacs/issues/133) about comment 5 or so
 
+    - emacswiki [Highlight Symbol](http://www.emacswiki.org/emacs/HighlightSymbol)
+    - how do I get el-get to tell me if it knows how to install HighlightSymbol?
+
+  highlight-symbol            available  Quickly highlight a symbol throughout the buffer and cycle through its locations.
+
+
 ----
 
 ## elisp references
