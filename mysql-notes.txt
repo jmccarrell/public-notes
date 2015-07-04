@@ -313,3 +313,25 @@ mysql> set @x = select count(*) from ff_member;
 ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds...
 
 Does mysql support coalesce?
+
+----
+
+**Fri Jul  3 21:13:00 PDT 2015**
+
+## mysql utf8mb4
+
+- here is a very [nice write up](https://mathiasbynens.be/notes/mysql-utf8mb4) by Mathias Bynens on utf8mb4, and why to prefer it in all
+  cases over utf8.
+
+- the preferred contents of /etc/my.cnf shown there
+
+    [client]
+    default-character-set = utf8mb4
+
+    [mysql]
+    default-character-set = utf8mb4
+
+    [mysqld]
+    character-set-client-handshake = FALSE
+    character-set-server = utf8mb4
+    collation-server = utf8mb4_unicode_ci
