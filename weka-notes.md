@@ -59,3 +59,11 @@ must have a class specified with -c <field_number>
 
 Discretize: map numeric attributes into nominal ones, based on class, via Fayyad and Irani's MDL method, or optionally via Kononeko's MDL method.
 
+## json
+
+- link to [stack overflow discussion](http://stackoverflow.com/questions/9998871/how-do-i-use-a-json-file-with-weka) about using the json importer
+
+- I need to know how weka deals with -- or not -- UTF-8.
+    - A: Yes, it [looks like it](http://weka.wikispaces.com/Can+I+process+UTF-8+datasets+or+files%3F)
+    - seems like the JVM must be started up with:
+        - -Dfile.encoding=utf-8
