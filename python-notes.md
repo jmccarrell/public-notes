@@ -445,3 +445,9 @@ This fact, and the fact that add2virtualenv throws an error says I have somethin
 more systemic wrong with my setup.
 
 So go back to square one tomorrow and try to build again.
+
+----
+
+## python style
+
+- a great python style guide was written by the google guys: [Google Python Style Guide](https://google-styleguide.googlecode.com/svn/trunk/pyguide.html)
