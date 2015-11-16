@@ -2,8 +2,13 @@
 
 - the [tmux tutorial](https://danielmiessler.com/study/tmux/) I used
 
+## Jeffs customizations
+
+- I re-bind the default C-b to C-o, so everywhere I have my dotiles, it is C-o
+
 ## session start / stop
 
+- from the server that you will be re-connecting to:
 - start a tmux session, with a name
 
         $ tmux new -s session-name
