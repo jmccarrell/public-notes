@@ -1,72 +1,88 @@
+**jwm N.B. most of this advice about distribute, et al, is obsolete**
+
+pip is the preferred installation mechanism for python modules, not distribute.
+
+https://pip.pypa.io/en/latest/installing/
+
+says:
+
+> Python 2.7.9 and later (on the python2 series), and Python 3.4 and later include pip by default [1], so you may have pip already.
+
+and the current installation info is given at the [1] reference above:
+
+https://docs.python.org/3/installing/
+
+which says among other things:
+
+- use pyvenv for python 3.4 and higher environments
+- use virtualenv for python 3.3 and lower environments
+
+----
+
 This stackoverflow article gives a good overview of tutorials, it gives 4 references:
-http://stackoverflow.com/questions/5844869/comprehensive-beginners-virtualenv-tutorial
-http://stackoverflow.com/questions/1534210/use-different-python-version-with-virtualenv
+
+- http://stackoverflow.com/questions/5844869/comprehensive-beginners-virtualenv-tutorial
+- http://stackoverflow.com/questions/1534210/use-different-python-version-with-virtualenv
 
 Apparently Lion does not ship with virtualenv:
 
-python --version
-Python 2.7.1
+    python --version
+    Python 2.7.1
 
-python -m virtualenv
-/usr/bin/python: No module named virtualenv
+    python -m virtualenv
+    /usr/bin/python: No module named virtualenv
 
-Notes from SimonOnSoftware: Virtualenv Tutorial {
-http://simononsoftware.com/virtualenv-tutorial/
+## Notes from SimonOnSoftware: [Virtualenv Tutorial](http://simononsoftware.com/virtualenv-tutorial/)
 
-All packages installed via easy_install are global.
-One tutorial recommends using
+All packages installed via easy_install are global.  One tutorial recommends using:
 
---no-site-packages
+    --no-site-packages
 
-argument to virtualenv to, I think, create local copies inside the virtual env,
-of site-packages.
+argument to virtualenv to, I think, create local copies inside the virtual env, of site-packages.
 
 here is a sample command:
 
-virt@ymon:~$ virtualenv virt_env/virt2 --no-site-packages
+    virt@ymon:~$ virtualenv virt_env/virt2 --no-site-packages
 
-After the virtualenv is created, one activates it:
-One sources a file in the env that was created:
+After the virtualenv is created, one activates it by: One sources a file in the env that was created:
 
-virt@ymon:~$ source virt_env/virt1/bin/activate
+    virt@ymon:~$ source virt_env/virt1/bin/activate
 
 which I am sure sets path, etc.  It changes the prompt, to e.g.:
-virt@ymon:~$
+
+    virt@ymon:~$
 
 One can deactivate (leave) the virtualenv like this:
-(virt1)virt@ymon:~$ deactivate
 
-To see what is installed in a virtualenv
-Simon says to use a thrid party package 'yolk' to see what packages are installed.
+    (virt1)virt@ymon:~$ deactivate
 
-}
+To see what is installed in a virtualenv:
 
-Notes from Chris Scott: A Primer on Virtualenv: {
-http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+Simon says to use a third party package 'yolk' to see what packages are installed.
+
+## Notes from Chris Scott: [A Primer on Virtualenv](http://iamzed.com/2009/05/07/a-primer-on-virtualenv/)
 
 Chris recommends installing virtualenv with easy_install:
 
-$ sudo easy_install virtualenv
+    $ sudo easy_install virtualenv
 
 by default virtualenv will symlink to the site-packages.
 To achieve more isolation, use --no-site-packages when creating the virtualenv
 
 ... activate ...
 
-the main changes virtualenv makes are: {
+the main changes virtualenv makes are:
 
-VIRTUAL_ENV="/Users/chris/Documents/clients/mycoolproject"
-export VIRTUAL_ENV
+    VIRTUAL_ENV="/Users/chris/Documents/clients/mycoolproject"
+    export VIRTUAL_ENV
 
-_OLD_VIRTUAL_PATH="$PATH"
-PATH="$VIRTUAL_ENV/bin:$PATH"
-export PATH
-}
+    _OLD_VIRTUAL_PATH="$PATH"
+    PATH="$VIRTUAL_ENV/bin:$PATH"
+    export PATH
 
-once the virtualenv is created and activated, Chris recommends installing packages
-with easy_install, like this:
+once the virtualenv is created and activated, Chris recommends installing packages with easy_install, like this:
 
-$ easy_install ipython
+    $ easy_install ipython
 
 NB. no sudo.
 
@@ -83,36 +99,35 @@ Chris' tips:
   virtualenvs easy.
   http://www.doughellmann.com/projects/virtualenvwrapper/
 
-Watch this screencast of virtualenvwrapper:
-http://mathematism.com/2009/jul/30/presentation-pip-and-virtualenv/
+Watch this [screencast of virtualenvwrapper](http://mathematism.com/2009/jul/30/presentation-pip-and-virtualenv/):
 
 this lists the interesting commands:
 
-mkvirtualenv (create a new virtualenv)
-rmvirtualenv (remove an existing virtualenv)
-workon (change the current virtualenv)
-add2virtualenv (add external packages in a .pth file to current virtualenv)
-cdsitepackages (cd into the site-packages directory of current virtualenv)
-cdvirtualenv (cd into the root of the current virtualenv)
-deactivate (deactivate virtualenv, which calls several hooks)
+- mkvirtualenv (create a new virtualenv)
+- rmvirtualenv (remove an existing virtualenv)
+- workon (change the current virtualenv)
+- add2virtualenv (add external packages in a .pth file to current virtualenv)
+- cdsitepackages (cd into the site-packages directory of current virtualenv)
+- cdvirtualenv (cd into the root of the current virtualenv)
+- deactivate (deactivate virtualenv, which calls several hooks)
 
-pip:
-pip is a replacement for easy_install that is virtualenv aware.
-(written by the same guy I think)
+## pip
+
+pip is a replacement for easy_install that is virtualenv aware.  (written by the same guy I think)
 
 there is a syntax for describing package requirements eg:
 
-Django>=1.1
-Pinax==0.5
+    Django>=1.1
+    Pinax==0.5
 
 it supports installing from tarballs, git, svn, ...
 
 pip can install a bunch of stuff from a 'requirements' document (plain text)
 pip freeze will write a requirements doc from a set of packages.
 
-}
 
-Find out what -u does for easy_install;
+## Find out what -u does for easy_install;
+
   saltycrane uses this to install virtualenv{,wrapper}
   sudo easy_install -U virtualenv
     --upgrade (-U)                 force upgrade (searches PyPI for latest
@@ -144,7 +159,8 @@ http://packages.python.org/distribute/
 package home:
 http://pypi.python.org/pypi/distribute
 
-Notes from the docs page: {
+## Notes from the distribute docs page
+
 Distribute is a fork of the Setuptools project.
 
 Distribute is intended to replace Setuptools as the standard method for working with
@@ -160,16 +176,13 @@ It appears that Distribute is how python packaging is done in python 3.
 
 From: http://packages.python.org/distribute/setuptools.html
 
-    Distribute is a collection of enhancements to the Python distutils (for Python 2.3.5
-    and up on most platforms; 64-bit platforms require a minimum of Python 2.4) that allow
-    you to more easily build and distribute Python packages, especially ones that have
-    dependencies on other packages.
-}
+>   Distribute is a collection of enhancements to the Python distutils (for Python 2.3.5 and up on most platforms; 64-bit platforms require a minimum of Python 2.4) that allow you to more easily build and distribute Python packages, especially ones that have dependencies on other packages.
 
-Read: The Hitchhiker’s Guide to Packaging¶
-http://guide.python-distribute.org/index.html
 
-Notes from HH Guide to Packaging: {
+
+√ read: [The Hitchhiker’s Guide to Packaging](http://guide.python-distribute.org/index.html)
+
+## Notes from HH Guide to Packaging: {
 
 A python package is defined to be:
 
@@ -180,11 +193,9 @@ A python package is defined to be:
     Therefore, distutils was created to install packages into the PYTHONPATH with little
     difficulty.  PYTHONPATH == sys.path in code.
 
-Traditionally, a developer groups related packages into an install tree, and then
-adds that tree to PYTHONPATH so they can be imported.
+Traditionally, a developer groups related packages into an install tree, and then adds that tree to PYTHONPATH so they can be imported.
 
-The most convenient way to do this was to add a 'path configuration file' to an existing
-directory in PYTHONPATH.
+The most convenient way to do this was to add a 'path configuration file' to an existing directory in PYTHONPATH.
 
     Path configuration files have an extension of .pth, and each line must contain a
     single path that will be appended to sys.path.
@@ -202,9 +213,7 @@ Also, two environment variables modify sys.path:
 
 Finally, sys.path is just a python list, so apps can modify it at will.
 
-A python installation has a site-packages directory inside the module directory.
-This is where user-installed packages are 'dropped.'
-A .pth file in this directory is maintained.
+A python installation has a site-packages directory inside the module directory.  This is where user-installed packages are 'dropped.'  A .pth file in this directory is maintained.
 
 jwm: I don't see any .pth files in my site-packages directories.
 
@@ -214,23 +223,28 @@ http://guide.python-distribute.org/introduction.html#current-state-of-packaging
 says: {
 
 past:
-  setuptools
-  distutils
+
+- setuptools
+-  distutils
 
 present:
-  Distribute
-  distutils
-  distutils2
+
+- Distribute
+- distutils
+-  distutils2
 
 future:
-  pip
-  Standard Library
+
+-  pip
+-  Standard Library
 
 distutils:
-  - is part of the the std lib
-  - will be discontinued in Python 3.3
-  - distutil2 will be backward compatible to 2.4 onward
-  - will be part of std lib in python 3.3
+
+- is part of the the std lib
+- will be discontinued in Python 3.3
+- distutil2 will be backward compatible to 2.4 onward
+- will be part of std lib in python 3.3
+
 
     The distutils module provides the basics for packaging Python. Unfortunately, the
     distutils module is riddled with problems, which is why a small group of python
@@ -1507,3 +1521,55 @@ A: I don't want to.  Use virtualenvwrapper like I have done before.
 Install pip globally, then use pip to install virtualenvwrapper, then create ffdev...
 That worked.
 }
+
+----
+
+**Wed Nov 18 15:24:56 PST 2015**
+
+First, read the current advice:
+
+- √ python 2: [Installing Python Modules](https://docs.python.org/2/installing/)
+- √ python 3: [Installing Python Modules](https://docs.python.org/3/installing/)
+
+
+Build a python2 virtual env for mrjob work on akamac capella.
+
+first, update pip, virtualenv and virtualenvwrapper using my brew install python2: {
+
+    $ which python
+    /usr/local/bin/python
+    $ python --version
+    Python 2.7.10
+
+    $ which pip
+    /usr/local/bin/pip
+    $ pip --version
+    pip 7.1.0 from /usr/local/lib/python2.7/site-packages (python 2.7)
+
+    $ pip freeze
+    async==0.6.1
+    gitdb==0.5.4
+    GitPython==0.3.2rc1
+    smmap==0.8.2
+    virtualenv==12.1.1
+    wheel==0.24.0
+
+    $ pip install --upgrade pip
+      ...
+    Successfully installed pip-7.1.2
+
+    $ pip install --upgrade virtualenv
+      ...
+    Successfully installed virtualenv-13.1.2
+
+    $ pip install --upgrade virtualenvwrapper
+      ...
+    Successfully installed argparse-1.4.0 pbr-1.8.1 six-1.10.0 stevedore-1.9.0 virtualenv-clone-0.2.6 virtualenvwrapper-4.7.1
+
+- but then I did not use virtualenvwrapper, as it adds too much confusion for me, and is just that much different from python 3.4 and later pyvenv.
+
+## setup mrjobenv
+
+    $ virtualenv -p /usr/local/bin/python2.7 mrjobenv
+
+    $ source mrjobenv/bin/activate
