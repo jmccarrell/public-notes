@@ -5,7 +5,7 @@
 
 ## Jeffs customizations
 
-- I re-bind the default `C-b` to `C-o`, so everywhere I have my dotiles, it is `C-o`
+- I re-bind the default `C-b` to `C-q`, so everywhere I have my dotiles, it is `C-q`
 
 
 
@@ -22,11 +22,11 @@
 
 - suspend a session inside it
 
-        C-o d
+        C-q d
 
 - list sessions inside tmux
 
-        C-o s
+        C-q s
 
 - how to see what is running after ssh
 
@@ -65,14 +65,14 @@
 
 # jeff key bindings
 
-- remap C-b to C-o
+- remap C-b to C-q
 
 - My initial tmux.conf file
 
-        # use C-o, as the prefix
-        set-option -g prefix C-o
-        unbind-key C-o
-        bind-key C-o send-prefix
+        # use C-q, as the prefix
+        set-option -g prefix C-q
+        unbind-key C-q
+        bind-key C-q send-prefix
         set -g base-index 1
 
         # Easy config reload
@@ -82,22 +82,22 @@
 
 ### split windows
 
-- split window horizontally:  `C-o "`
+- split window horizontally:  `C-q "`
     - like `C-x 4 b` in emacs
     - bind-key          " split-window
 
-- split window vertically:   `C-o %`
+- split window vertically:   `C-q %`
     - Split the current pane into two, left and right.
     - like `C-x 3 b` in emacs
     - bind-key          % split-window -h
 
 ### restore to a single pane
 
-- break-pane  `C-o !`
+- break-pane  `C-q !`
     - Break the current pane out of the window.
     - sort of like `C-x 1` in emacs, but splits the pane out into a new window like `C-x 5`
 
-- next layout:  `C-o space`
+- next layout:  `C-q space`
     - bind-key      Space next-layout
     - cycles through some interesting window layouts; seems useful
 
@@ -110,7 +110,7 @@
 ... the current pane may be changed with the select-pane command and the rotate-window and swap-pane commands may be used to swap panes without changing their position.  Panes are numbered beginning from zero in the order they are created.
 
 - How do I see the current window and pane in the status bar?
-    - A: `C-o i`: display some info
+    - A: `C-q i`: display some info
 
            i           Display some information about the current window.
 
@@ -124,7 +124,7 @@
     - is l and p the same thing?  I guess not
 
 - how do I switch between panes in a window?
-    - A: `C-o o`
+    - A: `C-q o`
 
            o           Select the next pane in the current window.
 
