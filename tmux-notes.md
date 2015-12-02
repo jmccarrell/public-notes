@@ -128,6 +128,10 @@
 
            o           Select the next pane in the current window.
 
+- how do I make a new pane?
+    - A: split an existing one, either:
+        - into top and bottom (preferred): `C-q "`
+        - into left and right: `C-q %`
 
 
 ## default bindings (tmux 2.1)
