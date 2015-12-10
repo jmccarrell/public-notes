@@ -382,3 +382,42 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 
 - emacs wiki [Locate Files Anywhere](http://www.emacswiki.org/emacs/LocateFilesAnywhere)
 - precursor [Emacs: Helm for finding files](http://amitp.blogspot.com/2012/10/emacs-helm-for-finding-files.html)
+
+## utf 8 / unicode
+
+- one of the main pages for international characters is in the emacs manual: [22 International Character Support](http://www.gnu.org/software/emacs/manual/html_node/emacs/International.html#International)
+
+
+It looks like C-x 8 is bound to a number of interesting unicode characters, as part of of iso-international mode, but it also appears to be very Latin-1 specific.
+
+There is an input-method called rfc1345, which follows the RFC.  [RFC 1345](https://tools.ietf.org/pdf/rfc1345.pdf) defines `RT` to produce the square root symbol that I am using for my check mark.
+
+So one officially sanctioned way to get a square root symbol into any buffer are the 4 characters:
+
+C-\ &RT
+
+then another C-\ to get back out of the rfc 1345 input method.
+
+another interesting character is infinity: 00.  So
+
+C-\ &00
+
+creates ∞
+
+I can also do this with the insert-character function.
+
+But the final answer I arrived at was to disable option as a meta character in my .emacs
+
+(when (and window-system (eq 'ns window-system))
+  (set-variable (quote mac-option-modifier) 'none))
+
+Then option-v produces my desired square root character.
+
+----
+
+I want to prefer utf-8 in all cases so add to my init file:
+
+;; prefer utf-8 encoding in all cases.
+(prefer-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
