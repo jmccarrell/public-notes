@@ -61,13 +61,11 @@
 
 Definition of Continuous Integration:
 
-> Fast, automated feedback on the correctness of your application every time
-there is a change to code.
+> Fast, automated feedback on the correctness of your application every time there is a change to code.
 
 Definition of Continuous Delivery:
 
-> Fast, automated feedback on the production readiness of your application every
-time there is a change -- to code, infrastructure, or configuration.
+> Fast, automated feedback on the production readiness of your application every time there is a change -- to code, infrastructure, or configuration.
 
 ## Continuous Delivery Ideal
 
@@ -182,6 +180,7 @@ The 3 C's:
 
 - communication
 - collaboration
+- clarity
 
 
 ### Communication
@@ -197,13 +196,11 @@ The 3 C's:
 
 ### Collaboration
 
-- get stakeholders involved in the architecture process and *solicit* ideas and
-feedback early and often
+- get stakeholders involved in the architecture process and *solicit* ideas and feedback early and often
 
 ### Clarity
 
-- articulate the architecture solution in clear and concise terms as appropriate
-to each stakeholder
+- articulate the architecture solution in clear and concise terms as appropriate to each stakeholder
 
 ### Translation Skills
 
@@ -221,8 +218,7 @@ the triangle of knowledge:
 
 so the game is to move stuff up the triangle
 
-as an architect technical breadth (stuff you know you don't know) is more
-important than technical depth (stuff you know).
+as an architect technical breadth (stuff you know you don't know) is more important than technical depth (stuff you know).
 
 So focus on stuff you know you don't know.
 
@@ -284,7 +280,7 @@ key point: once we know where we want to go, how do we get there?
     - Shyam R Chidamber
     - Chris F. Kemerer
 - [paper](http://faculty.salisbury.edu/~stlauterburg/cosc425/metricforood_chidamberkemerer94.pdf)
-- bundles prior metrics is a way that works well in OO.
+- bundles prior metrics in a way that works well in OO.
 
 ##### Easy C&K metrics
 
@@ -305,8 +301,7 @@ these next two may be the most useful from architecture standpoint, because they
 - CE: efferent coupling: ∑ of other classes this class uses (outgoing calls)
 - CA: afferent coupling: ∑ of how many other classes use this class (incoming calls)
 
-if cyclomatic complexity is a measure of complexity, then afferent coupling is a measure
-of importance.
+if cyclomatic complexity is a measure of complexity, then afferent coupling is a measure of importance.
 
 ##### Kiviat Metrics or Kiviat Graphs
 
@@ -377,8 +372,7 @@ code city
 
 ## Architecting for change
 
-Architecture agility
-: the ability to respond *quickly* to a constanntly changing environment
+**Architecture agility**: the ability to respond *quickly* to a constantly changing environment
 
 ### Techniques for Change
 
@@ -432,15 +426,12 @@ could be done via:
         - struts
         - tomcat
 
-- a given standard may not be your first choice, but they do significantly reduce the
-effort to achieve a given change; you can count on a larger pool of talent, and thus do
-not have to educate your workforce before they can even begin work.
+- a given standard may not be your first choice, but they do significantly reduce the effort to achieve a given change; you can count on a larger pool of talent, and thus do not have to educate your workforce before they can even begin work.
 - and leveraging standards typically helps reduce system integration issues
 
 #### Create Product-agnostic Architectures
 
-goal
-: isolate products to avoid vendor lock-in
+**goal**: isolate products to avoid vendor lock-in
 
 Use:
 
@@ -450,10 +441,8 @@ Use:
 
 #### Create Domain-specific Architectures
 
-- generic architectures -- aka *infinity architectures* -- are difficult to change
-because they are too broad adn take into account scenarios that are not actually used.
-- the mitigation technique is: limit the scope of the architecture by taking into
-account drivers, requirements, business direction and industry trends.
+- generic architectures -- aka *infinity architectures* -- are difficult to change because they are too broad and take into account scenarios that are not actually used.
+- the mitigation technique is: limit the scope of the architecture by taking into account drivers, requirements, business direction and industry trends.
 - Combine these 4 concerns:
     - business requirements
     - business goals
@@ -461,17 +450,49 @@ account drivers, requirements, business direction and industry trends.
     - industry trend
 - to arrive at the domain specific architecture.
 
-## Architecture Patterns Part 1
+# Architecture Patterns Part 1
 
-### History of Patterns Movement
+4 main architectural patterns:
 
-### Traditional Layered Architecture
+- Layered architecture
+- Event driven architecture
+- Micro-kernel architecture
+- Space-based architecture
 
-- often the layers are *closed*; i.e., there is no reaching around a layer
-to get to the one underneath it; you have to go through each layer.
+## History of Patterns Movement
 
-#### Advantages
+- origins is building architecture:
+    - _A Pattern Language_, Christopher Alexander, 1977
 
+## Traditional Layered Architecture
+
+- often the layers are *closed*; i.e., there is no reaching around a layer to get to the one underneath it; you have to go through each layer.
+
+### Advantages
+
+- good, general purpose architecture
 - separation of concerns
 - layers of isolation
+- easy to implement, test and govern
+
+### Layers
+
+Layered architecture usually has 4 layers:
+
+- presentation layer
+- business logic layer
+- persistence layer
+- database layer
+
+In this pattern, request flow is *always* top down: from presentation down to database.  There would never be, e.g., a request from the persistence layer up to the presentation layer.
+
+Antipattern: Architecture Sinkhole.
+
+Where do shared services go in a traditional layered architecture?  There really isn't a natural place.  Which gives rise to some hybrid architectures.
+
+Or open layered architectures, in which one layer -- such as a services layer -- are inserted.  Upper layers do not necessarily have to go down through all layers in an open layered architecture.
+
+## Service Oriented Architectures
+
+- granularity is the hardest part of SOA
 
