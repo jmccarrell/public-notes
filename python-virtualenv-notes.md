@@ -1573,3 +1573,30 @@ first, update pip, virtualenv and virtualenvwrapper using my brew install python
     $ virtualenv -p /usr/local/bin/python2.7 mrjobenv
 
     $ source mrjobenv/bin/activate
+
+----
+
+**Fri May 27 16:42:36 PDT 2016**
+
+- for my algorithms practice work, I want to review current state of the art for creating / using virtualenvs.
+- so, pyvenv is standard and supported as of python 3.4
+    - [pyvenv docs](https://docs.python.org/3/using/scripts.html#scripts-pyvenv)
+- so I created the first working area with:
+
+~~~
+$ pyvenv /j/proj/job-search-2016-02/pywork/bin_tree_serialize
+jeff at vega in /j/proj/job-search-2016-02/pywork on master [!?]
+$ source !$/bin/activate
+source /j/proj/job-search-2016-02/pywork/bin_tree_serialize/bin/activate
+(bin_tree_serialize) jeff at vega in /j/proj/job-search-2016-02/pywork on master [!?]
+~~~
+
+- then I wrote my files into the top-level `bin_tree_serialize` directory
+- and invoked the test suite in emacs like this:
+
+~~~
+cd /j/proj/job-search-2016-02/pywork/bin_tree_serialize && source ./bin/activate && python3 test_serialize.py
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+~~~

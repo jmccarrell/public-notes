@@ -451,3 +451,319 @@ So go back to square one tomorrow and try to build again.
 ## python style
 
 - a great python style guide was written by the google guys: [Google Python Style Guide](https://google-styleguide.googlecode.com/svn/trunk/pyguide.html)
+
+----
+
+## notes from _Programming in Python 3_
+
+- string (really any sequence) reverse idiom
+
+~~~python
+>>> s = 'down dog'
+>>> s, s[::-1]
+('down dog', 'god nwod')
+~~~
+
+- since strings are immutable sequences, `in` tests work for strings:
+
+~~~python
+>>> 'god' in s[::-1]
+True
+~~~
+
+- from Python 3.1, the positional args to str formatting can be omitted:
+    - as opposed to explicitly naming the 0, 1, 2:
+
+~~~python
+>>> "{} {} {}".format('Python', 'can', 'count')
+'Python can count'
+~~~
+
+### format with mapping-unpacking
+
+we can use format strings with mapping-unpacking to produce named value, from any dict, including the one of variables in local scope:
+
+~~~python
+>>> element = 'Gold'
+>>> number = 79
+>>> "Element {element} has atomic number {number}".format(**locals())
+'Element Gold has atomic number 79'
+~~~
+
+an example with a plain dictionary:
+
+~~~python
+>>> d = dict()
+>>> d['element'] = 'Silver'
+>>> d['number'] = 47
+>>> "Element {element} has atomic number {number}".format(**d)
+'Element Silver has atomic number 47'
+~~~
+
+we can use a conversion specifier to a format string to force representational output:
+
+~~~python
+>>> c = decimal.Decimal('3.1415')
+>>> c
+Decimal('3.1415')
+>>> "{0} {0!r} {0!s}".format(c)
+"3.1415 Decimal('3.1415') 3.1415"
+~~~
+
+'string' is the default representation for format() output; so `{0!s}` is redundant.
+
+----
+
+## sequences
+
+- a sequence type must support:
+    - membership operator 'in'
+    - size operator 'len'
+    - slices '[]'
+    - and be iterable
+- 5 built-in sequence types:
+    - bytearray
+    - bytes
+    - list
+    - str
+    - tuple
+- sequence types from the std lib:
+    - collections.namedtuple
+
+## list comprehensions
+
+~~~python
+[expression for item in iterable if condition]
+~~~
+
+- is equivalent to:
+
+~~~python
+temp = []
+for item in iterable:
+    if condition:
+        temp.append(expression)
+~~~
+
+## sets
+
+- must support at least operations:
+    - membership operator: `in` 
+    - size function: `len()`
+    - set.isdisjoint() method
+    - support for comparisons
+    - support for bitwise operators which are used to compute union, intersection, etc.
+- 2 built-in set types: mutable `set` and immutable `frozenset`
+- only hashable objects can be added to a set
+    - hashable objects:
+        - have a `__hash__()` function that returns a consistent value for the life of that object
+        - the hashes can be compared with `__eq__()`
+- all the built-in primitive types can be added to a set, as they are hashable:
+    - int, float, str, frozenset, tuple
+- but mutable (changing hash value) types cannot be added to a set:
+    - list, dict, set
+- `<` and `>` perform sub-set / super-set comparisons
+
+- sets are good for elminating duplicates, eg:
+
+~~~python
+>>> x = [c for c in "every good boy does fine."]
+>>> x
+['e', 'v', 'e', 'r', 'y', ' ', 'g', 'o', 'o', 'd', ' ', 'b', 'o', 'y', ' ', 'd', 'o', 'e', 's', ' ', 'f', 'i', 'n', 'e', '.']
+>>> x = list(set(x))
+>>> x
+['o', 'v', 'n', 'f', 'd', '.', 'g', 'b', 's', 'r', ' ', 'e', 'i', 'y']
+~~~
+
+### set comprehensions
+
+- set comprehensions are also supported, with the same basic syntax as list comprehensions, but with '{}' instead of '[]'
+
+~~~python
+{expression for item in iterable if condition}
+~~~
+
+- this example creates the list of HTML filenames lowercased:
+- since a set is used, there will be no duplicate filenames here.
+
+~~~python
+htmlfiles = {x for x in files if x.lower().endswith((".htm", ".html"))}
+~~~
+
+## Mapping Types
+
+### dicts
+
+- mapping types must support:
+    - the membership operator: `in`
+    - then `len()` function
+    - must be iterable
+    - must provide access to items: both keys and values
+
+- as of Python 3.1, there are 3 dict types:
+    - dictionary
+    - std lib: collections.defaultdict
+    - std lib: collections.OrderedDict
+        - maintain insertion order
+
+- only hashable objects can be used as keys
+- values can be any type
+
+- dictionaries can be compared with `==` and `!=`
+    - but not with `<` etc as relative comparisons don't make sense with unordered collections
+
+- dicts cannot be strided or sliced
+
+- creating a dict from literal values
+    - a sequence can be used if the sequence produces tuples with key and value in each element
+
+~~~python3
+>>> d1 = dict({'id': 48, 'name': 'KTM'})          # dict literal
+>>> d2 = dict(id=48, name='KTM')                  # keyword args
+>>> d3 = dict([('id', 48), ('name', 'KTM')])      # seq of key / value
+>>> d4 = dict(zip(('id', 'name'), (48, 'KTM')))   # seq of key / value formed by zip
+>>> d5 = {'id': 48, 'name': 'KTM'}                # dict literal
+>>> d1 == d2 == d3 == d4 == d5
+True
+~~~
+
+dict vs set literals:
+
+~~~python3
+>>> type({'id': 48, 'name': 'KTM'})
+<class 'dict'>
+>>> type({'id', 48, 'name', 'KTM'})
+<class 'set'>
+~~~
+
+idiom for setting a default value; useful for creating keys without having to test for existence first:
+
+~~~python3
+>>> d = {'id': 48}
+>>> d.setdefault('name', 'KTM')    # does both a set (of the supplied default value) and a get since name does not exist
+'KTM'
+>>> d
+{'name': 'KTM', 'id': 48}
+~~~
+
+another way to deal with the same issue: by supplying the default value to be returned by get when the key doesn't exist:
+
+here is an example word counting program:
+
+~~~python3
+import string
+import sys
+
+words = {}
+strip = string.whitespace + string.punctuation + string.digits + "\"'"
+for filename in sys.argv[1:]:
+    for line in open(filename):
+        for word in line.split():
+            word = word.strip(strip)
+            if len(word) > 2:
+                words[word] = words.get(word, 0) + 1
+for word in sorted(words):
+    print("{} occurs {} times".format(word, words[word]))
+~~~
+
+which when run on itself produces:
+
+~~~bash
+$ python3 unique_words.py unique_words.py
+filename occurs 1 times
+for occurs 4 times
+import occurs 2 times
+len(word occurs 1 times
+line occurs 1 times
+line.split occurs 1 times
+occurs occurs 1 times
+open(filename occurs 1 times
+print occurs 1 times
+sorted(words occurs 1 times
+string occurs 1 times
+string.digits occurs 1 times
+string.punctuation occurs 1 times
+string.whitespace occurs 1 times
+strip occurs 1 times
+sys occurs 1 times
+sys.argv occurs 1 times
+times".format(word occurs 1 times
+word occurs 3 times
+word.strip(strip occurs 1 times
+words occurs 1 times
+words.get(word occurs 1 times
+words[word occurs 2 times
+~~~
+
+Contrasting with storing a count as the value, one can compute unique sets of values by using a `set()` as the default value, as in:
+
+~~~python3
+sites = {}
+for filename in sys.argv[1:]:
+    for line in open(filename):
+        # extract http: references to sites into site
+        sites.setdefault(site, set()).add(filename)
+~~~
+
+### dict comprehensions
+
+~~~python3
+{keyexpression: valueexpresion for key, value in iterable if condition}
+~~~
+
+examples: dict of file sizes by name
+
+~~~python3
+>>> file_sizes = {name: os.path.getsize(name) for name in os.listdir('.') if not name.startswith('.')}
+>>> file_sizes
+{'__pycache__': 102, 'bin_tree_serialize.py': 194, 'test_serialize.py': 483, 'bin': 442, 'include': 68, 'lib': 102, 'pyvenv.cfg': 137}
+~~~
+
+example: invert a dict:
+
+~~~python3
+>>> sizes_file = {v: k for k, v in file_sizes.items()}
+>>> sizes_file
+{194: 'bin_tree_serialize.py', 483: 'test_serialize.py', 68: 'include', 102: 'lib', 137: 'pyvenv.cfg', 442: 'bin'}
+~~~
+
+### default dictionaries
+
+- default dicts behave exactly as dicts do, except for how they handle missing keys.
+- if a value is accessed by key `k`, which does not exist, a new value is created, inserted, and returned.
+- this means we can replace the code in unique_words above:
+
+~~~python3
+words = {}
+# ...
+                words[word] = words.get(word, 0) + 1
+~~~
+
+- with
+
+~~~python3
+words = collections.defaultdict(int)
+# ...
+                words[word] += 1
+~~~
+
+- The defaultdict constructor takes a factory function (name) which is called to create the new value.
+- Thus, in this case, a new integer (default value 0) is created whenever an unknown key is accessed in `words`.
+
+### Ordered dicts
+
+- collections.OrderedDict() preserves the insertion order of keys and values.
+- it preserves insertion order across updates to a keys' value.
+
+## iterating collections
+
+## queues
+
+`collections.deque` is the standard queue type, which support very fast adds and removes from both the beginning and end of the list.
+
+the relevant operations are:
+
+- append(): add an element to the right side of the queue
+- appendleft(): ... left side
+- pop(): remove and return the rightmost element
+- popleft():  ... leftmost
