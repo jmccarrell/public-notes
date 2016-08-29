@@ -767,3 +767,16 @@ the relevant operations are:
 - appendleft(): ... left side
 - pop(): remove and return the rightmost element
 - popleft():  ... leftmost
+
+## logging
+
+- a good desc of [exception logging patterns](https://www.loggly.com/blog/exceptional-logging-of-exceptions-in-python/)
+
+----
+
+- doc string conventions / best practices:
+    - [What to put in a python module docstring?](http://stackoverflow.com/questions/2557110/what-to-put-in-a-python-module-docstring)
+    - spec: [pep 257: Docstring Conventions](https://www.python.org/dev/peps/pep-0257/)
+    - there is also the [pep257 tool]()
+    - which has been superceded by [pydocstyle](http://www.pydocstyle.org/en/latest/)
+        - [github](https://github.com/PyCQA/pydocstyle)

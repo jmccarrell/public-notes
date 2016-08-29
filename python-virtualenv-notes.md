@@ -1576,6 +1576,45 @@ first, update pip, virtualenv and virtualenvwrapper using my brew install python
 
 ----
 
+**circa Mar 2016**
+
+## mrjob py venv
+
+- test my count words example in a python3 env
+    - mrjob has [explicit support for python3](https://github.com/Yelp/mrjob/pull/1007)
+
+- create a standalone mrjob environment that is very easy to recreate
+    - using both python3 and python2
+    - on capella
+    - push via git
+    - on vega
+    - I DONT KNOW create a separate git repo for mrjob-python2, 3?
+        - it would have a pip-requirements.txt
+            - or mrjob-requirements.txt?
+        - it would have separate pip instructions depending on python 2.7.10, 2.7.y etc.
+            - pip is bundled with python as of 2.7.9; before then one must install it
+            - C.A. cluster is at:
+                - Python 2.7.6
+                - Python 3.4.3
+    - or just a notes page telling how to do it?
+    - seems like we need a link to the python/pip installation instructions?  A: y
+        - which is where?
+        - √ python 2: [Installing Python Modules](https://docs.python.org/2/installing/)
+        - √ python 3: [Installing Python Modules](https://docs.python.org/3/installing/)
+    - first, just make a mrjob python 2 env and a py3 env
+        - borrow the idea from virtualenvwrapper and put these in home directory:
+            - `~/pyvenv`
+                - mrjob-py2
+                - mrjob-py3
+    - no, this conflates the source that create the venvs, which should be rev controlled and shared,
+      and the targets which are built per machine and should not be shared.
+    - proposal:
+        - /j/proj/jeffs-pyvenvs
+        - /j/proj/pyvenv/mrjob-py2
+        - ...-py3
+
+----
+
 **Fri May 27 16:42:36 PDT 2016**
 
 - for my algorithms practice work, I want to review current state of the art for creating / using virtualenvs.
@@ -1600,3 +1639,4 @@ cd /j/proj/job-search-2016-02/pywork/bin_tree_serialize && source ./bin/activate
 ----------------------------------------------------------------------
 Ran 1 test in 0.000s
 ~~~
+

@@ -335,3 +335,11 @@
     bind-key -t emacs-copy         C-Down scroll-down
 
 - Do any of my tutorials listed about talk about the copy buffer and how to use it?
+
+----
+
+**Tue Jul  5 17:03:26 PDT 2016**
+
+- with tmux 2.9+, we now have [tmux integration](https://gitlab.com/gnachman/iterm2/wikis/TmuxIntegration)
+    - this moves tmux commands out to the iterm2 level, which means a lot of nice integration features I want
+    - use `tmux -CC`
