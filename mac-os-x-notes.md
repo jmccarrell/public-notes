@@ -95,3 +95,17 @@ to see all of the network services:
         /j/notes/ampcamp-2012-notes.txt
         /j/notes/today-todo-2011.txt
         /j/notes/today-todo-2012.txt
+
+**Thu Sep  1 13:46:10 PDT 2016**
+
+## mission control notes
+
+- user gestures
+- enter mission control
+    - keyboard: ^-arrow-up
+    - mouse: 2 finger double-tap
+    - trackpad: 3 finger swipe up
+- move to higher/lower desktop: "swipe between full screen apps"
+    - keyboard: ^-arrow-left or right
+    - mouse: 2 finger double-tap
+    - trackpad: 2 finger swipe left or right

@@ -1640,3 +1640,40 @@ cd /j/proj/job-search-2016-02/pywork/bin_tree_serialize && source ./bin/activate
 Ran 1 test in 0.000s
 ~~~
 
+**Wed Aug 31 11:45:41 PDT 2016**
+
+- python 2 virtualenv, virtualenvwrapper use for athos.
+
+- what are the basic commands I need for virtualenvwrapper?
+
+- how to associate a project with its virtualenv?
+- mkvirtualenv
+
+```
+jeffmccarrell at pavo in /w/be
+$ mkvirtualenv trainingplans-api
+New python executable in /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/python2.7
+Also creating executable in /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/python
+Installing setuptools, pip, wheel...done.
+virtualenvwrapper.user_scripts creating /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/predeactivate
+virtualenvwrapper.user_scripts creating /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/postdeactivate
+virtualenvwrapper.user_scripts creating /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/preactivate
+virtualenvwrapper.user_scripts creating /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/postactivate
+virtualenvwrapper.user_scripts creating /Users/jeffmccarrell/tmp/venvs-python2/trainingplans-api/bin/get_env_details
+(trainingplans-api) jeffmccarrell at pavo in /w/be
+$ workon
+trainingplans-api
+```
+
+- notice that the project directory /w/be/trainingplans-api was not selected as cwd.
+- from the docs
+
+> A project directory is created and bound to a virtualenv when mkproject is run instead of mkvirtualenv. To bind an existing project directory to a virtualenv, use setvirtualenvproject.
+
+- so:
+
+```
+(trainingplans_api) jeffmccarrell at pavo in /w/be/trainingplans-api on develop
+$ setvirtualenvproject $VIRTUAL_ENV ${pwd}
+Setting project for trainingplans_api to /w/be/trainingplans-api
+```
