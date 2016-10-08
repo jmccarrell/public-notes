@@ -720,3 +720,67 @@ And, in fact, the github help recommends exactly that: [fork a repo](https://hel
         git remote add origin git@bitbucket.org:jmccarrell/jwm-ansible.git
         git push -u origin --all # pushes up the repo and its refs for the first time
         git push -u origin --tags # pushes up any tags
+
+----
+
+**Sat Oct  8 13:19:54 PDT 2016**
+
+- to resolve storing my own mysql DB password in revision controlled dev_settings.py, I want to try this recipe:
+    - [how do I keep a local version of files](http://stackoverflow.com/questions/11979634/how-do-i-keep-my-local-version-of-files-without-using-gitignore)
+    - which boils down to:
+    - `git update-index --assume-unchanged [file names]`
+- well, that didn't work at all like I wanted.
+
+```shell
+$ git st
+  ...
+	modified:   filing/autofile/ca.py
+$ git update-index --assume-unchanged davotech/dev_settings.py
+$ mv ~/Downloads/dev_settings.py  davotech
+$ git st
+  ...
+	modified:   davotech/dev_settings.py
+	modified:   filing/autofile/ca.py
+```
+
+- Ok, it looks like if I invert the order of operations, it might work.
+- Nope, same result:
+
+```
+$ git st
+  ...
+	modified:   filing/autofile/ca.py
+$ mv /c/davo/tmp/dev_settings.py davotech/dev_settings.py
+$ git st
+  ...
+	modified:   davotech/dev_settings.py
+	modified:   filing/autofile/ca.py
+$ git update-index --assume-unchanged davotech/dev_settings.py
+$ git st
+  ...
+	modified:   davotech/dev_settings.py
+	modified:   filing/autofile/ca.py
+```
+
+- so try --skip-worktree
+- that worked:
+
+```
+$ git st
+  ...
+	modified:   filing/autofile/ca.py
+$ cp -p ~/Downloads/dev_settings.py davotech/
+$ git st
+  ...
+	modified:   davotech/dev_settings.py
+	modified:   filing/autofile/ca.py
+$ git update-index --skip-worktree davotech/dev_settings.py
+$ git st
+  ...
+	modified:   filing/autofile/ca.py
+```
+
+- it remains to be seen whether or not this change persists across:
+    - branches
+    - pull
+- so far, so good.  I have made new branches, and merged in upstream changes.
