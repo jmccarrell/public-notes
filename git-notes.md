@@ -725,6 +725,8 @@ And, in fact, the github help recommends exactly that: [fork a repo](https://hel
 
 **Sat Oct  8 13:19:54 PDT 2016**
 
+# locally modified (config) files not revision controlled
+
 - to resolve storing my own mysql DB password in revision controlled dev_settings.py, I want to try this recipe:
     - [how do I keep a local version of files](http://stackoverflow.com/questions/11979634/how-do-i-keep-my-local-version-of-files-without-using-gitignore)
     - which boils down to:
@@ -762,7 +764,7 @@ $ git st
 	modified:   filing/autofile/ca.py
 ```
 
-- so try --skip-worktree
+- so try `--skip-worktree`
 - that worked:
 
 ```
