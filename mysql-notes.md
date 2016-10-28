@@ -361,3 +361,16 @@ mysql would have been started with the following arguments:
 ```
 SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_name LIKE 'collation%';
 ```
+
+----
+
+**Thu Oct 27 19:23:54 PDT 2016**
+
+## [mysql_config_editor](http://dev.mysql.com/doc/refman/5.7/en/mysql-config-editor.html)
+
+- to set up my davo access on vega, I did:
+
+```
+$ mysql_config_editor set --login-path=local --host=localhost --user=root --password
+Enter password:
+```

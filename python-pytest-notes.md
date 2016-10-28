@@ -188,3 +188,100 @@ pytest <testfile> --ipdb
 > If during implementing your tests you realize that you want to use a fixture function from multiple test files you can move it to a conftest.py file or even separately installable plugins without changing test code.
 
 > The discovery of fixtures functions starts at test classes, then test modules, then conftest.py files and finally builtin and third party plugins.
+
+----
+
+## Mocking
+
+- reading Mock getting started guide
+
+- prefer MagicMock() to Mock() in most cases
+    - tends to be a more functional superset of Mock
+    - implements dunder methods:
+        - __lt__, __ge__, __len__, __str__, ...
+
+### [Creating a mock from an existing object](https://docs.python.org/3/library/unittest.mock-examples.html#creating-a-mock-from-an-existing-object)
+
+- recommends `spec`
+- and [auto-speccing](https://docs.python.org/3/library/unittest.mock.html#auto-speccing)
+- and spec-set
+
+----
+
+- video [to mock or not to mock](https://www.youtube.com/watch?v=KYG5C1CEkOk)
+
+- patch() patch something within the scope of a context manager
+- 7:58 mock/patch the object where it is used, not where it is declared.
+
+### chapter two
+
+- 15:19
+
+- the good mocks are:
+    - system calls
+    - streams
+    - networking
+    - IO operations
+    - clocks, time, timezones
+    - unpredictable results
+
+- why we like them
+    - save time
+    - make impossible possible
+    - exclude external dependencies
+
+### chapter 3: bad mocks
+
+- speaker recommends Harry Percival book _Test Driven Development with Python_
+    - Percival also gave a pycon 2016 talk: [Outside-In TDD](https://www.youtube.com/watch?v=6zQAu23bKF8)
+- 25:55 carefully consider the tradeoffs between mocks, unit tests and integration tests.
+- only mock types that you own
+- _Growing Object oriented software guided by tests_  by Freeman, Nye
+
+### conclusions
+
+- mocks can be dangerous
+- they will hide what shouldn't be hidden
+- passing faulty tests give a false sense of security
+
+----
+
+# Outside-in TDD
+
+- 2 hour pycon 2016 [tutorial](https://www.youtube.com/watch?v=6zQAu23bKF8)
+- author: Harry Percival
+
+## setup
+
+- Percival sets up a simple todo list app for context
+
+## double-loop TDD
+
+- write an outer functional test
+- write inner unit tests
+- outer functional tests run less frequently
+- inner unit tests run a lot to help build the stuff needed by the functional test
+
+## practical example
+
+- 'mocks are error prone kinds of things so we are going to explore those, and maybe they (mocks) have some nice things about them too.'
+
+## conclusions and discussion
+
+- ~1:35
+
+- Functional tests
+    - provide the best guarantee that your application really runs correctly, from the point of view of the user
+    - but: its a slower feedback cycle
+    - and they don't necessarily help you write clean code
+- Integration tests (reliant on, eg, the ORM or the django test client)
+    - are quick to write
+    - easy to understand
+    - will warn you of any integration issues
+    - but may not always drive good design (that is up to you!)
+    - are usually slower than isolated tests
+- isolated ("mocky") tests
+    - these involve the most hard work
+    - they can be harder to read and understand
+    - but: these are the best ones for guiding you toward better design
+    - and they run the fastest

@@ -780,3 +780,52 @@ the relevant operations are:
     - there is also the [pep257 tool]()
     - which has been superceded by [pydocstyle](http://www.pydocstyle.org/en/latest/)
         - [github](https://github.com/PyCQA/pydocstyle)
+
+----
+
+**Tue Oct 25 16:16:41 PDT 2016**
+
+- after installing macos sierra, then doing a brew update, I got a new python and python3.
+- here are the notes from brew:
+
+- python2
+
+```
+==> Caveats
+Pip and setuptools have been installed. To update them
+  pip install --upgrade pip setuptools
+
+You can install Python packages with
+  pip install <package>
+
+They will install into the site-package directory
+  /usr/local/lib/python2.7/site-packages
+
+See: https://github.com/Homebrew/brew/blob/master/docs/Homebrew-and-Python.md
+
+.app bundles were installed.
+Run `brew linkapps python` to symlink these to /Applications.
+```
+
+- python3
+
+```
+==> Caveats
+Pip, setuptools, and wheel have been installed. To update them
+  pip3 install --upgrade pip setuptools wheel
+
+You can install Python packages with
+  pip3 install <package>
+
+They will install into the site-package directory
+  /usr/local/lib/python3.5/site-packages
+
+See: https://github.com/Homebrew/brew/blob/master/docs/Homebrew-and-Python.md
+
+.app bundles were installed.
+Run `brew linkapps python3` to symlink these to /Applications.
+```
+
+- so I immediately updated pip, setuptools and wheel
+
+- I linked my autofile venv to /usr/local/bin/python3.5
