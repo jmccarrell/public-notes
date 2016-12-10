@@ -421,3 +421,72 @@ I want to prefer utf-8 in all cases so add to my init file:
 (prefer-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
+
+----
+
+**Thu Nov 10 13:02:11 PST 2016**
+
+## emacs package managers again
+
+- I started with [el-get](http://www.emacswiki.org/emacs/el-get)
+- but I had problems install magit via el-get.
+- so throw out el-get, and fall back to MELPA.
+- what is the model post-installation to keep packages up to date?
+- A: manually:
+
+> After running package-list-packages, type U (mark Upgradable packages) and then x (eXecute the installs and deletions). When it’s done installing all the packages it will ask if you want to delete the obsolete packages and so you can hit y (Yes).
+
+## magit
+
+- support for magit added.
+
+## xterm-color
+
+- move to the MELPA packaged version of xterm-color from my private version.
+
+```
+M-x package-list-packages
+<search> xterm-color
+i
+x
+```
+
+- √ then nuke xterm-color from my repo
+
+**Fri Nov 11 11:08:24 PST 2016**
+
+## path inside emacs
+
+- as I frequently change virtual envs, the PATH of the shell changes
+- but emacs retains the PATH from when it was started.
+- to see the current path, eval:
+
+```lisp
+(getenv "PATH")
+"/c/davo/tmp/venvs/auto_filer/bin:/Users/jeff/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/TeX/texbin:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/bin-x86_64-10_9:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/libexec-x86_64-10_9"
+```
+
+- looks like there is a package [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell) to help with this specific issue.
+- so try it.
+- load it from melpa
+
+- but that has the opposite effect, as when it evals the shell, the shell doesn't know about the virtualenv, so it resets the emacs path like so:
+
+```lisp
+(when (memq window-system '(mac ns))
+  (exec-path-from-shell-initialize))
+(("MANPATH" . "/usr/local/opt/coreutils/libexec/gnuman:/usr/share/man:/usr/local/share/man:/Library/TeX/Distributions/.DefaultTeX/Contents/Man:/usr/local/opt/coreutils/libexec/gnuman") ("PATH" . "/Users/jeff/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/TeX/texbin"))
+```
+
+- so keep looking
+- found [pyvenv](https://github.com/jorgenschaefer/pyvenv), available via melpa
+- seems to do just what I want, via `pyvenv-activate`
+
+- M-x pyvenv-activate /c/davo/tmp/venvs/autofiler
+
+```lisp
+(getenv "PATH")
+"/c/davo/tmp/venvs/auto_filer/bin:/Users/jeff/bin/:/usr/local/bin/:/usr/bin/:/bin/:/usr/sbin/:/sbin/:/opt/X11/bin/:/Library/TeX/texbin/:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/libexec/"
+```
+
+- does the right thing.  Problem solved.

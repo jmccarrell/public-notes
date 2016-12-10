@@ -786,3 +786,12 @@ $ git st
     - branches
     - pull
 - so far, so good.  I have made new branches, and merged in upstream changes.
+
+----
+
+- good reference for git remote branch handling: [Advanced Git concepts; the upstream tracking branch](https://felipec.wordpress.com/2013/09/01/advanced-git-concepts-the-upstream-tracking-branch/)
+
+
+### rebasing
+
+- read the pro git chapter on rebasing
