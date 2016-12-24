@@ -795,3 +795,9 @@ $ git st
 ### rebasing
 
 - read the pro git chapter on rebasing
+
+----
+
+## [ignore local changes](http://www.virtuouscode.com/2011/05/20/keep-local-modifications-in-git-tracked-files/)
+
+`git update-index --skip-worktree FILENAME`
