@@ -801,3 +801,33 @@ $ git st
 ## [ignore local changes](http://www.virtuouscode.com/2011/05/20/keep-local-modifications-in-git-tracked-files/)
 
 `git update-index --skip-worktree FILENAME`
+
+----
+
+## creating and applying patchs
+
+- a nice overview: [How to create and apply a patch with Git](https://ariejan.net/2009/10/26/how-to-create-and-apply-a-patch-with-git/)
+
+- create the patch from a dev branch:
+
+$ git format-patch develop --stdout > /c/davo/tmp/s3-key-names.patch
+
+- create a branchn in the target to test applying that patch.
+
+$ git co -b feature_#137359471
+
+- check out / test the patch to see if it will apply cleanly
+
+```
+$ git apply --stat /c/davo/tmp/s3-key-names.patch
+ filing/autofile/ca_efile.py |   43 +++++++++++++++++++++++--------------------
+ 1 file changed, 23 insertions(+), 20 deletions(-)
+```
+
+- it turns out I had already applied that change:
+
+```
+$ git apply --check /c/davo/tmp/s3-key-names.patch
+error: patch failed: filing/autofile/ca_efile.py:184
+error: filing/autofile/ca_efile.py: patch does not apply
+```
