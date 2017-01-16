@@ -222,7 +222,7 @@ foldr :: Foldable t => (a -> b -> b) -> b -> t a -> b
 
 NB. Chris chose a tuple representation for the row because cassava already knows them.  He suggests converting this to a Haskell record type later.
 
-- reduce (_, _, _, atBats) to a type? function? that extracts the fourth element of the tuple
+- reduce `(_, _, _, atBats)` to a type? function? that extracts the fourth element of the tuple
 - add
 
 ```haskell
@@ -385,3 +385,32 @@ instance Traversable Records -- Defined in ‘Data.Csv.Streaming’
 
 What the records type is doing for us is letting us process records just like a lazy list, but with a little extra content in the `Nil` case.
 
+## Add tests
+
+- add a `test-suite` to the cabal file
+
+```haskell
+test-suite tests
+  ghc-options:         -Wall
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      tests
+  main-is:             Tests.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5,
+                       bassbull,
+                       hspec
+```
+
+- √ and refactor the code into a lib as a single module named `Bassbull`.
+
+----
+
+- to get a repl with the tests loaded: `stack ghci bassbull:tests`
+- which will give a REPL which has the symbols as loaded by the Cabal named `tests`
+- so from there, one can run the main function, or ...
+
+----
+
+- Chris finds he needs fewer tests overall
+- he often works with an emacs and a REPL of `stack ghci`
+- as his code starts to pass the type checker, he starts running the tests as another layer
