@@ -3,31 +3,31 @@
 registers in emacs:
 
 - `C-x r <SPC> R`
-    - Save position of point in register R (point-to-register).
+  - Save position of point in register R (point-to-register).
 
 - `C-x r j R`
-    - Jump to the position saved in register R (jump-to-register).
+  - Jump to the position saved in register R (jump-to-register).
 
 - `C-x r s R`
-    - Copy region into register R (copy-to-register).
+  - Copy region into register R (copy-to-register).
 
 - `C-x r i R`
-    - Insert text from register R (insert-register).
+  - Insert text from register R (insert-register).
 
 - `M-x append-to-register <RET> R`
-    - Append region to text in register R.
+  - Append region to text in register R.
 
 - `M-x prepend-to-register <RET> R`
-    - Prepend region to text in register R.
+  - Prepend region to text in register R.
 
 - `C-x r r R`
-    - Copy the region-rectangle into register R
-     (copy-rectangle-to-register).  With numeric argument, delete it
-     as well.
+  - Copy the region-rectangle into register R
+   (copy-rectangle-to-register).  With numeric argument, delete it
+   as well.
 
 - `C-x r i R`
-    - Insert the rectangle stored in register R (if it contains a
-     rectangle) (insert-register).
+  - Insert the rectangle stored in register R (if it contains a
+   rectangle) (insert-register).
 
 jwm: follow this reference when you have a minute:
 
@@ -42,7 +42,7 @@ columns of numbers
 ## directory-local-variables
 
 - I found an interesting [reference to directory-local-variables](http://atomized.org/2009/05/emacs-23-easier-directory-local-variables/)
-    - it could be a solution to my per-directory formatting needs.
+  - it could be a solution to my per-directory formatting needs.
 
 ## php-mode
 
@@ -490,3 +490,77 @@ x
 ```
 
 - does the right thing.  Problem solved.
+
+**Thu Feb  9 07:54:09 PST 2017**
+
+- I need to update my emacs env quite a bit.
+  - make a list of common markdown mode key bindings I am likely to need:
+    - [follow link](http://www.example.com/)
+  - configure a markdown previewer from
+    - OSX: Marked2
+    - ubuntu: Multimarkdown?
+  - re-read this notes file; I have trod some of this ground before
+  - consider enabling diff3 mode by default for git
+    - to enable smerge in emacs
+    - drill into this more.
+  - LARGELY DONE yasnippet
+  - IN PROGESS markdown-mode or github flavored markdown gfm-mode
+  - IN PROGRESS I need a minor shell mode that works with my colorization
+  - improve the dynamism of setting the font-size
+    - certainly read about setting the font size interactively
+    - and having that propogate to new frames
+  - bind keys to anticipate coming esc key moving to the whatever bar on mac laptops
+  - make bindings to insert common unicode chars I use:
+    - √
+    - λ
+  - insert a date stamp in markdown format on a key binding
+    - when in markdown-mode or gfm-mode, make it bold?
+
+## yasnippet ##
+
+- remaining: evaluate existing snippet packages
+  - for python
+- decide how to patition my snippets among the supported packages
+  - or if this is even easily supported
+
+- IN PROGRESS set up yasnippet for quoting haskell in markdown
+  - √ so yasnippet is turned on by default
+  - sync through to orion
+  - worry about shared snippets later
+- √ devolve to: identify a markdown mode
+  - choose markdown-mode, along with gfm-mode for github flavored markdown
+
+## xterm-color ##
+
+- I need to configure this.
+- it would be great to get emacs to treat /j/proj/jwm-dotfiles as HOME for the purpose of evaluating new emacs configs.
+
+jeff at vega in /j/proj/jwm-dotfiles on jwm-dotfiles
+$ HOME=$(PWD) emacs -nw
+
+fails trying to load magit
+
+- Ok, initally seems to work for some things
+- push yasnippet through bitbucket
+- push through bitbucket to orion
+- see if I get the (B in the bash prompt over there without the iterm2 specializations
+  - yes, I do see the (B on orion
+- based on the xterm color tests (perl tests/xterm-colortest && perl tests/256colors2.pl)
+  - it looks like the (B issue is with my prompt, not with the xterm color package.
+  - although it is curious why bash on both linux and os x don't have the issue while emacs does.
+
+- interesting that in bash:
+
+```
+$ echo $PS1
+\[\033]0;\W\007\]\[\]\[\]\u\[\] at \[\]\h\[\] in \[\]\w$(prompt_git "\[\] on \[\]" "\[\]")\n\[\]$ \[\]
+```
+
+- while in shell-mode:
+
+```
+$ (Becho $PS1
+\[\033]0;\W\007\]\[\]\[\]\u\[\] at \[\]\h\[\] in \[\]\w$(prompt_git "\[\] on \[\]" "\[\]")\n\[\]$ \[(B\]
+```
+
+- so there is the (B at the end
