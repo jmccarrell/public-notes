@@ -270,6 +270,8 @@ appendFile :: FilePath -> String -> IO ()
 - Q for Chris:
     - is this recursive pattern common in the FR code base?
     - is it really tail recursion, and if so, does the compiler eliminate the tail recursion?
+- A: no, recursion is not typically written this way; this is not good Haskell.
+
 
 ## efficiency of Haskell strings
 
