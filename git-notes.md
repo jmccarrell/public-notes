@@ -710,9 +710,9 @@ And, in fact, the github help recommends exactly that: [fork a repo](https://hel
 
 - A common pattern I have is to start a new git repo, then push it up to a shared repository.
 - so I do:
-    - git init
-    - create the repo on github / bitbucket / gitlab
-    - then push
+  - git init
+  - create the repo on github / bitbucket / gitlab
+  - then push
 
 - the instructions from bitbucket are helpful
 
@@ -728,9 +728,9 @@ And, in fact, the github help recommends exactly that: [fork a repo](https://hel
 # locally modified (config) files not revision controlled
 
 - to resolve storing my own mysql DB password in revision controlled dev_settings.py, I want to try this recipe:
-    - [how do I keep a local version of files](http://stackoverflow.com/questions/11979634/how-do-i-keep-my-local-version-of-files-without-using-gitignore)
-    - which boils down to:
-    - `git update-index --assume-unchanged [file names]`
+  - [how do I keep a local version of files](http://stackoverflow.com/questions/11979634/how-do-i-keep-my-local-version-of-files-without-using-gitignore)
+  - which boils down to:
+  - `git update-index --assume-unchanged [file names]`
 - well, that didn't work at all like I wanted.
 
 ```shell
@@ -783,8 +783,8 @@ $ git st
 ```
 
 - it remains to be seen whether or not this change persists across:
-    - branches
-    - pull
+  - branches
+  - pull
 - so far, so good.  I have made new branches, and merged in upstream changes.
 
 ----

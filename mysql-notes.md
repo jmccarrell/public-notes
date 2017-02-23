@@ -374,3 +374,7 @@ SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_name LIK
 $ mysql_config_editor set --login-path=local --host=localhost --user=root --password
 Enter password:
 ```
+
+**Sun Feb 12 11:38:13 PST 2017**
+
+- when I downgraded to mariadb, I lost `--login-path` and `mysql_config_editor`.
