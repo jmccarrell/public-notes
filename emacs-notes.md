@@ -564,3 +564,10 @@ $ (Becho $PS1
 ```
 
 - so there is the (B at the end
+
+----
+
+**Wed Feb 22 11:48:09 PST 2017**
+
+- I tried to use `(exec-path-from-shell-initialize)` on ubuntu LTS.
+  - did it work?  A: No, it did not.
