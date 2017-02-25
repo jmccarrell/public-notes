@@ -1,4 +1,4 @@
-## registers
+## registers ##
 
 registers in emacs:
 
@@ -39,12 +39,12 @@ columns of numbers
 
 ----
 
-## directory-local-variables
+## directory-local-variables ##
 
 - I found an interesting [reference to directory-local-variables](http://atomized.org/2009/05/emacs-23-easier-directory-local-variables/)
   - it could be a solution to my per-directory formatting needs.
 
-## php-mode
+## php-mode ##
 
 set up php-mode (and any other local vars desired) in php files:
 
@@ -80,7 +80,7 @@ Here is more context on Local Variables:
 
 ----
 
-## recursive edit
+## recursive edit ##
 
 when in recursive edit, with the [[ ]] on the mode line,
 
@@ -90,7 +90,7 @@ will get out of it.
 
 ----
 
-## mysql in emacs
+## mysql in emacs ##
 
 use
 
@@ -113,7 +113,7 @@ Then useful commands can be found in the SQL menu, like:
 
 ----
 
-## outline mode
+## outline mode ##
 
 outline-minor-mode is typically what I would use for txt files with a file local variable:
 
@@ -149,7 +149,7 @@ Outline Motion Commands:
 - ``C-c C-u``
     - Move point up to a lower-level (more inclusive) visible heading line.
 
-### outline visibility commands
+### outline visibility commands ###
 
 - ``C-c C-c``
     - Make the current heading line's body invisible.
@@ -216,7 +216,7 @@ emacs strips those from the rest of the section
 
 ----
 
-## font size increase/decrease
+## font size increase/decrease ##
 
 The functions
 
@@ -229,7 +229,7 @@ Very useful.
 
 ----
 
-## comint mode
+## comint mode ##
 
 emacs notes to drill down on:
 
@@ -243,11 +243,11 @@ emacs notes to drill down on:
 
 ----
 
-## solarized emacs
+## solarized emacs ##
 
 - [code and instructions](https://github.com/sellout/emacs-color-theme-solarized) from github
 
-### precursor
+### precursor ##
 
 - I want my emacs library files brought along in my environment so I can have a
   consistent env.  These files:
@@ -272,7 +272,7 @@ Other data:
 
 ----
 
-## Other packages I want
+## Other packages I want ##
 
 - editorconfig
     - there is an editorconfig package available in MELPA.
@@ -302,7 +302,7 @@ Other data:
 
     - try installing and using yaml-mode via melpa.  What does it look like?
 
-## √ el-get
+## √ el-get ##
 
 - looks like [el-get](http://www.emacswiki.org/emacs/el-get) is the equivalent
   to apt-get for emacs packages
@@ -324,11 +324,11 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
   `init-<package-name>.el` in the directory named by `el-get-user-package-directory`,
   which has to be given a value.
 
-## √ solarized
+## √ solarized ##
 
 - I like solarized-dark
 
-### next steps
+### next steps ##
 
 - leave .emacs.d to emacs for transitory things.
 - put Jeffs emacs stuff into .emacs-jwm.d
@@ -351,7 +351,7 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 
 ----
 
-## elisp references
+## elisp references ##
 
 - Steve Yegge has written his [emergency elisp](http://steve-yegge.blogspot.com/2008/01/emergency-elisp.html) blog entry
     - it is written for programmers who don't know elisp.  good stuff.  Coverge includes:
@@ -363,7 +363,7 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 
 ----
 
-## use solarized foreground and background colors
+## use solarized foreground and background colors ##
 
 - NO SEE BELOW change references from ~ to $HOME so I can use the
     - HOME=/j/proj/jwm-dotfiles emacs -i $HOME/.emacs
@@ -378,12 +378,11 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 
 ----
 
-## better find-files
+## better find-files ##
 
-- emacs wiki [Locate Files Anywhere](http://www.emacswiki.org/emacs/LocateFilesAnywhere)
-- precursor [Emacs: Helm for finding files](http://amitp.blogspot.com/2012/10/emacs-helm-for-finding-files.html)
+- [Emacs: find files anywhere, updated for 2016](http://amitp.blogspot.com/2016/07/emacs-find-files-anywhere.html)
 
-## utf 8 / unicode
+## utf 8 / unicode ##
 
 - one of the main pages for international characters is in the emacs manual: [22 International Character Support](http://www.gnu.org/software/emacs/manual/html_node/emacs/International.html#International)
 
@@ -426,7 +425,7 @@ I want to prefer utf-8 in all cases so add to my init file:
 
 **Thu Nov 10 13:02:11 PST 2016**
 
-## emacs package managers again
+## emacs package managers again ##
 
 - I started with [el-get](http://www.emacswiki.org/emacs/el-get)
 - but I had problems install magit via el-get.
@@ -436,11 +435,11 @@ I want to prefer utf-8 in all cases so add to my init file:
 
 > After running package-list-packages, type U (mark Upgradable packages) and then x (eXecute the installs and deletions). When it’s done installing all the packages it will ask if you want to delete the obsolete packages and so you can hit y (Yes).
 
-## magit
+## magit ##
 
 - support for magit added.
 
-## xterm-color
+## xterm-color ##
 
 - move to the MELPA packaged version of xterm-color from my private version.
 
@@ -455,7 +454,7 @@ x
 
 **Fri Nov 11 11:08:24 PST 2016**
 
-## path inside emacs
+## path inside emacs ##
 
 - as I frequently change virtual envs, the PATH of the shell changes
 - but emacs retains the PATH from when it was started.
@@ -571,3 +570,31 @@ $ (Becho $PS1
 
 - I tried to use `(exec-path-from-shell-initialize)` on ubuntu LTS.
   - did it work?  A: No, it did not.
+
+**Fri Feb 24 19:09:23 PST 2017**
+
+## helm ##
+
+- turn on helm mode.
+- for find files:
+  - C-x c C-x C-f
+- likewise for list buffers:
+  - C-x c C-x C-b
+- explore helm-locate
+  - C-x c l
+  - which requires locate to be working on the mac
+  - explored in mac-os-notes
+  - locate is building the db now.
+- so I have the basics.
+
+- consider fixing the face choices used by helm; not so good with solarized.
+
+## solarized ##
+
+- which led me to an investigation of how to simply use the 2 variants of solarized:
+- which led me to [this advice to](http://stackoverflow.com/questions/9840558/why-cant-emacs-24-find-a-custom-theme-i-added) auto load any installed themes into the emacs `custom-theme-load-path`
+  - which refers to in ~/emacs.d/init.el
+  - so check that out.
+    - it doesn't exist in my config.
+    - so add the snippet to ~/.emacs
+- looks like this is working pretty ok.

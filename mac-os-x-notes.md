@@ -98,7 +98,7 @@ to see all of the network services:
 
 **Thu Sep  1 13:46:10 PDT 2016**
 
-## mission control notes
+## mission control notes ##
 
 - user gestures
 - enter mission control
@@ -109,3 +109,15 @@ to see all of the network services:
     - keyboard: ^-arrow-left or right
     - mouse: 2 finger double-tap
     - trackpad: 2 finger swipe left or right
+
+## locate ##
+
+- I want to enable locate, especially for use with emacs helm-locate.
+- so first turn it on, which runs in once per week on Sat AM.
+
+```
+sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
+```
+
+- √ go look at the config file: /etc/locate.rc
+- I just went with the defaults.
