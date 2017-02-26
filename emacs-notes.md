@@ -587,7 +587,7 @@ $ (Becho $PS1
   - locate is building the db now.
 - so I have the basics.
 
-- consider fixing the face choices used by helm; not so good with solarized.
+- √ consider fixing the face choices used by helm; not so good with solarized.
 
 ## solarized ##
 
@@ -598,3 +598,99 @@ $ (Becho $PS1
     - it doesn't exist in my config.
     - so add the snippet to ~/.emacs
 - looks like this is working pretty ok.
+
+## todo ##
+
+- investigate my-packages
+  - I saw a defvar in someones init.el to describe the packages they use
+- investigate use-package
+  - author talk on youtube: [Emacs package highlight: use-package](https://www.youtube.com/watch?v=2TSKxxYEbII)
+- explore `C-x $` set-selective display
+  - super useful for code narrowing; start using this immediately
+
+## search for better emacs patterns ##
+
+- notes from listening to youtube: [Editor of a lifetime](https://www.youtube.com/watch?v=VADudzQGvU8)
+  - none; this was not a useful talk to me; just about why emacs overview, not details of how to use it well.
+
+### emacculate ###
+
+- I like these guys; they explain how they have leveraged emacs pretty well.
+
+## `use-package` ##
+
+- [Emacs package highlight: use-package](https://www.youtube.com/watch?v=2TSKxxYEbII)
+- [github](https://github.com/jwiegley/use-package)
+- Author John Wiegley
+
+### Philosophy ###
+
+- `use-package` philosophy
+  - be targeted and specific
+  - have a declaration that is going to work
+  - or, essentially do nothing on every machine where you use it
+    - could be: report a useful error and continue
+
+### Notes ###
+
+- the author really likes a package to expand and show macros, which is what use-package largely is.
+  - macrostep
+- which he uses like this:
+
+```elisp
+(use-package macrostep
+  :load-path "site-lisp/macrostep"
+  :bind ("C-c e m" . macrostep-expand))
+```
+
+- the author also really likes `ggtags`
+  - which is an interface to the [gnu global](https://www.gnu.org/software/global/) next gen etags system
+
+----
+
+- `:disabled t` looks particularly useful to me to try things out
+
+### ensure ###
+
+- the author does not use ensure, nor package managers
+- he prefers to manually install every package so he can manage his emacs startup time
+- he stated he has his personal emacs load time down to < 1/3 second
+
+### describe-personal-keybindings ###
+
+- for users of the use-package system, there is a key board command referenced in this talk about 16:08 in
+- that shows the current key bindings *and* what you may have overriddenn; what is now hidden.
+  - it looks super useful to me as I refine my emacs usage.
+  - `describe-personal-keybindings`
+- so this is specific to `use-package`
+
+- about 17:00 in is where we can see John's personal key bindings, which could be useful to compare.
+  - eg, he binds C-z to delete-other-windows, like C-x 0
+  - no more suspend-emacs
+
+- explore the `bind:` capabilities of `use-package`
+
+### init vs config ###
+
+- init happens before the require
+- config happens after the require
+- preface will happen when the use-pacakge macro is evaluated, and when it is byte compiled.
+
+----
+
+## silver searcher ##
+
+- [the_silver_searcher](https://github.com/ggreer/the_silver_searcher)
+- an ack replacement that knows about about .gitignore
+  - and .ignore
+    - it specifically mentions .min.js
+- runs much faster as well
+- there is ag.el
+  - and helm ag
+  - and John Wiegleys startup file shows how to configure them with use-package
+    - about 21:58 into the use-package video
+- looks like a winner to me.
+
+## erc ##
+
+- emacs IRC internet relay chat client
