@@ -831,3 +831,23 @@ $ git apply --check /c/davo/tmp/s3-key-names.patch
 error: patch failed: filing/autofile/ca_efile.py:184
 error: filing/autofile/ca_efile.py: patch does not apply
 ```
+
+**Sat Feb 25 16:28:28 PST 2017**
+
+## git from the bottom up ##
+
+- looks like a very well written guide to understanding git internals.
+- looks well worth my time.
+
+### TOC ###
+
+- IN PROGRESS John Wiegley's [git-from-the-bottom-up](https://github.com/jwiegley/git-from-the-bottom-up/blob/master/index.md)
+  - √ [1-Repository](https://github.com/jwiegley/git-from-the-bottom-up/tree/master/1-Repository)
+  - [2-The-index](https://github.com/jwiegley/git-from-the-bottom-up/tree/master/2-The-Index)
+  - [3-Reset](https://github.com/jwiegley/git-from-the-bottom-up/tree/master/3-Reset)
+  - [4-Stashing-and-the-reflog](https://github.com/jwiegley/git-from-the-bottom-up/blob/master/4-Stashing-and-the-reflog.md)
+  - [5-Conclusion](https://github.com/jwiegley/git-from-the-bottom-up/blob/master/5-Conclusion.md)
+  - [6-Further-Reading](https://github.com/jwiegley/git-from-the-bottom-up/blob/master/6-Further-Reading.md)
+
+- IN PROGRESS recommends reading the git-rebase man page
+  - I have read down to "Merge Strategies"
