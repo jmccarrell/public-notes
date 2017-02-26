@@ -694,3 +694,151 @@ $ (Becho $PS1
 ## erc ##
 
 - emacs IRC internet relay chat client
+
+**Sat Feb 25 16:48:18 PST 2017**
+
+- consider changing emacs env to improve productivity
+  - goals
+    - leverage helm-ag to search file repositories more effectively
+    - get to using org-mode instead of markdown for authoring my notes and especially for executing code.
+
+- which one is more important?  A: helm-ag
+
+- model my target env after John Wiegleys
+
+- look into [ibuffer save filter groups](https://github.com/jwiegley/dot-emacs/blob/master/settings.el#L703)
+  - [ibuffer mode](https://github.com/jwiegley/dot-emacs/blob/master/init.el#L2558)
+- look into [recentf](https://github.com/jwiegley/dot-emacs/blob/master/settings.el#L886)
+- look into [smart compile alist](https://github.com/jwiegley/dot-emacs/blob/master/settings.el#L987)
+- look into helm swoop youtube
+- look into [hippie / dabbrev](https://github.com/jwiegley/dot-emacs/blob/master/init.el#L2323)
+
+- use settings.el for custom settings:
+
+ '(custom-file "~/.emacs.d/settings.el")
+ '(fill-column 78)
+ '(global-font-lock-mode t nil (font-lock))
+
+ '(indent-tabs-mode nil)
+;;; needs to be my user name
+ '(inhibit-startup-echo-area-message "johnw")
+ '(inhibit-startup-screen t)
+ '(initial-major-mode (quote fundamental-mode))
+
+ '(kill-do-not-save-duplicates t)
+ '(kill-whole-line t)
+ '(large-file-warning-threshold nil)
+
+ '(markdown-command "pandoc -f markdown_mmd -S")
+ '(markdown-command-needs-filename t)
+ '(markdown-enable-math t)
+ '(markdown-open-command "open-markdown")
+
+ '(menu-bar-mode nil)
+
+ '(package-archives
+(quote
+ (("gnu" . "https://elpa.gnu.org/packages/")
+  ("MELPA" . "https://melpa.org/packages/")
+  ("Marmalade" . "https://marmalade-repo.org/packages/"))))
+
+ '(regex-tool-backend (quote perl))
+
+ '(user-full-name "John Wiegley")
+ '(user-initials "jww")
+ '(user-mail-address "johnw@newartisans.com")
+
+ '(whitespace-auto-cleanup t t)
+ '(whitespace-line-column 110)
+ '(whitespace-rescan-timer-time nil t)
+ '(whitespace-silent t t)
+ '(whitespace-style (quote (face trailing lines space-before-tab empty)))
+
+- [just one space](https://github.com/jwiegley/dot-emacs/blob/master/init.el#L420)
+- [hack font](https://www.google.com/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=font+Hack-normal-normal-normal-*-14-*-*-*-m-0-iso10646-1&*)
+- how John deals with [variable size frames](https://github.com/jwiegley/dot-emacs/blob/master/init.el#L487)
+
+- an [example of binding his own keymap](https://github.com/jwiegley/dot-emacs/blob/master/init.el#L462)
+- explore ffap: find-file-at-point
+  - johns binding: (bind-key "C-c v" #'ffap)
+
+- packages to consider
+  - compile
+  - css
+  - csv
+  - diff-mode
+  - diff-view
+  - diminish
+  - docker
+    - dockerfile-mode
+  - dr-racket-like-unicode
+  - ediff
+  - etags
+  - flyspell
+  - graphviz-dot-mode
+  - grep
+  - helm-config
+  - helm-grep
+  - helm-make
+  - helm-swoop
+  - hi-lock
+  - hilit-chg
+  - iedit
+  - iflipb
+  - isearch
+  - json-mode
+  - lusty-explorer
+  - macrostep
+  - magit
+  - markdown-mode
+  - mule
+    - configure utf8 stuff here?
+  - multiterm
+    - maybe; jww uses screen, not tmux
+  - nxml-mode
+    - example of calling tidy on the buffer here
+  - outline
+  - pabbrev
+  - paredit
+    - minor mode for parens
+    - check this out.
+  - mic-paren or paren
+  - projectile
+    - maybe: check this one out
+  - python-mode
+  - recentf?
+  - regex-tool
+  - restclient
+  - rubymode
+  - selected
+  - session
+    - sounds useful, but last updated in 2012?
+  - sh-{script,toggle} ?
+    - I can't find these in melpa
+  - smart compile
+    - disabled by jww
+  - smart-tabs-mode
+  - smerge-mode?
+  - sort-words
+  - swiper-helm
+  - tiny?  maybe
+    - Quickly generate linear ranges in Emacs
+  - tramp-sh
+    - including integration with docker containers
+  - transpose-mark?
+    - seems pretty specialized
+  - vdiff
+    - another diff mode akin to ediff
+  - visual regexp
+  - vkill
+  - whitespace
+  - winner
+  - workgroups?
+    - or maybe workgroups2
+    - not clear what this provides
+  - wrap-region
+  - yaml-mode
+  - yasnippet
+  - zencoding-mode?
+    - maybe; low priority
+  - ztree-diff
