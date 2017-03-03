@@ -134,70 +134,67 @@ so every command below is at, e.g.,  'C-c @ C-n' instead of 'C-c C-n'
 Outline Motion Commands:
 
 - `C-c C-n`
-    - Move point to the next visible heading line
+  - Move point to the next visible heading line
 
 - `C-c C-p`
-    - Move point to the previous visible heading line
+  - Move point to the previous visible heading line
 
 - ``C-c C-f``
-    - Move point to the next visible heading line at the same level as
-      the one point is on.
+  - Move point to the next visible heading line at the same level as
+    the one point is on.
 
 - ``C-c C-b``
-    - Move point to the previous visible heading line at the same level.
+  - Move point to the previous visible heading line at the same level.
 
 - ``C-c C-u``
-    - Move point up to a lower-level (more inclusive) visible heading line.
+  - Move point up to a lower-level (more inclusive) visible heading line.
 
 ### outline visibility commands
 
 - ``C-c C-c``
-    - Make the current heading line's body invisible.
+  - Make the current heading line's body invisible.
 
 - ``C-c C-e``
-    - Make the current heading line's body visible.
+  - Make the current heading line's body visible.
 
 - ``C-c C-d``
-    - Make everything under the current heading invisible, not including
-     the heading itself.
+  - Make everything under the current heading invisible, not including
+   the heading itself.
 
 - ``C-c C-s``
-    - Make everything under the current heading visible, including body,
-      subheadings, and their bodies.
+  - Make everything under the current heading visible, including body,
+    subheadings, and their bodies.
 
 - ``C-c C-l``
-    - Make the body of the current heading line, and of all its
-      subheadings, invisible.
+  - Make the body of the current heading line, and of all its
+    subheadings, invisible.
 
 - ``C-c C-k``
-    - Make all subheadings of the current heading line, at all levels,
-      visible.
+  - Make all subheadings of the current heading line, at all levels,
+    visible.
 
 - ``C-c C-i``
-    - Make immediate subheadings (one level down) of the current heading
-     line visible.
+  - Make immediate subheadings (one level down) of the current heading
+    line visible.
 
 - ``C-c C-t``
-    - Make all body lines in the buffer invisible.
+  - Make all body lines in the buffer invisible.
 
 - ``C-c C-a``
-    - Make all lines in the buffer visible.
+  - Make all lines in the buffer visible.
 
 - ``C-c C-q``
-    - Hide everything except the top N levels of heading lines.
+  - Hide everything except the top N levels of heading lines.
 
 - ``C-c C-o``
-    - Hide everything except for the heading or body that point is in,
-      plus the headings leading up from there to the top level of the
-      outline.
+  - Hide everything except for the heading or body that point is in,
+    plus the headings leading up from there to the top level of the
+    outline.
 
 How does searching work in the context of hidden outline elements?
 From the emacs manual:
 
->    When incremental search finds text that is hidden by Outline mode, it makes that part
-     of the buffer visible.  If you exit the search at that position, the text remains
-     visible.  You can also automatically
-
+> When incremental search finds text that is hidden by Outline mode, it makes that part of the buffer visible.  If you exit the search at that position, the text remains visible.  You can also automatically
 
 ----
 
@@ -251,12 +248,12 @@ emacs notes to drill down on:
 
 - I want my emacs library files brought along in my environment so I can have a
   consistent env.  These files:
-    - c-m-supl.el
-    - jc_ctags.el
-    - jc_misc.el
-    - p4.el
-    - ps-ccrypt.el
-    - yaml-mode.el
+  - c-m-supl.el
+  - jc_ctags.el
+  - jc_misc.el
+  - p4.el
+  - ps-ccrypt.el
+  - yaml-mode.el
 
 - so the first question is: can I use  `$HOME/.emacs.d` provisioned under jwm-dotfiles
   for this purpose?
@@ -266,27 +263,27 @@ emacs notes to drill down on:
 Other data:
 
 - [solarized theme](https://github.com/bbatsov/solarized-emacs) available as a package loaded by a package manager
-    - works from emacs 24 on.
-    - some support for emacs 23.
-    - recommends [MELPA](http://melpa.org/) emacs package manager
+  - works from emacs 24 on.
+  - some support for emacs 23.
+  - recommends [MELPA](http://melpa.org/) emacs package manager
 
 ----
 
 ## Other packages I want
 
 - editorconfig
-    - there is an editorconfig package available in MELPA.
+  - there is an editorconfig package available in MELPA.
 
 - yaml-mode
-    - yes, available on MELPA
+  - yes, available on MELPA
 
 ----
 
 - discover the idiomatic usage of multiple emacs packages
-    - how does this work?
-    - gnu ELPA vs MELPA vs Marmalade
+  - how does this work?
+  - gnu ELPA vs MELPA vs Marmalade
 - could I write a ansible playbook to update my emacs environment on a given machine?
-    - what would that look like?
+  - what would that look like?
 
 ----
 
@@ -297,10 +294,10 @@ Other data:
 
 - I guess the next thing to do is to explore the mechanisms:
 
-    - will ~/.emacs.d/elisp
-      be searched and autoloaded?
+  - will ~/.emacs.d/elisp
+    be searched and autoloaded?
 
-    - try installing and using yaml-mode via melpa.  What does it look like?
+  - try installing and using yaml-mode via melpa.  What does it look like?
 
 ## √ el-get
 
@@ -318,7 +315,7 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
         M-x load-theme <solarized-{dark,light}>
 
 - where does el-get put the packages it downloads?
-    - A: `~/.emacs.d/el-get/<package-name>`
+  - A: `~/.emacs.d/el-get/<package-name>`
 
 - el-get [recommends](https://github.com/dimitri/el-get#package-setup) customizing a given package by putting the customization code into
   `init-<package-name>.el` in the directory named by `el-get-user-package-directory`,
@@ -332,21 +329,21 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 
 - leave .emacs.d to emacs for transitory things.
 - put Jeffs emacs stuff into .emacs-jwm.d
-    - version control this in jwm-dotfiles
-    - put my customizations to packages in there
-    - convert my font and color settings in .emacs to a theme
-        - .emacs-jwm.d/themes
-        - follow [the conventions](https://github.com/bbatsov/solarized-emacs#stand-alone-manual-installation)
+  - version control this in jwm-dotfiles
+  - put my customizations to packages in there
+  - convert my font and color settings in .emacs to a theme
+  - .emacs-jwm.d/themes
+  - follow [the conventions](https://github.com/bbatsov/solarized-emacs#stand-alone-manual-installation)
 
 ----
 
 - Investigate auto-highlight-mode as a productivity enhancer:
-    - c.f.: [rainbow identifiers solarized issue](https://github.com/bbatsov/solarized-emacs/issues/133) about comment 5 or so
+  - c.f.: [rainbow identifiers solarized issue](https://github.com/bbatsov/solarized-emacs/issues/133) about comment 5 or so
 
-    - emacswiki [Highlight Symbol](http://www.emacswiki.org/emacs/HighlightSymbol)
-    - how do I get el-get to tell me if it knows how to install HighlightSymbol?
+  - emacswiki [Highlight Symbol](http://www.emacswiki.org/emacs/HighlightSymbol)
+  - how do I get el-get to tell me if it knows how to install HighlightSymbol?
 
-  highlight-symbol            available  Quickly highlight a symbol throughout the buffer and cycle through its locations.
+  highlight-symbol      available  Quickly highlight a symbol throughout the buffer and cycle through its locations.
 
 
 ----
@@ -354,25 +351,25 @@ so I guess it is there now.  How to turn [solarized-emacs](https://github.com/bb
 ## elisp references
 
 - Steve Yegge has written his [emergency elisp](http://steve-yegge.blogspot.com/2008/01/emergency-elisp.html) blog entry
-    - it is written for programmers who don't know elisp.  good stuff.  Coverge includes:
-    - lexical stuff
-    - operators
-    - statements
-    - classes
-    - with some nice elisp / java side by side comparisons
+  - it is written for programmers who don't know elisp.  good stuff.  Coverge includes:
+  - lexical stuff
+  - operators
+  - statements
+  - classes
+  - with some nice elisp / java side by side comparisons
 
 ----
 
 ## use solarized foreground and background colors
 
 - NO SEE BELOW change references from ~ to $HOME so I can use the
-    - HOME=/j/proj/jwm-dotfiles emacs -i $HOME/.emacs
-    - convention to ease testing of color changes
-    - yes, but that has the effect of creating a whole new
-        - /j//proj/jwm-dotfiles/.emacs.d
-    - populated by el-get
-    - which I do not want ever revision controlled.
-    - so abandon this idea.
+  - HOME=/j/proj/jwm-dotfiles emacs -i $HOME/.emacs
+  - convention to ease testing of color changes
+  - yes, but that has the effect of creating a whole new
+    - /j//proj/jwm-dotfiles/.emacs.d
+  - populated by el-get
+  - which I do not want ever revision controlled.
+  - so abandon this idea.
 - √ drop support for emacs-21 and 22 in my customization functions
 - √ merge solarized foreground and background colors into my standard frame definition.
 
