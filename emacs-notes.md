@@ -619,8 +619,10 @@ $ (Becho $PS1
 
 ## `use-package` ##
 
-- [Emacs package highlight: use-package](https://www.youtube.com/watch?v=2TSKxxYEbII)
-- [github](https://github.com/jwiegley/use-package)
+- 30 minute talk by the author:
+  - [Emacs package highlight: use-package](https://www.youtube.com/watch?v=2TSKxxYEbII)
+  - part of youtube channel by Sacha Chua
+- source [github](https://github.com/jwiegley/use-package)
 - Author John Wiegley
 
 ### Philosophy ###
@@ -694,6 +696,10 @@ $ (Becho $PS1
 ## erc ##
 
 - emacs IRC internet relay chat client
+
+# upate emacs env #
+
+## scoping ##
 
 **Sat Feb 25 16:48:18 PST 2017**
 
@@ -842,3 +848,154 @@ $ (Becho $PS1
   - zencoding-mode?
     - maybe; low priority
   - ztree-diff
+
+## implementation ##
+
+### questions to answer ###
+
+- what is in ~/.emacs.d now?
+  - A: just emacs side effects dirs and files
+- where will my elisp go?
+  - now in `~/.emacs.jwm.d/elisp/`
+  - move to `~/.emacs.d/jwm-elisp`
+- will I create a separate repo just for emacs?
+  - A: yes.  stored on github
+- keep el-get?
+  - probably not; do whatever jww is doing here
+- how will I manage the transition?
+  - create a new repo in parallel to jwm-dotfiles
+  - then I can push with jwm-dotfiles to re-create my old config
+    - or rm the old emacs config with a shell script?
+
+### todo ###
+
+- √ I have to untangle my .emacs-jwm.d
+- I want C-x C-e to only run compile in certain modes; not globally
+  - C-x C-e to evaluate an sexpr in lisp mode is particularly useful.
+
+### exploration ###
+
+- the first thing I need to know is: will use-package require a compile step?
+  - are the .elc files checked into jww's git repo?  A: no.
+  - My guess is no: the simplest invocation is: `(use-package foo)`
+- read the docs: [use-package](https://github.com/jwiegley/use-package)
+
+- the emacculate guys have a template to get started with.
+  - [the template](https://github.com/durantschoon/.emacs.d/tree/boilerplate-sane-defaults_v1.0)
+- switch from .emacs to emacs.d/init.el
+
+### transition plan ###
+
+- I need a way to move back and forth between old style and new style
+
+#### move to new style ####
+
+- presume there is a repo in bitbucket: jmccarrell/.emacs.d
+- start from the template
+
+```
+if [ ! -e ~/tmp/emacs.d ] ; then
+  mv ~/.emacs.d ~/tmp/emacs.d
+fi
+if [ ! -f ~/tmp/dot-emacs ] ; then
+  mv ~/.emacs ~/tmp/dot-emacs
+fi
+
+git clone path-to-repo ~/.emacs.d
+```
+
+#### move back to old style ####
+
+- check to make sure there are no unsaved changes in ~/.emacs.d
+- rm -rf ~/.emacs.d
+- mv ~/tmp/emacs.d ~/.emacs.d
+- mv ~/tmp/dot-emacs ~/.emacs
+
+## start conversion ##
+
+- decide what to call the repo
+  - .emacs.d
+  - √ dot-emacs
+
+- so can they coexist?
+- what if I just mv aside .emacs, so .emacs.d/init.el takes over?
+- worth a try
+
+```
+$ if [ ! -f ~/tmp/dot-emacs ] ; then
+→   mv ~/.emacs ~/tmp/dot-emacs
+→ fi
+jeff at vega in ~
+$ cp -pv /j/proj/dot-emacs/*.* ~/.emacs.d
+/j/proj/dot-emacs/config.el -> /Users/jeff/.emacs.d/config.el
+/j/proj/dot-emacs/config.org -> /Users/jeff/.emacs.d/config.org
+/j/proj/dot-emacs/custom.el -> /Users/jeff/.emacs.d/custom.el
+/j/proj/dot-emacs/init.el -> /Users/jeff/.emacs.d/init.el
+```
+
+- so that appears to have worked.
+- so that means: no more dot-emacs project
+  - do it in jwm-dotfiles
+  - √ on a branch: refactor-emacs-init
+
+- set up the initial set of files.
+- on that branch, I can git rm .emacs
+  - will that propogate through ./bootstrap.sh?  A: no, so I need a postprocessing step to rm ~/.emacs at times.
+
+- √ so this should be the trick to get going:
+
+```
+cd /j/proj/jwm-dotfiles && ./bootstrap.sh -f && mv ~/.emacs ~/tmp/dot-emacs
+```
+
+## pull the best from other configs ##
+
+- john wiegley
+  - $ git clone git@github.com:jwiegley/dot-emacs.git ~/tmp/jwiegley-dotemacs
+- daniel mai:
+  - $ git clone git@github.com:danielmai/.emacs.d.git ~/tmp/danielmai-dotemacs
+
+## bring back Jeffs stuff ##
+
+- √ username
+- √ jwm emacs dir
+
+- solarized
+- jeffs colors
+
+- so how did Daniel do color theme?
+
+## new functionality ##
+
+**Mon Feb 27 18:37:47 PST 2017**
+
+- strive for feature parity in the new scheme.
+- what is left to map over?
+- √ magit
+- √ helm
+  - helm-ag
+    - installed, but I don't know how to use it yet.
+- √ yasnippet
+  - configure my qh haskell yasnippet
+- DEFER xterm-color
+  - and eshell
+- √ intero
+- ALREADY THERE figure out how to add recentf into helm, if it is not already there.
+- √ nxhtml
+  - I used jwiegley's nxml mode config instead.
+- ccrypt and bcrypt support
+  - transition to gpg2?
+
+- mode hooks
+  - C mode
+  - python mode
+- yaml-mode
+
+- frame defaults
+  - orange cursor in emacs
+- font size / font setting on both platforms
+
+- discard terminal face settings
+
+- os x keybindings
+  - adopt Daniel Mais
