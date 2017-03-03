@@ -568,3 +568,22 @@ $ (Becho $PS1
 
 - I tried to use `(exec-path-from-shell-initialize)` on ubuntu LTS.
   - did it work?  A: No, it did not.
+
+# org mode #
+
+- basic key bindings for org mode
+
+**Thu Mar  2 16:10:50 PST 2017**
+
+- X figure out how to do a git pull from inside magit
+  - shown on the top level magit page.
+  - fetch: f u
+  - pull: F u
+- figure out how to create a branch inside magit
+
+## Magit cheat sheet ##
+
+- `z Z` to stash
+- TAB will expand/contract visibility in a status buffer
+- C-TAB will cycle visibility
+  - a short cut for my often used 'd d'; switch to buffer approach
