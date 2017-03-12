@@ -242,6 +242,15 @@ emacs notes to drill down on:
 
 ## solarized emacs ##
 
+- many variants; standardize on bbatsov:
+
+- [solarized theme](https://github.com/bbatsov/solarized-emacs) available as a package loaded by a package manager
+  - works from emacs 24 on.
+  - some support for emacs 23.
+  - recommends [MELPA](http://melpa.org/) emacs package manager
+
+### no, older prefer bbatsov ###
+
 - [code and instructions](https://github.com/sellout/emacs-color-theme-solarized) from github
 
 ### precursor ##
@@ -257,15 +266,6 @@ emacs notes to drill down on:
 
 - so the first question is: can I use  `$HOME/.emacs.d` provisioned under jwm-dotfiles
   for this purpose?
-
-----
-
-Other data:
-
-- [solarized theme](https://github.com/bbatsov/solarized-emacs) available as a package loaded by a package manager
-  - works from emacs 24 on.
-  - some support for emacs 23.
-  - recommends [MELPA](http://melpa.org/) emacs package manager
 
 ----
 
