@@ -1247,4 +1247,3 @@ bash: no job control in this shell
 
 - can I get emacs 25 on ubuntu?  I must be able to.
 - move both branches over there; try things out.
-
