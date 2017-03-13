@@ -1011,3 +1011,33 @@ cd /j/proj/jwm-dotfiles && ./bootstrap.sh -f && mv ~/.emacs ~/tmp/dot-emacs
 - TAB will expand/contract visibility in a status buffer
 - C-TAB will cycle visibility
   - a short cut for my often used 'd d'; switch to buffer approach
+
+**Thu Mar  2 17:08:47 PST 2017**
+
+## status ##
+
+- so am I ready to move my emacs env over to orion?  A: no.
+- what is the key functionality that is missing?
+  - helm / ag searcher
+  - which is not configured on vega.
+  - xterm-color?
+  - frame defaults
+    - orange cursor in emacs
+  - font size / font setting on both platforms
+
+## issues noted ##
+
+- comment-face is not italic
+  - switch to custom-var style to make it so
+
+
+## next steps ##
+
+- so next steps in emacs move over:
+
+- √ use settings.el for customization as jwiegley does
+  - drop custom.el
+- os x keybindings
+  - adopt Daniel Mais
+  - cant test this except under Frame
+- where am I working?  jwm-dotfiles:refactor-emacs-init
