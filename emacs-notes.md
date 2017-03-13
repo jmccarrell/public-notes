@@ -1041,3 +1041,210 @@ cd /j/proj/jwm-dotfiles && ./bootstrap.sh -f && mv ~/.emacs ~/tmp/dot-emacs
   - adopt Daniel Mais
   - cant test this except under Frame
 - where am I working?  jwm-dotfiles:refactor-emacs-init
+
+**Sun Mar 12 10:23:49 PDT 2017**
+
+## emacs ##
+
+- √ install emacs 25 for GUI os x
+  - https://emacsformacosx.com/
+  - upgrade from 24.5.1
+  - this can be had (and kept updated by brew) with the emacs cask:
+
+``` sh
+$ brew cask info emacs
+emacs: 25.1-1
+https://emacsformacosx.com/
+```
+
+### √ brew cask migration ###
+
+- Ok, it turns out that the brew cask location has changed:
+
+``` sh
+$ brew cask list
+Warning: The default Caskroom location has moved to /usr/local/Caskroom.
+
+Please migrate your Casks to the new location and delete /opt/homebrew-cask/Caskroom,
+or if you would like to keep your Caskroom at /opt/homebrew-cask/Caskroom, add the
+following to your HOMEBREW_CASK_OPTS:
+
+  --caskroom=/opt/homebrew-cask/Caskroom
+
+For more details on each of those options, see https://github.com/caskroom/homebrew-cask/issues/21913.
+emacs                     java                      rstudio                   vagrant                   virtualbox                wkhtmltopdf
+```
+- so I cleaned all of that up.
+- then installed emacs fresh from homebrew cask.
+
+``` sh
+$ brew cask install emacs
+==> Creating Caskroom at /usr/local/Caskroom
+==> We'll set permissions properly so we won't need sudo in the future
+==> Downloading https://emacsformacosx.com/emacs-builds/Emacs-25.1-1-universal.dmg
+######################################################################## 100.0%
+==> Verifying checksum for Cask emacs
+==> Moving App 'Emacs.app' to '/Applications/Emacs.app'
+==> Symlinking Binary 'emacsclient' to '/usr/local/bin/emacsclient'
+==> Symlinking Binary 'ctags' to '/usr/local/bin/ctags'
+==> Symlinking Binary 'ebrowse' to '/usr/local/bin/ebrowse'
+==> Symlinking Binary 'etags' to '/usr/local/bin/etags'
+🍺  emacs was successfully installed!
+```
+
+### √ improve cursor in terminal defaults so I can find it in emacs ###
+
+- √ in iterm2, the cursor is an underline char now; make it an orange box so I can see it better.
+  - alternatively, use <Alt/cookie> / iterm2 command to show the cursor.
+
+- convert init.el to use the exact same solarized that .emacs does.
+- make it so C-k at bol kills the whole line in init.el emacs.
+
+### IN PROGRESS ag silver searcher ###
+
+- IN PROGRESS get silver searcher working in emacs
+  - at least understand what it can do for me
+  - ag is a drop-in? replacement for ack
+
+## ag ##
+
+- it respect the contents of .gitignore and .hgignore
+- and .ignore
+
+### useful commands ###
+
+- (helm-ag-project-root)
+- search from the root of the project
+  - using the heuristic of .git
+
+- what is the difference between (helm-ag-project-root) and (helm-do-ag-project-root)
+
+- (helm-do-ag-project-root)
+  - seems like an interactive search
+
+- C-u helm-ag
+  - to search from a given directory
+
+- what bindings to ag does eg, the emacs guy use?
+  - work on it by searching
+    - jwiegley
+    - danielmai
+
+
+### danielmai ag config ###
+
+``` lisp
+#+BEGIN_SRC emacs-lisp
+(use-package ag
+  :commands ag
+  :ensure t)
+#+END_SRC
+```
+### danielmai helm config ###
+
+``` lisp
+#+begin_src emacs-lisp
+(use-package helm
+  :ensure t
+  :diminish helm-mode
+  :init (progn
+          (require 'helm-config)
+          (use-package helm-projectile
+            :ensure t
+            :commands helm-projectile
+            :bind ("C-c p h" . helm-projectile))
+          (use-package helm-ag :defer 10  :ensure t)
+          (setq helm-locate-command "mdfind -interpret -name %s %s"
+                helm-ff-newfile-prompt-p nil
+                helm-M-x-fuzzy-match t)
+          (helm-mode)
+          (use-package helm-swoop
+            :ensure t
+            :bind ("H-w" . helm-swoop)))
+  :bind (("C-c h" . helm-command-prefix)
+         ("C-x b" . helm-mini)
+         ("C-`" . helm-resume)
+         ("M-x" . helm-M-x)
+         ("C-x C-f" . helm-find-files)))
+#+end_src
+```
+
+### explore ag / helm configs ###
+
+- Ok, I definitely want ag in my emacs config.  So add it to both variants.
+
+- what does `:commands` do here?
+
+```lisp
+(use-package ag
+  :commands ag
+```
+
+- A: from the docs:
+
+:commands      Define autoloads for commands that will be defined by the
+               package.  This is useful if the package is being lazily loaded,
+               and you wish to conditionally call functions in your `:init'
+               block that are defined in the package.
+
+- how do I use `ag`?
+- A: [ag usage](http://agel.readthedocs.io/en/latest/usage.html)
+
+- it recommends installing wgrep
+  - do jwiegley or danielmai have wgrep?
+  - A: unanswered just yet.
+
+**Sat Mar 11 13:22:47 PST 2017**
+
+- √ Davo work
+- write Peter K linkedin reference
+- write Peter Malutta tax prep email
+- √ update emacs env enough to be productive on vega
+  - accomplised by reverting back to my former setup.
+- install VM with windows 8 in prep for excel
+  - next signal is Wed.
+- reply to Speck
+
+## emacs work ##
+
+- kill to end of line when at beginning of line
+
+## consider moving to refactor-emacs-init approach to emacs ##
+
+### current issues ###
+
+#### mac os x specific ####
+
+- resolve the alt-vs option key issue on the mac keyboard.
+- what I have now is not working.
+  - the key labeled "alt" or clover is bound to: super
+    - <Alt> d => s-d runs: s-d runs the command isearch-repeat-backward
+  - the key labeled "option" or windows is bound to: meta
+    - <Option> d => M-d runs the command kill-word
+  - consider mapping the key labeled caps lock to Meta
+    - it is big and then I could use my pinkie to shift into Meta
+
+- shell-command-on-region issues:
+
+bash: cannot set terminal process group (-1): Inappropriate ioctl for device
+bash: no job control in this shell
+(B[mSat Mar 11 13:30:48 PST 2017
+
+#### common issues ####
+
+- √ for window system:
+  - menubar display for window system
+  - √ doesn't kill the startup screen on startup
+
+### transition plan ###
+
+- make a branch to stash current emacs config: preserve-emacs-config-before-init-upgrade
+- then merge refactor-emacs-init branch in
+  - will destroy .emacs altogether
+
+
+### test it out on ubuntu ###
+
+- can I get emacs 25 on ubuntu?  I must be able to.
+- move both branches over there; try things out.
+
