@@ -1242,8 +1242,21 @@ bash: no job control in this shell
 - then merge refactor-emacs-init branch in
   - will destroy .emacs altogether
 
-
 ### test it out on ubuntu ###
 
 - can I get emacs 25 on ubuntu?  I must be able to.
 - move both branches over there; try things out.
+
+**Sun Mar 12 22:47:22 PDT 2017**
+
+## solarized blue background on terminal ##
+
+- attempt to resolve the blue background in emacs -nw
+  - there is no problem in emacs with window system
+
+- consider the two solarized packages:
+  - bbatsov: solarized-theme
+    - which I started with
+  - sellout: color-theme-solarized
+
+- which one does danielmai use?  A: bbatsov, same as me.
