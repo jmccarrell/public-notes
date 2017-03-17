@@ -1,0 +1,331 @@
+* No specific help for this source at this time.
+
+It may appear after first results popup in helm buffer.
+
+* Helm Generic Help
+
+‘helm’ is an Emacs framework for incremental
+completions and narrowing selections.
+
+Helm narrows the list of candidates as the pattern is typed and
+updates the list in a live feedback.
+
+Helm accepts multiple patterns (entered with a space between patterns).
+Helm support also fuzzy matching in some places when specified.
+
+Helm uses familiar Emacs navigation keys to move up and down the list,
+however some keybindings maybe confusing for new users, here are some:
+
+‘RET’ selects the candidate from the list and execute default action
+on it, exiting helm session.
+
+‘C-j’ execute the default action
+but without exiting helm session, it may be not available in some places.
+
+‘TAB’ show you a list of actions
+available on current candidate or all marked candidates, this maybe
+surprising for new helm users that expect
+‘TAB’ for completions and have not
+realized they are already completing something as soon as helm is
+started! See [[https://github.com/emacs-helm/helm/wiki#helm-completion-vs-emacs-completion][Helm wiki]]
+
+** Helm mode
+
+‘helm-mode’ allows you enabling helm completion in native emacs functions,
+so when you turn on ‘helm-mode’ commands like e.g ‘switch-to-buffer’ will use
+helm completion instead of the usual emacs completion buffer.
+
+*** What is helmized and not when ‘helm-mode’ is enabled ?
+
+Helm is providing completion on all functions in emacs using ‘completing-read’
+and derived and ‘completion-in-region’, it uses generic functions for this.
+
+For the functions using ‘completing-read’ and derived e.g ‘read-file-name’ helm
+have a user variable that allows controlling which function to use for a specific
+emacs command, it is ‘helm-completing-read-handlers-alist’, it allows also
+disabling helm completion for a specific command when the specified
+function is nil.
+See its documentation for more infos.
+
+*** Helm functions vs helmized emacs functions
+
+Sometimes you have helm functions that do the same completion as other
+emacs vanilla helmized functions, e.g ‘switch-to-buffer’ and
+‘helm-buffers-list’, you have to understand that the native helm
+functions like ‘helm-buffers-list’ can receive new features, allow
+marking candidates, have several actions and much more whereas the
+emqacs vanilla helmized functions have only a helm completion, one
+action and no more what emacs provide for this function, it is the
+intended behavior.
+
+So generally you have better time using the native helm command generally
+much more featured than the emacs function helmized than ‘helm-mode’.
+
+** Helm Help
+
+C-h m		Shows this generic Helm help.
+
+While in the help buffer, you have most of the regular keybindings
+available in emacs buffers, the most important are shown in
+minibuffer; However due to the implementation that do not use regular
+emacs keymap (you are in a loop when reading help buffer) they are
+hardcoded and not modifiable, here they are:
+
+| Key       | Alternative keys | Command             |
+|-----------+------------------+---------------------|
+| C-v       | Space next       | Scroll up           |
+| M-v       | b prior          | Scroll down         |
+| C-s       |                  | Isearch forward     |
+| C-r       |                  | Isearch backward    |
+| C-a       |                  | Beginning of line   |
+| C-e       |                  | End of line         |
+| C-f       | right            | Forward char        |
+| C-b       | left             | Backward char       |
+| C-n       | down             | Next line           |
+| C-p       | up               | Previous line       |
+| M-a       |                  | Backward sentence   |
+| M-e       |                  | Forward sentence    |
+| M-f       |                  | Forward word        |
+| M-b       |                  | Backward word       |
+| M->       |                  | End of buffer       |
+| M-<       |                  | Beginning of buffer |
+| C-<SPACE> |                  | Toggle mark         |
+| TAB       |                  | Org cycle           |
+| M-<TAB>   |                  | Toggle visibility   |
+| M-w       |                  | Copy region         |
+| q         |                  | Quit                |
+
+
+** Helm’s Basic Operations and Default Key Bindings
+
+| Key     | Alternative Keys | Command                                                   |
+|---------+------------------+-----------------------------------------------------------|
+| C-p     | Up               | Previous Line                                             |
+| C-n     | Down             | Next Line                                                 |
+| M-v     | PageUp           | Previous Page                                             |
+| C-v     | PageDown         | Next Page                                                 |
+| Enter   |                  | Execute first (default) action / Select                   |
+| M-<     |                  | First Line                                                |
+| M->     |                  | Last Line                                                 |
+| C-M-S-v | M-PageUp, C-M-y  | Previous Page (other-window)                              |
+| C-M-v   | M-PageDown       | Next Page (other-window)                                  |
+| Tab     | C-i              | Show action list                                          |
+| Left    |                  | Previous Source                                           |
+| Right   | C-o              | Next Source                                               |
+| C-k     |                  | Delete pattern (with prefix arg delete from point to end) |
+| C-j     | C-z              | Persistent Action (Execute and keep helm session)         |
+
+** Shortcuts For nth Action
+
+f1-12: Execute nth Action where n is 1 to 12.
+
+** Shortcuts for executing Default Action on the nth candidate
+
+C-x <n> => executes default action on number <n> candidate before currently selected candidate.
+
+C-c <n> => executes default action on number <n> candidate after current selected candidate.
+
+n is limited only to 1 through 9. For larger jumps use other
+navigation keys. Also note that Helm candidates list by default
+do not display line numbers. Line numbers can be enabled with the
+linum-relative package.
+
+** Marked candidates
+
+You can mark candidates to execute an action on them instead
+of the current selected candidate only (See binding below).
+Most Helm actions operate on marked candidates unless marking candidates
+is prevented explicitely for a specific source.
+
+** Follow candidates
+
+You can execute automatically an action specified in the source as persistent-action
+while moving up and down in helm-window or while updating the list of candidates by
+turning on ‘helm-follow-mode’ while in helm.
+The follow behavior will be saved and used in next emacs sessions when ‘helm-follow-mode-persistent’
+is non-nil.
+
+** Frequently Used Commands
+
+C-t		Toggle vertical/horizontal split on first hit and swap helm window on second hit.
+C-x C-f		Drop into ‘helm-find-files’.
+C-c C-k		Kill display value of candidate and quit (with prefix arg, kill the real value).
+C-c C-y		Yank current selection into pattern.
+C-c TAB		Copy selected candidate at point in current-buffer.
+C-c C-f		Toggle automatic execution of persistent action.
+<C-down>	Run persistent action and then select next line.
+<C-up>		Run persistent action and then select previous line.
+C-c C-u		Recalculate and redisplay candidates.
+C-!		Suspend/reenable updates to candidates list.
+
+** Global Commands
+
+C-c h b revives the last ‘helm’ session.
+Very useful for resuming previous Helm. Binding a key to this
+command will greatly improve ‘helm’ interactivity especially
+after an accidental exit.
+
+** Debugging helm
+
+helm have a special variable called ‘helm-debug’, setting it to non-nil
+will allow helm logging in a special outline-mode buffer.
+Helm is resetting the variable to nil at end of each session.
+
+A convenient command is bound to C-h C-d
+and allow turning debugging to this session only.
+To avoid accumulating log while you are typing your pattern, you can use
+C-! to turn off updating, then when you
+are ready turn it on again to start updating.
+
+Once you exit your helm session you can access the debug buffer with ‘helm-debug-open-last-log’.
+It is possible to save logs to dated files when ‘helm-debug-root-directory’
+is set to a valid directory.
+
+NOTE: Be aware that helm log buffers grow really fast, so use ‘helm-debug’ only when needed.
+
+** Writing your own helm sources
+
+It is easy writing simple sources for your own usage.
+Basically in a call to ‘helm’ function, the sources are added as a
+single source which can be a symbol or a list of sources in the :sources slot.
+Sources can be builded with different eieio classes depending
+what you want to do, for simplifying this several ‘helm-build-*’ macros are provided.
+We will not go further here, see [[https://github.com/emacs-helm/helm/wiki/Developing][Helm wiki]] for more infos.
+Below simple examples to start with.
+
+#+begin_src elisp
+
+    ;; Candidates are stored in a list.
+    (helm :sources (helm-build-sync-source "test"
+                     ;; A function can be used as well
+                     ;; to provide candidates.
+                     :candidates ’("foo" "bar" "baz"))
+          :buffer "*helm test*")
+
+    ;; Candidates are stored in a buffer.
+    ;; Generally faster but doesn’t allow a dynamic updating
+    ;; of the candidates list i.e the list is fixed on start.
+    (helm :sources (helm-build-in-buffer-source "test"
+                     :data ’("foo" "bar" "baz"))
+          :buffer "*helm test*")
+
+#+end_src
+
+For more complex sources, See [[https://github.com/emacs-helm/helm/wiki/Developing][Helm wiki]]
+and the many examples you will find in helm source code.
+
+** Helm Map
+key             binding
+---             -------
+
+C-@             helm-toggle-visible-mark
+C-c             Prefix Command
+C-g             helm-keyboard-quit
+C-h             Prefix Command
+TAB             helm-select-action
+C-j             helm-execute-persistent-action
+C-k             helm-delete-minibuffer-contents
+C-l             helm-recenter-top-bottom-other-window
+RET             helm-maybe-exit-minibuffer
+C-n             helm-next-line
+C-o             helm-next-source
+C-p             helm-previous-line
+C-r             helm-minibuffer-history
+C-t             helm-toggle-resplit-and-swap-windows
+C-v             helm-next-page
+C-w             ??
+C-x             Prefix Command
+C-z             helm-execute-persistent-action
+ESC             Prefix Command
+C-SPC           helm-toggle-visible-mark
+C-!             helm-toggle-suspend-update
+C-{             helm-enlarge-window
+C-}             helm-narrow-window
+<C-M-down>      helm-scroll-other-window
+<C-M-up>        helm-scroll-other-window-down
+<C-down>        helm-follow-action-forward
+<C-up>          helm-follow-action-backward
+<M-next>        helm-scroll-other-window
+<M-prior>       helm-scroll-other-window-down
+<XF86Back>      previous-history-element
+<XF86Forward>   next-history-element
+<down>          helm-next-line
+<f1>            ??
+<f10>           ??
+<f11>           ??
+<f12>           ??
+<f13>           ??
+<f2>            ??
+<f3>            ??
+<f4>            ??
+<f5>            ??
+<f6>            ??
+<f7>            ??
+<f8>            ??
+<f9>            ??
+<help>          Prefix Command
+<left>          helm-previous-source
+<next>          helm-next-page
+<prior>         helm-previous-page
+<right>         helm-next-source
+<up>            helm-previous-line
+
+<help> m        helm-help
+
+C-h C-d         helm-enable-or-switch-to-debug
+C-h m           helm-help
+
+C-c C-f         helm-follow-mode
+C-c TAB         helm-copy-to-buffer
+C-c C-k         helm-kill-selection-and-quit
+C-c C-u         helm-refresh
+C-c C-y         helm-yank-selection
+C-c -           helm-swap-windows
+C-c 1           ??
+C-c 2           ??
+C-c 3           ??
+C-c 4           ??
+C-c 5           ??
+C-c 6           ??
+C-c 7           ??
+C-c 8           ??
+C-c 9           ??
+C-c >           helm-toggle-truncate-line
+C-c ?           helm-help
+
+C-x C-b         helm-resume-list-buffers-after-quit
+C-x C-f         helm-quit-and-find-file
+C-x 1           ??
+C-x 2           ??
+C-x 3           ??
+C-x 4           ??
+C-x 5           ??
+C-x 6           ??
+C-x 7           ??
+C-x 8           ??
+C-x 9           ??
+C-x b           helm-resume-previous-session-after-quit
+
+C-M-a           helm-show-all-in-this-source-only
+C-M-e           helm-display-all-sources
+C-M-l           helm-reposition-window-other-window
+C-M-v           helm-scroll-other-window
+C-M-y           helm-scroll-other-window-down
+M-SPC           helm-toggle-visible-mark
+M-(             helm-prev-visible-mark
+M-)             helm-next-visible-mark
+M-<             helm-beginning-of-buffer
+M->             helm-end-of-buffer
+M-U             helm-unmark-all
+M-a             helm-mark-all
+M-m             helm-toggle-all-marks
+M-n             next-history-element
+M-o             helm-previous-source
+M-p             previous-history-element
+M-v             helm-previous-page
+C-M-S-v         helm-scroll-other-window-down
+
+M-r             previous-matching-history-element
+M-s             next-matching-history-element
+  (that binding is currently shadowed by another mode)
+

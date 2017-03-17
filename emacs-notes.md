@@ -1260,3 +1260,65 @@ bash: no job control in this shell
   - sellout: color-theme-solarized
 
 - which one does danielmai use?  A: bbatsov, same as me.
+
+**Thu Mar 16 09:31:28 PDT 2017**
+
+## elisp ##
+
+- at some point, I am going to ahve to bite off the [elisp introduction](https://www.gnu.org/software/emacs/manual/eintr.html)
+
+
+## helm ##
+
+- the [helm wiki](https://github.com/emacs-helm/helm/wiki)
+
+- looks like the idiom to search within a directory recursively from the current buffer is: `helm-grep-do-git-grep`
+- there is also: helm-do-grep-ag, bound to `C-c h M-g a`
+
+- set mark is `C-SPC` or `M-SPC`
+- select all with `M-a`
+
+### yanking text ###
+
+Yank symbol at point from helm-current-buffer (i.e. buffer where a helm command was invoked):
+
+- `M-n` copies symbol at point to minibuffer
+
+- `C-w` appends word next to point to the minibuffer and advance to next word
+  - hitting `C-_` undo last insertion and rewind yank point in helm-current-buffer
+
+### find files ###
+
+Other quick jumping off features of helm-find-files:
+
+- `C-x C-d` (`helm-browse-project`) shows buffers and files in the project.
+- DOES NOT WORK FOR ME: `C-c C-d` with prefix argument shows files in this directory and its subdirectories recursively.
+- When using `helm-ls-git` and `helm-ls-hg`, files under version control have a corresponding backend indicator.
+
+- `C-x C-b` to switch back to the resumed Helm sources.
+- `M-p` to access history of helm-find-files
+- `C-c h` to access the full history of files (`file-name-history`)
+- `C-x C-f` switches back to helm-find-files
+
+- you can insert marked candidates into the current buffer with `C-c C-i`
+  - this is useful to save a list of candidates for later
+
+## Mastering Emacs ##
+
+- read his [reading guide](https://www.masteringemacs.org/reading-guide)
+- make a list of next steps from there.
+
+### next steps ###
+
+- read [effective editing and movement in Emacs](https://www.masteringemacs.org/articles/2011/01/14/effective-editing-movement/)
+- read [mastering key bindings in emacs](https://www.masteringemacs.org/articles/2011/02/08/mastering-key-bindings-emacs/)
+- read [disabling prompts in emacs](https://www.masteringemacs.org/articles/2010/11/14/disabling-prompts-emacs/)
+- read [make tooltips appear in echo area](https://www.masteringemacs.org/articles/2010/10/15/making-tooltips-appear-in-echo-area/)
+- read [finding stuff fast with occur](https://www.masteringemacs.org/articles/2011/07/20/searching-buffers-occur-mode/)
+- read [evaluating elisp in emacs](https://www.masteringemacs.org/article/evaluating-elisp-emacs)
+- read [eshell](https://www.masteringemacs.org/articles/2010/12/13/complete-guide-mastering-eshell/)
+- read [fixing the mark commands](https://www.masteringemacs.org/articles/2010/12/22/fixing-mark-commands-transient-mark-mode/)
+
+## book notes ##
+
+### first ###
