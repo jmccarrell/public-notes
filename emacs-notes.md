@@ -1322,3 +1322,9 @@ Other quick jumping off features of helm-find-files:
 ## book notes ##
 
 ### first ###
+
+## 24 bit color in emacs ##
+
+- this guy has hacked on emacs to provide 24 bit color support
+- he even has it working in tmux on osx
+- his blog [emacs category](http://hoppsjots.org/?cat=6)
