@@ -1328,3 +1328,153 @@ Other quick jumping off features of helm-find-files:
 - this guy has hacked on emacs to provide 24 bit color support
 - he even has it working in tmux on osx
 - his blog [emacs category](http://hoppsjots.org/?cat=6)
+
+## todo ##
+
+- IN PROGRESS watch this youtube [Aaron Schumacher: Emacs for Python](https://www.youtube.com/watch?v=eH-epEqLVAs)
+
+## emacs jedi ##
+
+- I want all of these python navigation features in emacs: [Emacs as a Python IDE](https://www.youtube.com/watch?v=6BlTGPsjGJk)
+- this guy uses projectile too
+
+### package requirements ###
+
+- about 8:30 into the video
+
+- Need an interface for completion and showing alternatives
+  - auto-complete
+- Need an interpreter that knows python3
+  - to parse your project code
+  - here, a server that wraps a python parsing library
+- glue
+  - epc, emacs/jedi
+
+- so the packages required
+  - projectile
+  - epc
+  - jedi
+  - auto-complete
+
+- about 17:51 in
+  - some nice elisp to find uninstalled packages, and install them.
+
+### Projectile ###
+
+- about 18:10
+- helpful commands:
+  - C-c p s   switch to proejct
+  - C-c p f   list files in project
+  - C-c p k   kill all buffers for project
+- https://github.com/bbatsov/projectile
+
+### autocomplete ###
+
+- config at: 21:29
+- automatically integrates with most common programming languages
+- but only enables completions
+  - language specific keywords
+  - words in buffers with the same mode
+- does not know about lang syntax
+- so jedi provides additional completions to ac
+
+### jedi ###
+
+- at 22:50
+- there is both a standalone [jedi](https://github.com/davidhalter/jedi)
+- and [emacs-jedi](https://github.com/tkf/emacs-jedi)
+- and [emacs-epc](https://github.com/tkf/python-epc)
+
+#### jedi dependencies ####
+
+- 25:30
+
+- let jedi handle it:
+  - requires virtualenv and pip
+  - a one-time M-x jedi:install-server
+  - dependencies are installed in a sandbox
+  - doesn't work with other managers (conda)
+- DYI
+  - install it all yourself
+  
+#### jedi server config ####
+
+- about 28:52
+- find your project --sys-path
+- find your installed modules --virtual-env
+  - the active venv is found automatically
+- details: C-h v <RET> jedi:server-args <RET>
+
+- variable values to find project roots: 30:42
+
+- interactively writing elisp and evaluating it side-by-side: 34:00
+- make jedi server buffer-local: but across the entire project: 36:26
+
+- suggested key bindings: 39:00
+
+- local-set-key example: 39:42
+  - don't globally clobber buffer keys
+
+- the author prefers to trigger get-in-function-call with a binding,
+  - so he delays the auto trigger by setting the delay value to a large number.
+- the author likes jedi:complete-on-dot
+
+- other packages supply something similiar for other langs:
+  - rope: Ruby
+  - irony-mode C / C++
+  - gocode golang
+  - CEDET various
+
+- is there a connection between jedi and company?  the author did not think so. circa May 2014.
+
+## [Aaron Schumacher: Emacs for Python](https://www.youtube.com/watch?v=eH-epEqLVAs) ##
+
+- importantly, he runs an emacs server on os x.
+  - this seems important to setup
+  - then he has aliases:
+    - e: non-window emacs
+    - eg: graphical emacs
+
+- about 11:30 in the video Aaron shows editing numbers using keyboard macros and rectangle command: `rectangle-number-lines`: `C-x r N`
+  - it uses multiple cursors some how.
+  - check this out.
+- using jedi, one can select a symbol in a buffer (`C-c e`) and edit all of the instances at once
+  - not based on the text, but on the jedi parsed evaluation of which of those are symbols and which are not.
+- Aaron uses snippets in the repl
+  - eg common imports
+  - and tab-completion
+- 16:21: he shows sending text from the .py file he is working on to evaluate it in the repl.  nice.
+- 17:02 he turns on line number mode to get line numbers down the left column.
+  - no, not line number mode; that controls displaying row, col of point in the modeline.
+  - some other command.  looks like: `linum-mode`
+
+- He uses `M-.` to follow class definitions up a class hierarchy.
+- 19:01: Aaron navigates to a graphical display of the kill ring.
+  - helm keyboard command: `C-c h M-y`: `helm-show-kill-ring`
+
+- the [notes over the presentation](https://github.com/ajschumacher/emacs_python)
+
+- an emacs blog aggregator: [Planet Emacsen](http://planet.emacsen.org/)
+
+- [helm dash](https://github.com/areina/helm-dash) to read dash docsets as text in emacs may be helpful.
+
+- the irreal blog has an entry on ag, searching and workflow [The Silver Searcher, Ivy-occur, and Swiper](http://irreal.org/blog/?p=6008)
+  - which covers grabbing the results of the ag serach as a buffer and then visiting each place in turn.
+  - it is based on ivy though.
+    - ivy-occur
+
+## todo ##
+
+- work through emacs server
+- √ first set up, emacs per the [emacs OSX guy's recommendation](https://emacsformacosx.com/tips)
+  - √ which means an osx specific home directory added to path only on osx: MacOS
+- then turn on emacs-server in init.el
+  - what does wiegley do?  A: I can't tell.  He uses a 2012 package called session.
+- so do an experiment: 
+  - does emacsclient start an emacs for me?
+
+
+## projectile ##
+
+- √ turn on projectile
+- then learn how to leverage it.
