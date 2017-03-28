@@ -1471,10 +1471,29 @@ Other quick jumping off features of helm-find-files:
 - then turn on emacs-server in init.el
   - what does wiegley do?  A: I can't tell.  He uses a 2012 package called session.
 - so do an experiment: 
-  - does emacsclient start an emacs for me?
-
+  - does emacsclient start an emacs for me?  A: no.
+  - so I have to start emacs myself, and then run `M-x server-start` which seems Ok for now.
 
 ## projectile ##
 
 - √ turn on projectile
 - then learn how to leverage it.
+
+## session ##
+
+- wiegley uses session; I should too.
+- not used by danielmai
+- `C-x C-/` is jump to last position.
+
+- Ok, I configured session.
+
+## ztree ##
+
+- does wiegley use ztree?  A: he uses ztree-diff
+
+## resize font face used based on frame dimensions ##
+
+- cf: [SetFonts](https://www.emacswiki.org/emacs/SetFonts) at emacswiki
+- can this be done dynamically?  A: yes:.
+- Steve Purcell has written a package to handle this: [default-text-scale](https://github.com/purcell/default-text-scale)
+- and in general, [Steve's emacs config](https://github.com/purcell/emacs.d) looks like a good source of info, in particular for python
