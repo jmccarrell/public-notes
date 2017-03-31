@@ -34,6 +34,19 @@ when active, the region-rectangle is highlighted and can be shrunk/grown.  the s
 
 - fill this out from [Rectangle Registers](https://www.gnu.org/software/emacs/manual/html_node/emacs/Rectangle-Registers.html#Rectangle-Registers)
 
+* Outline key bindings
+
+- outline minor mode (not used in org mode) uses prefix `C-c @`
+
+| key     | used for                                                                  |
+|---------+---------------------------------------------------------------------------|
+| C-c C-n | move point to next visible heading line                                   |
+| C-c C-p | ... previous ...                                                          |
+| C-c C-f | move point to next visibile heading line at the same level                |
+| C-c C-b | ... previous ...                                                          |
+| C-c C-u | move point to a lower-level (bigger, more inclusive) visible heading line |
+
+
 * Org key bindings
 
 ** References
