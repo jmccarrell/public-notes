@@ -38,6 +38,8 @@ when active, the region-rectangle is highlighted and can be shrunk/grown.  the s
 
 - outline minor mode (not used in org mode) uses prefix `C-c @`
 
+** Outline Motion
+
 | key     | used for                                                                  |
 |---------+---------------------------------------------------------------------------|
 | C-c C-n | move point to next visible heading line                                   |
@@ -45,6 +47,16 @@ when active, the region-rectangle is highlighted and can be shrunk/grown.  the s
 | C-c C-f | move point to next visibile heading line at the same level                |
 | C-c C-b | ... previous ...                                                          |
 | C-c C-u | move point to a lower-level (bigger, more inclusive) visible heading line |
+
+** Outline Visibility
+
+- the outline visibility commands are superceded in org mode by TAB cycling.
+
+| key     | used for                                                         |
+|---------+------------------------------------------------------------------|
+| C-c C-c | make current heading line invisibile  (not in org mode; use TAB) |
+| C-c C-e | ... visible (not in org mode; use TAB)                           |
+| ...     | many others that are not terribly releveant in org mode          |
 
 
 * Org key bindings
