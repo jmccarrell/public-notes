@@ -1,0 +1,71 @@
+* GTD Project
+
+- [X] figure out what outline mode uses for outline bullets
+- [X] figure out how to enter a todo item in org mode
+
+** TODO Follow Sacha's org-mode Map
+
+*** Todos including shortcuts
+
+**** Todo configuration
+define your own workflow
+
+*** Scheduling
+
+*** Date Offset
+
+*** Agendas
+weekly, daily
+
+**** Agenda Deadlines
+
+**** Repeating Agendas
+
+*** Logs
+lognotedone, logdone
+
+*** Tags
+
+*** Search
+esp with tags; also, jumping
+
+*** Custom Agenda
+
+*** Stuck Projects
+defining your own
+
+*** Capture
+templates, links
+
+*** Refiling
+organizing
+
+**** Sorting
+priority, ABC
+
+*** Archiving
+
+*** Multiple Files
+
+**** Includes
+
+*** Views
+
+** Build up my set of categories
+
+- [ ] figure out what cateogries:
+  - John W uses
+  - Charles uses
+  - decide my own categories
+
+** Build up my set of org mode files
+
+- survey
+  - John W
+  - Charles
+  - Sacha?
+- decide my set of initial org files
+  - candidates
+    - gtd
+    - someday
+
