@@ -1,0 +1,102 @@
+* Jeffs Notes
+
+The weird duality of the fundamental table structure (which is a hash table) also containing
+the position of each key/values pair is a bit hard to get ahold of.
+
+It has significance in ~table.unpack()~ eg.
+
+Lua treats as true all values other than =false= and =nil=.
+
+* Preface
+
+** References
+
+  - [[http://lua-users.org][community of users]]
+  - [[http://luabinaries.sourceforge.net/][prebuilt libraries]]
+    - contains prebuilt lua 5.3.3
+    - but building lua is supposed to be easy.
+
+* Ch 1: The Stand-alone Interpreter
+
+the C idiom ~a ? b : c~ is written as: ~a and b or c~
+
+* Ch 4: Strings
+
+the length function is written ~#~
+
+#+BEGIN_SRC lua
+print(#"bogus")    --> 5
+#+END_SRC
+
+* Ch 6: Functions
+
+** Multiple Results
+
+Because of the rules around functions that return multiple values being truncated to a single return value,
+some weirdnesses exist.
+
+To evaluate a function that returns multiple values to only return the first of the multiple values, enclose it in an extra set of parens.
+
+This means that writing ~return (f())~ with parentheses around the call to ~f()~ will *always* return at most 1 return value of ~f()~, no matter how many values ~f()~ may return.
+
+** Variadic Functions
+
+A useful trick to tracing calls to an arbitrary function ~foo()~ is to define another func with varargs:
+
+#+BEGIN_SRC lua
+function trace_foo(...)
+    print(...)
+    foo(...)
+#+END_SRC
+
+
+* Ch 7: the External World
+
+Odd note: page 60: In Lua 5.2 and before, all string operations must be prefixed with '*'.
+Lua 5.3 still accepts these for backward compatibility
+
+** The Complete I/O model
+
+a typical idiom for catching errors is:
+
+#+BEGIN_SRC lua
+    local f = assert(io.open(filename, mode))
+#+END_SRC
+
+** Other System Calls
+
+External lib =LuaFileSystem= has basic file system manipulations.
+=luaposix= offers much of the functionality of POSIX.1.
+
+* Ch 8: Filling Some Gaps
+
+recall that every variable not declared =local= is global in Lua.
+
+it is good habit to use the module =strict.lua= for global variable / scope checks.
+
+the idiom
+
+#+BEGIN_SRC lua
+local foo = foo
+#+END_SRC
+
+creates a new local variable and initializes it to the value of the global foo.
+often used to work with a global value while leaving it undisturbed.
+cf page 68.
+
+* Sample Org
+** Lord of the Rings
+   My favorite scenes are (in this order)
+   1. The attack of the Rohirrim
+   2. Eowyn's fight with the witch king
+      + this was already my favorite scene in the book
+      + I really like Miranda Otto.
+   3. Peter Jackson being shot by Legolas
+      - on DVD only
+      He makes a really funny face when it happens.
+   But in the end, no individual scenes matter but the film as a whole.
+   Important actors in this film are:
+   - Elijah Wood :: He plays Frodo
+   - Sean Austin :: He plays Sam, Frodo's friend.  I still remember
+     him very well from his role as Mikey Walsh in The Goonies.
+
