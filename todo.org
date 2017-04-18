@@ -1,0 +1,178 @@
+#+SEQ_TODO: NEXT(n) TODO(t) WAITING(w) SOMEDAY(s) PROJ(p) | DONE(d) CANCELLED(c)
+
+* PROJ Set up GTD in org mode
+
+The idea is to keep 3 files initially:
+
+  - this file, todo.org: all personal projects at the top level
+  - datawhere.org: tasks related to Datawhere
+  - davo.org: ditto for Davo
+
+** SOMEDAY Empty my Inbox
+
+  - email inbox
+  - walk back through prior today-todo file extracting projects
+  - review /j/proj
+  - review /j/ebooks
+
+** Capture my list of projects into org mode
+
+
+** Initial Configuration [%]
+  - [X] define my set of initial states
+  - [ ] get the display of number of tasks done to work
+  - [ ] define my list of org mode files
+  - [ ] set up the archive file for each of my org files
+  - [ ] start working with agendas
+  - [ ] start a keyboard cheat sheet
+
+
+** TODO Follow Sacha's org-mode Map
+
+[[http://sachachua.com/blog/2014/01/tips-learning-org-mode-emacs/][Some tips for learning Org Mode for Emacs]]
+
+*** Todos including shortcuts
+
+**** Todo configuration
+define your own workflow
+
+*** Scheduling
+
+*** Date Offset
+
+*** Agendas
+weekly, daily
+
+**** Agenda Deadlines
+
+**** Repeating Agendas
+
+*** Logs
+lognotedone, logdone
+
+*** Tags
+
+*** Search
+esp with tags; also, jumping
+
+*** Custom Agenda
+
+*** Stuck Projects
+defining your own
+
+*** Capture
+templates, links
+
+*** Refiling
+organizing
+
+**** Sorting
+priority, ABC
+
+*** Archiving
+
+*** Multiple Files
+
+**** Includes
+
+*** Views
+
+** Build up my set of categories
+
+- [ ] figure out what categories:
+  - John W uses
+  - Sacha uses
+  - Charles uses
+  - Steve Purcell uses
+  - decide my own categories
+
+*** Categories John W uses
+
+I can't find any match in johns config for =org-todo-keywords=
+
+
+*** Categories Sacha uses
+
+...can be found [here](http://pages.sachachua.com/.emacs.d/Sacha.html#org5e4acb0)
+
+She uses keywords:
+
+#+begin_src emacs-lisp
+(setq org-todo-keywords
+ '((sequence
+    "TODO(t)"  ; next action
+    "TOBLOG(b)"  ; next action
+    "STARTED(s)"
+    "WAITING(w@/!)"
+    "SOMEDAY(.)" "|" "DONE(x!)" "CANCELLED(c@)")
+   (sequence "LEARN" "TRY" "TEACH" "|" "COMPLETE(x)")
+   (sequence "TOSKETCH" "SKETCHED" "|" "POSTED")
+   (sequence "TOBUY" "TOSHRINK" "TOCUT"  "TOSEW" "|" "DONE(x)")
+   (sequence "TODELEGATE(-)" "DELEGATED(d)" "|" "COMPLETE(x)")))
+#+end_src
+
+with faces:
+
+#+begin_src emacs-lisp
+(setq org-todo-keyword-faces
+      '(("TODO" . (:foreground "green" :weight bold))
+        ("DONE" . (:foreground "cyan" :weight bold))
+        ("WAITING" . (:foreground "red" :weight bold))
+        ("SOMEDAY" . (:foreground "gray" :weight bold))))
+#+end_src
+
+** Build up my set of org mode files
+
+- survey
+  - John W
+  - Charles
+  - Sacha?
+  - Steve Purcell
+- decide my set of initial org files
+  - candidates
+    - gtd
+    - someday
+
+*** John W gtd org files
+
+the best inference I can find to the files John Wiegley uses is this bit of his config:
+
+#+begin_src emacs-lisp
+     ("O" "All TODOs" tags "TODO<>\"\""
+      ((org-agenda-overriding-header "All TODOs")
+       (org-agenda-files
+        (quote
+         ("~/doc/tasks/todo.txt" "~/doc/tasks/BAE.txt" "~/doc/tasks/Bahai.txt" "~/doc/tasks/OSS.txt" "~/doc/tasks/emacs.txt" "~/doc/tasks/habits.txt" "~/doc/tasks/index.txt" "~/doc/tasks/notes.txt" "~/doc/tasks/archive/BAE.txt" "~/doc/tasks/archive/Bahai.txt" "~/doc/tasks/archive/BoostPro.txt" "~/doc/tasks/archive/CEG.txt" "~/doc/tasks/archive/Embarcadero.txt" "~/doc/tasks/archive/FPComplete.txt" "~/doc/tasks/archive/IL-05.txt" "~/doc/tasks/archive/TI.txt" "~/doc/tasks/archive/archive-2007.txt" "~/doc/tasks/archive/archive-2008.txt" "~/doc/tasks/archive/archive-2009.txt" "~/doc/tasks/archive/archive-2010.txt" "~/doc/tasks/archive/archive-2011.txt" "~/doc/tasks/archive/archive-2012.txt" "~/doc/tasks/archive/archive-2013.txt" "~/doc/tasks/archive/archive-2014.txt" "~/doc/tasks/archive/archive-2015.txt" "~/doc/tasks/archive/archive-2016.txt" "~/doc/tasks/archive/archive.txt" "~/doc/tasks/archive/emacs.txt"))))))))
+#+end_src
+
+*** Sacha org files
+
+
+
+
+** Working with Code
+
+*** workflow
+
+One can open a given block of code in a new buffer with =C-c '=; then one can eval-buffer
+
+
+** TODO org mode capture
+
+- [ ] How do I use capture?  C-c c to capture a new item.  Doesn't seem to work for me.  C-c c is unbound.
+
+*** TODO read Capture - Refile - Archive: section 9
+
+- [ ] - so I need to specify where my org stuff is going to go.  propose: =/j/notes/org=
+- and I need a binding for 'org-capture
+
+- [ ] what does John W do?  A: I can't tell
+- sacha?  Sacha doesn't use org-capture at all.
+  
+
+** DONE get describe-personal-keybindings to work
+
+
+* PROJ Learn /enough/ Emacs Lisp
+
+[[https://emacs.stackexchange.com/questions/16805/good-elisp-tutorial-for-thorough-lisp-understanding][Good elisp tutorial for thorough Lisp understanding?]]
