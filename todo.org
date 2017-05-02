@@ -8,12 +8,22 @@ The idea is to keep 3 files initially:
   - datawhere.org: tasks related to Datawhere
   - davo.org: ditto for Davo
 
+** Watch again the videos on agenda basics
+
+- [ ] make a basic keyboard cheet sheet; or augment the one I already have.
+
+*** Watch 103: schedule, deadlines, agendas
+*** Watch 104: Repeating Tasks
+*** Watch 105: Checklists
+
 ** SOMEDAY Empty my Inbox
 
   - email inbox
   - walk back through prior today-todo file extracting projects
+  - empty Things categories: look at 'Next'
   - review /j/proj
   - review /j/ebooks
+  - ~/Dropbox/project-list.md or some such
 
 ** Capture my list of projects into org mode
 
@@ -121,6 +131,12 @@ with faces:
         ("SOMEDAY" . (:foreground "gray" :weight bold))))
 #+end_src
 
+
+*** My Categories
+
+- to read/review
+
+
 ** Build up my set of org mode files
 
 - survey
@@ -168,7 +184,7 @@ One can open a given block of code in a new buffer with =C-c '=; then one can ev
 
 - [ ] what does John W do?  A: I can't tell
 - sacha?  Sacha doesn't use org-capture at all.
-  
+
 
 ** DONE get describe-personal-keybindings to work
 
@@ -176,3 +192,232 @@ One can open a given block of code in a new buffer with =C-c '=; then one can ev
 * PROJ Learn /enough/ Emacs Lisp
 
 [[https://emacs.stackexchange.com/questions/16805/good-elisp-tutorial-for-thorough-lisp-understanding][Good elisp tutorial for thorough Lisp understanding?]]
+
+* PROJ Repair door ding in Lexus
+
+** DONE find the name of the body shop
+
+* PROJ Configure datawhere Digital Ocean server with ansible
+
+** Design
+
+- all user level operations done as user jeff
+  - compiles, git repo work etc.
+
+
+** DONE set up a python 2 virtual env
+
+- ansible has only experimental support for py3
+- stored relative to datawhere dir: /c/datawhere/tmp/venvs/dw-ansible
+
+** DONE create an API key
+
+** DONE Get ansible running in a virtual env
+
+reall that you must install ansible *in* the virtual env
+
+pip install ansible
+
+you know it worked when the ansible is in the path:
+
+#+BEGIN_SRC bash
+$ which ansible
+/c/datawhere/tmp/venvs/dw-ansible/bin/ansible
+#+END_SRC
+
+
+*** pycrypto build issue
+
+[[http://stackoverflow.com/questions/15375171/pycrypto-install-fatal-error-gmp-h-file-not-found/35753259][Pycrypto install fatal error: gmp.h file not found]]
+
+allows one to use pip to install pycrypto, not easy_install.
+
+#+BEGIN_SRC bash
+(dw-ansible) jeff at vega in /c/datawhere/digital-ocean-ansible
+$ env "CFLAGS=-I/usr/local/include -L/usr/local/lib" pip install pycrypto
+Collecting pycrypto
+  Using cached pycrypto-2.6.1.tar.gz
+Building wheels for collected packages: pycrypto
+  Running setup.py bdist_wheel for pycrypto ... done
+  Stored in directory: /Users/jeff/Library/Caches/pip/wheels/80/1f/94/f76e9746864f198eb0e304aeec319159fa41b082f61281ffce
+Successfully built pycrypto
+Installing collected packages: pycrypto
+Successfully installed pycrypto-2.6.1
+#+END_SRC
+
+** DONE resolve error: key already exists.
+** define roles
+
+- jeff-user
+  - provision jeff as a user
+  - emacs25
+  - jeffs emacs config
+- lua-prod
+- lua-dev
+  - depends on lua-prod
+  - all the packages needed for Lua development
+
+** DONE initialize the droplet
+
+to find the available regions digital ocean offers, I wrote a bit of python:
+
+#+BEGIN_SRC python
+$ python
+Python 2.7.13 (default, Dec 19 2016, 09:49:24)
+[GCC 4.2.1 Compatible Apple LLVM 8.0.0 (clang-800.0.42.1)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import dopy
+>>> help(dopy)
+
+>>> from dopy.manager import DoManager
+>>> do = DoManager(None, 'cecdfe2c1c3e18df4760f6f76f2e510de192ff8d8cd50ba3a5e881f966961de6', api_version=2)
+>>> from pprint import pprint
+>>> pprint(do.all_regions())
+[
+  ...
+ {u'available': True,
+  u'features': [u'private_networking',
+                u'backups',
+                u'ipv6',
+                u'metadata',
+                u'install_agent',
+                u'storage'],
+  u'name': u'San Francisco 2',
+  u'sizes': [u'512mb',
+             u'1gb',
+             u'2gb',
+             u'4gb',
+             u'8gb',
+             u'16gb',
+             u'32gb',
+             u'48gb',
+             u'64gb'],
+  u'slug': u'sfo2'},
+>>>
+#+END_SRC
+
+I found the images like this:
+
+./list-images.py | grep ubuntu
+
+./list-images.py | grep ubuntu
+  u'slug': u'ubuntu-14-04-x64',
+  u'slug': u'ubuntu-14-04-x32',
+  u'slug': u'ubuntu-16-10-x32',
+  u'slug': u'ubuntu-16-10-x64',
+  u'slug': u'ubuntu-17-04-x32',
+  u'slug': u'ubuntu-17-04-x64',
+  u'slug': u'ubuntu-16-04-x64',
+  u'slug': u'ubuntu-16-04-x32',
+  u'slug': u'ubuntu-12-04-x32',
+  u'slug': u'ubuntu-12-04-x64',
+
+pick ubuntu-16-04-x64
+
+** DONE configure DNS manually (not ansbile)
+
+** encrypt the secrets
+
+- do api key
+
+
+*** move api key into ansible vault?
+
+** configure new user: jeff, with access via ssh only
+
+** configure ubuntu
+*** sudoers
+*** ensure root login is only allowed via ssh, not password
+*** configure a new account: jeff
+** configure Jeffs dot files
+** configure emacs 25
+** configure git
+** configure lua
+** configure refreshing packages
+
+* apply to roche job
+
+https://stackoverflow.com/jobs/129526/python-software-engineer-sequencing-roche?sec=False
+
+* Brigade
+
+- done over skype / google hangouts
+- structured kind of like a VC funded startup
+  - honestly not like most startups
+  - more of a play at trying to change how people interact in politics
+  - Sean Parker
+    - funding them completely
+    - have funding through the elections of 2018
+
+** Discussion with Dave Kincaid
+
+- Dave is Director of Data
+
+*** problems they want to solve
+
+Handles 2 kinds of work:
+
+- data pipelining, ETL
+- 3 types of data:
+  - client telmetry
+    - very wide product surface
+    - scale not very high
+- some third party data
+  - core notions: if we have actions that target representatives, we need a very structured
+    - need representatives, candidates,
+- product data features
+- we run with a lot of the microservices
+
+- in the middle of the shift;
+  - had a data team with reasonable staff, but not the greatest purpose and direction
+- in some senses we are starting from scratch
+- 2 roles immediately
+  - junior generalist
+  - more senior: worked with multiple different data architectures
+- what we have is mostly scala
+
+- do I need to be a political junkie to succeed at Brigade?
+  - Dave Kincaid
+
+- Dave is from a mobile security company
+
+- for a bike lane here in S.F.
+  - harder: to know if you care about a bike lane
+
+- Brigade
+
+- ex: build the 49er stadium
+
+- want to launch with 2 main actions in teh next couple of months
+  - petition
+    - might want to target the S.C. county commissioners
+    - or the mayor
+    - accountability is part of it
+    - hopefully there is some legislation; to close the feedback loop
+  - vote pledging
+    - semi public indicator of how you intend to vote
+
+- there were a couple of tools in the 2016 election to do vote pledging
+
+- looking for how to solve a problem
+  - how I work to solve a problem
+  - don't particularly care
+
+- in general the amount of emotional investment is high
+- commitment shows itself in terms of professional development
+- put a lot of emphasis on code reviews
+  - 1 hour per day
+  -
+the back end
+
+- Dave Kincaid has 7 years of experience
+  - he is very satisfied that he hasn't gone stale while he has been there
+- the opportunities to grow are large
+
+- DK wants to have an impact through data
+  - he to
+
+
+* Evaluate Mike Kennedy's Python courses
+
+[[https://training.talkpython.fm/courses/all][course list]]
