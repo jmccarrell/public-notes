@@ -378,3 +378,7 @@ Enter password:
 **Sun Feb 12 11:38:13 PST 2017**
 
 - when I downgraded to mariadb, I lost `--login-path` and `mysql_config_editor`.
+
+**Wed Apr 19 12:42:21 PDT 2017**
+
+- after I moved back to mysql, I restored `--login-path`.
