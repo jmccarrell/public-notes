@@ -121,3 +121,17 @@ sudo launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
 
 - √ go look at the config file: /etc/locate.rc
 - I just went with the defaults.
+
+## revision to how ssh keys / keychain are handled ##
+
+- stackexchange: [macOS Sierra doesn’t seem to remember SSH keys between reboots](https://apple.stackexchange.com/questions/254468/macos-sierra-doesn-t-seem-to-remember-ssh-keys-between-reboots)
+
+which boils down to:
+
+add this to `~/.ssh/config`:
+
+``` shell
+Host *
+   AddKeysToAgent yes
+   UseKeychain yes
+```
