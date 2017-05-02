@@ -1,4 +1,4 @@
-* Jeffs Notes
+* Jeffs Lua Book Notes
 
 The weird duality of the fundamental table structure (which is a hash table) also containing
 the position of each key/values pair is a bit hard to get ahold of.

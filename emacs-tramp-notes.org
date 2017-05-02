@@ -1,0 +1,6 @@
+* Notes on setting up tramp
+
+experiment with tramp using my digital ocean instance dw.mccarrell.org
+
+‘/user@host:/path/to.file’
+

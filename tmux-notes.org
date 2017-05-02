@@ -1,15 +1,13 @@
-# tmux notes
+* tmux notes
 
 - the [tmux tutorial](https://danielmiessler.com/study/tmux/) I used
     - the [shortcut key references](https://danielmiessler.com/study/tmux/#reference) there are useful
 
-## Jeffs customizations
+** Jeffs customizations
 
-- I re-bind the default `C-b` to `C-q`, so everywhere I have my dotiles, it is `C-q`
+- I re-bind the default `C-b` to `C-q`, so everywhere I have my dotiles, PREFIX is `C-q`
 
-
-
-## session management
+** session management
 
 - think of sessions as a top-level thing, like
     - leafcutter
@@ -48,12 +46,12 @@
 
         $ tmux kill-session -t session-name
 
-# tmux and ssh together notes
+* tmux and ssh together notes
 
 - [combining ssh and tmux](http://www.bsdnow.tv/tutorials/ssh-tmux)
     - no useful info here at all.
 
-# other tmux configs to follow
+* other tmux configs to follow
 
 - this [search: tmux ssh tutorial](https://www.google.com/search?client=safari&rls=en&q=tmux+ssh+tutorial&ie=UTF-8&oe=UTF-8) shows interesting things to follow
 
@@ -63,11 +61,11 @@
 - advice on how to [autostart tmux](http://marklodato.github.io/2013/10/31/autostart-tmux-on-ssh.html)
 
 
-# jeff key bindings
+* jeff key bindings
 
 - remap C-b to C-q
 
-- My initial tmux.conf file
+** My initial tmux.conf file
 
         # use C-q, as the prefix
         set-option -g prefix C-q
@@ -78,9 +76,9 @@
         # Easy config reload
         bind-key R source-file ~/.tmux.conf \; display-message "tmux.conf reloaded."
 
-## window work
+** window work
 
-### split windows
+*** split windows
 
 - split window horizontally:  `C-q "`
     - like `C-x 4 b` in emacs
@@ -91,7 +89,7 @@
     - like `C-x 3 b` in emacs
     - bind-key          % split-window -h
 
-### restore to a single pane
+***  restore to a single pane
 
 - break-pane  `C-q !`
     - Break the current pane out of the window.
@@ -101,7 +99,7 @@
     - bind-key      Space next-layout
     - cycles through some interesting window layouts; seems useful
 
-## windows and panes
+** windows and panes
 
 - there are both windows and panes
 
@@ -133,8 +131,11 @@
         - into top and bottom (preferred): `C-q "`
         - into left and right: `C-q %`
 
+- how do I label a session?
+  - A: 
 
-## default bindings (tmux 2.1)
+
+** default bindings (tmux 2.1)
 
 
            C-b         Send the prefix key (C-b) through to the application.
@@ -198,7 +199,7 @@
            M-Left, M-Right
                        Resize the current pane in steps of five cells.
 
-## key bindings for emacs-edit
+** key bindings for emacs-edit
 
     bind-key -t emacs-edit    C-a start-of-line
     bind-key -t emacs-edit    C-b cursor-left
@@ -230,7 +231,7 @@
     bind-key -t emacs-edit    M-f next-word-end
     bind-key -t emacs-edit    M-m start-of-line
 
-## key bindings for emacs-choice
+** key bindings for emacs-choice
 
     bind-key -t emacs-choice            C-c cancel
     bind-key -t emacs-choice            C-j choose
@@ -273,7 +274,7 @@
     bind-key -t emacs-choice         C-Left tree-collapse-all
     bind-key -t emacs-choice        C-Right tree-expand-all
 
-## key bindings for emacs-copy
+** key bindings for emacs-copy
 
     bind-key -t emacs-copy        C-Space begin-selection
     bind-key -t emacs-copy            C-a start-of-line
@@ -336,10 +337,22 @@
 
 - Do any of my tutorials listed about talk about the copy buffer and how to use it?
 
-----
-
-**Tue Jul  5 17:03:26 PDT 2016**
+** Tmux iterm2 integration -CC
 
 - with tmux 2.9+, we now have [tmux integration](https://gitlab.com/gnachman/iterm2/wikis/TmuxIntegration)
-    - this moves tmux commands out to the iterm2 level, which means a lot of nice integration features I want
+    - This moves tmux commands out to the iterm2 level, which means a lot of nice integration features I want
     - use `tmux -CC`
+
+** More tmux usage to follow
+
+- I found video [vim and tmux with c++/c](https://www.youtube.com/watch?v=MG91ihb0oZ0) which has some interesting side-by-side use cases; largely what I do with emacs and the shell.
+
+- in it is a recommendation to enable scrolling in tmux, from tmux.conf:
+
+``` shell
+# who knows what this does, but I can now scroll in a tmux window
+set -g terminal-overrides 'xterm*:smcup@:rmcup@'
+set -g mode-mouse on
+```
+
+- of course?, I don't want that if I use iterm2 to manage tmux.
