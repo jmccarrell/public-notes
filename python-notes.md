@@ -829,3 +829,14 @@ Run `brew linkapps python3` to symlink these to /Applications.
 - so I immediately updated pip, setuptools and wheel
 
 - I linked my autofile venv to /usr/local/bin/python3.5
+
+## create python 3 virtualenvs ##
+
+with python 3.5 or maybe 3.6, support for the `venv` module is standard.
+so to create a venv I did:
+
+``` shell
+$ python3 -m venv /c/davo/tmp/venvs/autofiler
+$ source /c/davo/tmp/venvs/autofiler/bin/activate
+(autofiler) jeff at vega in /c/davo/wke on develop
+```
