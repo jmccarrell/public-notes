@@ -531,3 +531,44 @@ https://stackoverflow.com/jobs/129526/python-software-engineer-sequencing-roche?
 
 *** DONE Unload kraut into jars
     SCHEDULED: <2017-05-06 Sat>
+
+* FordGoBike
+
+- $124 for an annual membership with unlimited 45 min rides.
+- starts 6/28, which is a Wednesday.
+
+* Python env
+
+I need to remove python 3.4 from vega now that it is no longer needed.
+
+What is the difference between autoenv and pyenv?
+
+pyenv is specific to python
+
+autoenv sets state per directory, and is deprecated in favor of direnv, according to the author Kenneth Reitz.
+
+so how do I add the homebrew python3 to pyenv?
+
+some quick googling does not show any obvious recipes
+and given the name clash between python and python3,
+and that pyenv has to work by overriding the literal names
+for its 'shims' approach to work,
+I think there is not likely to be a good solution here.
+
+So just go back to what I was doing before.
+
+** Todo
+
+- [ ] Nuke pyenv entirely, as I no longer need its functionality.
+- [ ] recreate the autofile virtualenv with homebrew py361
+
+use [[https://direnv.net/][direnv]] to set per-directory configuration, like PATH etc in the future.
+and its [[https://github.com/direnv/direnv/wiki/Emacs][emacs package]]
+
+* Nephrology appt
+
+I need to call and schedule this appt
+- phone: 650 853 6795
+
+10 AM June 15th: Dr Siva
+Lee building: second floor
