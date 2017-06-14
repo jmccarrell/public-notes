@@ -1,0 +1,39 @@
+* Jeffs Emacs Projectile Notes
+
+** One time
+
+- projectile-mode is already enabled
+
+** Basic usage
+
+- the [[http://projectile.readthedocs.io/en/latest/usage/][usage table of commands]]
+
+Jeffs notable commands
+
+*** Helm projectile commands
+
+from M-x helm projectile
+
+
+| keybinding | description                                  |
+|------------+----------------------------------------------|
+| C-c p e    | helm-projectile-recentf                      |
+| C-c p f    | helm-projectile-find-file                    |
+| C-c p d    | helm-projectile-find-dir                     |
+| C-c p p    | helm-projectile-switch-project               |
+| C-c p s s  | Runs ag on the project.                      |
+
+plain projectile commands
+
+| keybinding | description                                                           |
+|------------+-----------------------------------------------------------------------|
+| C-c p k    | kills all project buffers                                             |
+| C-c p D    | opens the project root in dired                                       |
+| C-c p e    | show a list of recently visited project files                         |
+| C-c p b    | display a list of open project buffers                                |
+| C-c p T    | display a list of all test files(specs, features, etc) in the project |
+| C-c p ESC  | switch to the most recently used projectile buffer                    |
+
+** Jeffs conversions
+
+- use C-c p f and C-c p 4 f for finding files to apply the project context to the lookup
