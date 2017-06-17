@@ -1,4 +1,4 @@
-* Lexical
+* Jeffs Ruby Notes.
 
 identifiers that begin with Capital letters are constants
 
@@ -103,3 +103,47 @@ collect == map
 select  == grep
 reject  == ! grep
 inject  == too complex for a 1 liner
+
+** Function declaration
+
+specify a default:
+
+def load_font( name, size = 12 )
+  # find the font...
+end
+
+varargs functions; declare with `*`; which supplies all args as an array
+
+def echo_args( *args )
+  args.each { |a| puts a }
+end
+
+in irb how can I get the type of an object?  A: there is no notion of type, but there is class
+
+>> key_pad.class
+Hash
+
+** pry
+
+so it seems that pry is the repl of choice.
+install it:
+
+$ gem install pry pry-doc
+  ...
+6 gems installed
+
+*** Inspect docs
+
+to see docs on an object
+
+from an instance s of String
+
+show-doc s.each_line
+
+from the ri syntax:
+
+show-doc String#each_line
+
+*** inspect methods
+
+[14] pry(main)> show-method s.each_line

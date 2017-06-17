@@ -736,13 +736,13 @@ And, in fact, the github help recommends exactly that: [fork a repo](https://hel
 ```shell
 $ git st
   ...
-	modified:   filing/autofile/ca.py
+        modified:   filing/autofile/ca.py
 $ git update-index --assume-unchanged davotech/dev_settings.py
 $ mv ~/Downloads/dev_settings.py  davotech
 $ git st
   ...
-	modified:   davotech/dev_settings.py
-	modified:   filing/autofile/ca.py
+        modified:   davotech/dev_settings.py
+        modified:   filing/autofile/ca.py
 ```
 
 - Ok, it looks like if I invert the order of operations, it might work.
@@ -751,17 +751,17 @@ $ git st
 ```
 $ git st
   ...
-	modified:   filing/autofile/ca.py
+        modified:   filing/autofile/ca.py
 $ mv /c/davo/tmp/dev_settings.py davotech/dev_settings.py
 $ git st
   ...
-	modified:   davotech/dev_settings.py
-	modified:   filing/autofile/ca.py
+        modified:   davotech/dev_settings.py
+        modified:   filing/autofile/ca.py
 $ git update-index --assume-unchanged davotech/dev_settings.py
 $ git st
   ...
-	modified:   davotech/dev_settings.py
-	modified:   filing/autofile/ca.py
+        modified:   davotech/dev_settings.py
+        modified:   filing/autofile/ca.py
 ```
 
 - so try `--skip-worktree`
@@ -770,16 +770,16 @@ $ git st
 ```
 $ git st
   ...
-	modified:   filing/autofile/ca.py
+        modified:   filing/autofile/ca.py
 $ cp -p ~/Downloads/dev_settings.py davotech/
 $ git st
   ...
-	modified:   davotech/dev_settings.py
-	modified:   filing/autofile/ca.py
+        modified:   davotech/dev_settings.py
+        modified:   filing/autofile/ca.py
 $ git update-index --skip-worktree davotech/dev_settings.py
 $ git st
   ...
-	modified:   filing/autofile/ca.py
+        modified:   filing/autofile/ca.py
 ```
 
 - it remains to be seen whether or not this change persists across:
@@ -851,3 +851,24 @@ error: filing/autofile/ca_efile.py: patch does not apply
 
 - IN PROGRESS recommends reading the git-rebase man page
   - I have read down to "Merge Strategies"
+
+**Thu Jun 15 15:57:29 PDT 2017**
+
+Jason Rosendale observed:
+
+To add an empty commit that will automatically create a link to your PR in asana:
+```
+git commit --allow-empty -m 'https://app.asana.com/0/6641...'
+```
+To do a force-push that will only go through if nobody else has done a push since your last pull:
+```
+git push origin some_branch_that_is_not_master --force-with-lease
+```
+To see all changes that have been made to a particular file, in chronological order:
+```
+git log -p ./app/.../whatever.rb
+```
+
+Alex Deeb added:
+
+One command I like to use to see the names of all files changed in a particular commit: `git diff-tree --no-commit-id --name-only -r {commit_sha}`u

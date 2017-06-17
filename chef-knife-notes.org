@@ -1,0 +1,16 @@
+* Jeffs notes using chef and knife
+
+Jason Rosendale said:
+
+Today’s weird use of knife’s --command option:
+
+I don’t remember all of the many command line options necessary to connect to the replica RDS instance. But I know that I did it once from one of the preprod boxes. So:
+```knife deploy preprod reputedly-web-* --command='grep mysql  ~/.bash_history'
+```
+I’m not 100% sure why, but `--command='history'` doesn’t actually do anything
+
+Chris Hardy [2:59 PM]
+@jason.rosendale you could do a knife search to grab an ipaddress, then do an ssh for bash_history so
+`knife search "chef_environment:staging AND roles:reputedly-web-*" -a ipaddress`
+then
+`knife ssh "chef_environment:staging AND ipaddress:1.2.3.4" "grep mysql ~/.bash_history"`
