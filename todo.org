@@ -1,5 +1,5 @@
 #+TITLE: Jeffs Projects
-#+SEQ_TODO: NEXT(n) TODO(t) WAITING(w) SOMEDAY(s) PROJ(p) | DONE(d) CANCELLED(c)
+#+SEQ_TODO: NEXT(n) TODO(t) WAITING(w) SOMEDAY(s) PROJ(p) | DONE(d) CANCELLED(c) DEFERRED(D)
 #+TAGS: AGENDAS(a) MARCY(m) ERRANDS(e) BIKES(b) READ_REVIEW(r)
 
 * GTD Weekly Review
@@ -8,266 +8,6 @@
   :PROPERTIES:
   :LAST_REPEAT: [2017-05-06 Sat 09:47]
   :END:
-
-* PROJ Set up GTD in org mode
-
-The idea is to keep 3 files initially:
-
-  - this file, todo.org: all personal projects at the top level
-  - yadle.org: tasks related to Datawhere
-  - davo.org: ditto for Davo
-
-
-** Finish reading GTD book
-
-*** DONE read GTD chapter 9: Engaging: Making the Best Action Choices
-    SCHEDULED: <2017-05-06 Sat>
-
-*** read GTD chapter 10: Getting Projects under Control
-    SCHEDULED: <2017-05-06 Sat>
-
-*** read GTD chapter 11: the Power of the Capturing Habit
-    SCHEDULED: <2017-05-07 Sun>
-
-*** read GTD chapter 12: the Power of the Next Action Decision
-    SCHEDULED: <2017-05-07 Sun>
-
-*** read GTD chapter 13: the Power of Outcome Focusing
-    SCHEDULED: <2017-05-08 Mon>
-
-*** read GTD chapter 14: GTD and Cognitive Science
-    SCHEDULED: <2017-05-08 Mon>
-
-*** read GTD chapter 15:  the Path of GTD Mastery
-    SCHEDULED: <2017-05-09 Tue>
-
-** Come up with an initial set of contexts [1/1]
-
-- [X] first review contexts in the GTD book
-
-*** possible initial contexts
-
-- Agendas
-  - Marcy
-  - PeterK
-  - DaveL
-- Davo and Yadle
-  - no, defined by the file the tasks are in
-- Errands
-- Calls?
-  - not sure I have enough for this to make sense
-- Read/Review
-
-
-*** the GTD list of common contexts
-
-- Calls
-- At computer
-- Errands
-- At office (miscellaneous)
-- At Home
-- Anywhere
-- Agendas (for people and meetings)
-- Read/Review
-
-
-** explore the notion of separating todos from notes
-
-my today-todo is a mixed journal of todo items and notes on how I did those things.
-
-if I pursue the idea of separating out long-lived notes from todo lists, how does that affect my workflow?
-
-** figure out how to format preformatted text in org mode
-
-
-** Investigate agenda views [0/1]
-
-the default agenda views present everything;
-
-- [ ] I need to understand how agendas can be filtered and viewed
-- [ ] re-watch Rainer's agenda video
-
-** NEXT GTD org-mode FAQ
-
-*** what is the key binding to mark something TODO, NEXT, etc?
-
-A: Shift-<LEFT, RIGHT> to move to the next state definedin SEQ_TODO
-A: ~C-c C-t~ to set the state to one of the choices, like DONE.
-
-*** How do I schedule something?
-
-put the cursor on the headline; then 
-
-*** how do I get an agenda of the current things I am working on?
-
-A: ~C-a a~ then ~a~ for basic agenda.
-
-Restrict the agenda view to the current file or subtree
-
-- restrict to file: ~C-u C-c C-x <~
-- to subtree:  ~C-c C-x <~
-- restore unrestrict ~C-c C-x >~
-
-*** how are GTD contexts typically implemented?
-
-The usual way is to implement TAGS at the top of the file.
-
-then insert one more many tags with ~C-c C-q~
-
-
-*** how do I archive things?
-
-A: ~C-c C-x C-a~, org-archive-subtree-default to archive everthing in the subtree
-A: there is also ~C-c C-x C-s~ org-archive-subtree which archives the subtree starting at point
-
-- and its prefix modifier: ~C-u C-c C-x C-s~ which will search for any open TODO items.  if none are found, it will offer to archive that subtree.
-
-** Watch again the videos on agenda basics
-
-- [ ] make a basic keyboard cheet sheet; or augment the one I already have.
-
-*** Watch 103: schedule, deadlines, agendas
-*** Watch 104: Repeating Tasks
-*** Watch 105: Checklists
-
-** SOMEDAY Empty my Inbox
-
-  - email inbox
-  - walk back through prior today-todo file extracting projects
-  - empty Things categories: look at 'Next'
-  - review /j/proj
-  - review /j/ebooks
-  - ~/Dropbox/project-list.md or some such
-
-** Capture my list of projects into org mode
-
-
-** TODO Follow Sacha's org-mode Map
-
-[[http://sachachua.com/blog/2014/01/tips-learning-org-mode-emacs/][Some tips for learning Org Mode for Emacs]]
-
-*** Todos including shortcuts
-
-**** Todo configuration
-define your own workflow
-
-*** Scheduling
-
-*** Date Offset
-
-*** Agendas
-weekly, daily
-
-**** Agenda Deadlines
-
-**** Repeating Agendas
-
-*** Logs
-lognotedone, logdone
-
-*** Tags
-
-*** Search
-esp with tags; also, jumping
-
-*** Custom Agenda
-
-*** Stuck Projects
-defining your own
-
-*** Capture
-templates, links
-
-*** Refiling
-organizing
-
-**** Sorting
-priority, ABC
-
-*** Archiving
-
-*** Multiple Files
-
-**** Includes
-
-*** Views
-
-** Build up my set of categories
-
-- [ ] figure out what categories:
-  - John W uses
-  - Sacha uses
-  - Charles uses
-  - Steve Purcell uses
-  - decide my own categories
-
-*** Categories John W uses
-
-I can't find any match in johns config for =org-todo-keywords=
-
-
-*** Categories Sacha uses
-
-...can be found [here](http://pages.sachachua.com/.emacs.d/Sacha.html#org5e4acb0)
-
-She uses keywords:
-
-#+begin_src emacs-lisp
-(setq org-todo-keywords
- '((sequence
-    "TODO(t)"  ; next action
-    "TOBLOG(b)"  ; next action
-    "STARTED(s)"
-    "WAITING(w@/!)"
-    "SOMEDAY(.)" "|" "DONE(x!)" "CANCELLED(c@)")
-   (sequence "LEARN" "TRY" "TEACH" "|" "COMPLETE(x)")
-   (sequence "TOSKETCH" "SKETCHED" "|" "POSTED")
-   (sequence "TOBUY" "TOSHRINK" "TOCUT"  "TOSEW" "|" "DONE(x)")
-   (sequence "TODELEGATE(-)" "DELEGATED(d)" "|" "COMPLETE(x)")))
-#+end_src
-
-with faces:
-
-#+begin_src emacs-lisp
-(setq org-todo-keyword-faces
-      '(("TODO" . (:foreground "green" :weight bold))
-        ("DONE" . (:foreground "cyan" :weight bold))
-        ("WAITING" . (:foreground "red" :weight bold))
-        ("SOMEDAY" . (:foreground "gray" :weight bold))))
-#+end_src
-
-
-*** My Categories
-
-- to read/review
-
-
-** Working with Code
-
-*** workflow
-
-One can open a given block of code in a new buffer with =C-c '=; then one can eval-buffer
-
-
-** TODO org mode capture
-
-- [ ] How do I use capture?  C-c c to capture a new item.  Doesn't seem to work for me.  C-c c is unbound.
-
-*** TODO read Capture - Refile - Archive: section 9
-
-- [ ] - so I need to specify where my org stuff is going to go.  propose: ~/j/notes/org~
-- and I need a binding for 'org-capture
-
-- [ ] what does John W do?  A: I can't tell
-- sacha?  Sacha doesn't use org-capture at all.
-
-
-** NEXT get describe-personal-keybindings to work
-
-after projectile loads, this command throws:
-
-funcall-interactively: Wrong type argument: symbolp, (quote projectile-command-map)
-
 
 * PROJ Improve my standard emacs config
 
@@ -372,12 +112,6 @@ so just make a better key binding for helm-swoop: choose: M-i
 * PROJ Learn /enough/ Emacs Lisp
 
 [[https://emacs.stackexchange.com/questions/16805/good-elisp-tutorial-for-thorough-lisp-understanding][Good elisp tutorial for thorough Lisp understanding?]]
-
-* PROJ Repair door ding in Lexus
-
-** DONE find the name of the body shop
-
-** NEXT Work with Marcy to get the NX to the body shop        :AGENDAS:MARCY:
 
 * PROJ Configure datawhere Digital Ocean server with ansible
 
@@ -517,53 +251,9 @@ pick ubuntu-16-04-x64
 ** configure lua
 ** configure refreshing packages
 
-* apply to roche job
-
-https://stackoverflow.com/jobs/129526/python-software-engineer-sequencing-roche?sec=False
-
 * Evaluate Mike Kennedy's Python courses
 
 [[https://training.talkpython.fm/courses/all][course list]]
-
-* Home
-
-** Kitchen / Cooking
-
-*** DONE Unload kraut into jars
-    SCHEDULED: <2017-05-06 Sat>
-
-* FordGoBike
-
-- $124 for an annual membership with unlimited 45 min rides.
-- starts 6/28, which is a Wednesday.
-
-* Python env
-
-I need to remove python 3.4 from vega now that it is no longer needed.
-
-What is the difference between autoenv and pyenv?
-
-pyenv is specific to python
-
-autoenv sets state per directory, and is deprecated in favor of direnv, according to the author Kenneth Reitz.
-
-so how do I add the homebrew python3 to pyenv?
-
-some quick googling does not show any obvious recipes
-and given the name clash between python and python3,
-and that pyenv has to work by overriding the literal names
-for its 'shims' approach to work,
-I think there is not likely to be a good solution here.
-
-So just go back to what I was doing before.
-
-** Todo
-
-- [ ] Nuke pyenv entirely, as I no longer need its functionality.
-- [ ] recreate the autofile virtualenv with homebrew py361
-
-use [[https://direnv.net/][direnv]] to set per-directory configuration, like PATH etc in the future.
-and its [[https://github.com/direnv/direnv/wiki/Emacs][emacs package]]
 
 * Nephrology appt
 
@@ -572,3 +262,88 @@ I need to call and schedule this appt
 
 10 AM June 15th: Dr Siva
 Lee building: second floor
+
+* CIMI Presentation at SFBAOG
+
+Sat Jun 17 09:00:38 PDT 2017
+
+Al Z presenting
+
+I asked Al about his 'fixed cost trading platforms'.
+He cited 3:
+
+'wrap accounts': [[http://www.investopedia.com/terms/w/wrapaccount.asp][investopedia wrap account]]
+
+Motif: trade up to 30 stocks per day for $10
+
+Folio Investing is where Al does a lot of his trading
+
+- fixed cost $300 / year
+- window trading: only at 11 & 2 eastern
+
+Portfolio 123 is the $600/year cost portfolio screening tool that could be used to replace the AAII screen
+
+- [ ] read Als article: [[http://www.aaii.com/computerized-investing/article/backtesting-a-stock-screen-to-improve-your-results][Backtesting the AAII Estimate Revisions Stock Screen]]
+
+Al thinks the top 30 revision screen is a 'pretty good' screen
+
+* Portfolio 123 investigation
+
+- I can get an extended free trial period by signing up as a referral from an existing member
+  - here is [[http://www.backtestinvesting.com/2016/10/30/start-here/][one such referral]]
+
+** Recreate hound results
+
+*** Qs for Terry
+
+
+- were there limits on liquidity in the 26 year rule set?
+  - likley: no, but limiting the universe to the Value Line 1700 effectively does so
+
+- I need the buy & sell rules as well
+
+* Recreate hound '27 years' strategy
+
+- [ ] email Terry: ask for help
+
+* Organize my notes, tasks
+
+<2017-06-19 Mon 07:21>
+
+I want to split out the information I manage daily and for projects.
+It seems like I have the *inbox* kind of flow:
+
+- todos
+- short term reminders
+
+and much longer term multi-step efforts
+
+What is the timestamped org mode files?
+
+- here is now John Wiegley [[http://newartisans.com/2007/08/using-org-mode-as-a-day-planner/][uses org mode as a day planner]]
+
+- [ ] set up org-capture so it works for me.
+
+the issue is that I get an error when I try to capture a new task:
+
+org-capture-set-target-location: Target buffer ".notes" for file+headline should be in Org mode
+
+the central point here of John W's approach are:
+
+- there is a *single* file
+- the flow relies on:
+  - quickly capturing tasks
+  - organizing ones day in the daily view: scheduling tasks is what gets them done
+  - links from tasks to other working files are essential
+  - the state transition (with timestamps and notes) are what JW uses for motivation
+  - archive tasks off to get them out of the daily view
+  - reschedule any tasks carried over from the past
+
+certainly using JW's approach will improve my data flow quite a bit.
+
+What are the preconditions to using it effectively?
+
+- [ ] pick my initial categories
+- [ ] figure out how to schedule a task
+- [ ] get org-capture working
+- [ ] learn some key bindings for state transitions
