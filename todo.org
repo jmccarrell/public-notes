@@ -9,6 +9,14 @@
   :LAST_REPEAT: [2017-05-06 Sat 09:47]
   :END:
 
+* Florida autofiler
+
+** TODO create DR15-SW
+   SCHEDULED: <2017-06-20 Tue>
+   [2017-06-20 Tue]
+   [[file:/c/davo/notes/florida-auto-filer-dev-notes.md]]
+
+
 * PROJ Improve my standard emacs config
 
 - [ ] nuke site-lisp in John Wiegleys config to improve search results.
@@ -292,19 +300,17 @@ Al thinks the top 30 revision screen is a 'pretty good' screen
 - I can get an extended free trial period by signing up as a referral from an existing member
   - here is [[http://www.backtestinvesting.com/2016/10/30/start-here/][one such referral]]
 
-** Recreate hound results
+* Recreate hound '27 years' strategy
 
-*** Qs for Terry
-
+** Qs for Terry
 
 - were there limits on liquidity in the 26 year rule set?
   - likley: no, but limiting the universe to the Value Line 1700 effectively does so
 
 - I need the buy & sell rules as well
 
-* Recreate hound '27 years' strategy
 
-- [ ] email Terry: ask for help
+** WAITING Get help from Terry with the rules
 
 * Organize my notes, tasks
 
@@ -322,12 +328,6 @@ What is the timestamped org mode files?
 
 - here is now John Wiegley [[http://newartisans.com/2007/08/using-org-mode-as-a-day-planner/][uses org mode as a day planner]]
 
-- [ ] set up org-capture so it works for me.
-
-the issue is that I get an error when I try to capture a new task:
-
-org-capture-set-target-location: Target buffer ".notes" for file+headline should be in Org mode
-
 the central point here of John W's approach are:
 
 - there is a *single* file
@@ -343,7 +343,11 @@ certainly using JW's approach will improve my data flow quite a bit.
 
 What are the preconditions to using it effectively?
 
-- [ ] pick my initial categories
-- [ ] figure out how to schedule a task
-- [ ] get org-capture working
-- [ ] learn some key bindings for state transitions
+** DONE set up org-capture so it works for me.
+   SCHEDULED: <2017-06-19 Mon>
+** make a table of frequently used key bindings
+   SCHEDULED: <2017-06-20 Tue>
+** pick my initial categories
+** figure out how to schedule a task
+** get org-capture working
+** learn some key bindings for state transitions

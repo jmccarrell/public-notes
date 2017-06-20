@@ -1,0 +1,22 @@
+#+TITLE: Jeffs Tasks
+#+SEQ_TODO: NEXT(n) TODO(t) WAITING(w) SOMEDAY(s) PROJ(p) | DONE(d) CANCELLED(c) DEFERRED(D)
+
+* Tasks
+** TODO figure out how to insert a link to a file in org mode
+   SCHEDULED: <2017-06-20 Tue>
+   [2017-06-20 Tue]
+   [[file:/c/davo/docs/fl/DOR%20FER%202015/2015_DR-15SW_FER/FERFilingBody.xsd::<xsd:annotation>][file:/c/davo/docs/fl/DOR FER 2015/2015_DR-15SW_FER/FERFilingBody.xsd::<xsd:annotation>]]
+
+   In particular, I want to link to the sections of the solid waste schema.
+
+** TODO add notes files to agenda list so those scheduled tasks show up
+   SCHEDULED: <2017-06-20 Tue>
+
+   I want tasks I schedule from capture to show up in the agenda.
+
+   [2017-06-20 Tue]
+   [[file:/j/notes/notes.org::*figure%20out%20how%20to%20insert%20a%20link%20to%20a%20file%20in%20org%20mode][figure out how to insert a link to a file in org mode]]
+** TODO download the RMD files from Daves ftp site
+   SCHEDULED: <2017-06-20 Tue>
+   [2017-06-20 Tue]
+   [[file:/c/davo/notes/time-tracker-davo.txt::Florida%20Solid%20Waste%20dev][file:/c/davo/notes/time-tracker-davo.txt::Florida Solid Waste dev]]
