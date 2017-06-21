@@ -1,0 +1,20 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /j/notes/notes.org
+
+
+* DONE add notes files to agenda list so those scheduled tasks show up
+  SCHEDULED: <2017-06-20 Tue>
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2017-06-20 Tue 11:30
+  :ARCHIVE_FILE: /j/notes/notes.org
+  :ARCHIVE_OLPATH: Tasks
+  :ARCHIVE_CATEGORY: notes
+  :ARCHIVE_TODO: DONE
+  :END:
+
+  I want tasks I schedule from capture to show up in the agenda.
+
+  [2017-06-20 Tue]
+  [[file:/j/notes/notes.org::*figure%20out%20how%20to%20insert%20a%20link%20to%20a%20file%20in%20org%20mode][figure out how to insert a link to a file in org mode]]

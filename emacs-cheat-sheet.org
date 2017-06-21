@@ -373,7 +373,17 @@ Outside of tables, these bindings may have other functionality.
 
 * Jeffs Frequently Used Bindings
 
+** Global bindings
+
 | key     | description                                        |
 |---------+----------------------------------------------------|
 | C-c C-u | outline: move "out"; up to a higher, broader level |
 | C-c C-s | schedule a task on a date                          |
+
+** Agenda view bindings
+
+| key | description                    |
+|-----+--------------------------------|
+| t   | move a task through its states |
+| z   | add a note to a task           |
+| ?   | archive done tasks             |
