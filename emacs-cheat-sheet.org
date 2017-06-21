@@ -375,10 +375,20 @@ Outside of tables, these bindings may have other functionality.
 
 ** Global bindings
 
-| key     | description                                        |
-|---------+----------------------------------------------------|
-| C-c C-u | outline: move "out"; up to a higher, broader level |
-| C-c C-s | schedule a task on a date                          |
+| key     | description                                              |
+|---------+----------------------------------------------------------|
+| C-c C-u | outline: move "out"; up to a higher, broader level       |
+| C-c C-s | schedule a task on a date                                |
+| C-C l   | store a link, like in a file; region becomes search text |
+| C-c C-l | create or edit an org mode link                          |
+
+
+** Org mode bindings
+
+| key   | description                                  |
+|-------+----------------------------------------------|
+| C-c % | Push the current position onto the mark ring |
+
 
 ** Agenda view bindings
 

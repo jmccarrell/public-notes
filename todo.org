@@ -12,7 +12,7 @@
 * Florida autofiler
 
 ** TODO create DR15-SW
-   SCHEDULED: <2017-06-20 Tue>
+   SCHEDULED: <2017-06-24 Sat>
    [2017-06-20 Tue]
    [[file:/c/davo/notes/florida-auto-filer-dev-notes.md]]
 
@@ -343,10 +343,6 @@ certainly using JW's approach will improve my data flow quite a bit.
 
 What are the preconditions to using it effectively?
 
-** DONE set up org-capture so it works for me.
-   SCHEDULED: <2017-06-19 Mon>
-** make a table of frequently used key bindings
-   SCHEDULED: <2017-06-20 Tue>
 ** pick my initial categories
 ** figure out how to schedule a task
 ** get org-capture working
