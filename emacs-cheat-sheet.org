@@ -392,8 +392,8 @@ Outside of tables, these bindings may have other functionality.
 
 ** Agenda view bindings
 
-| key | description                    |
-|-----+--------------------------------|
-| t   | move a task through its states |
-| z   | add a note to a task           |
-| ?   | archive done tasks             |
+| key    | description                    |
+|--------+--------------------------------|
+| t      | move a task through its states |
+| z      | add a note to a task           |
+| a or $ | archive done tasks             |
