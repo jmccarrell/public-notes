@@ -2,11 +2,11 @@
 #+SEQ_TODO: NEXT(n) TODO(t) WAITING(w) SOMEDAY(s) PROJ(p) | DONE(d) CANCELLED(c) DEFERRED(D)
 
 * Tasks
-** TODO download the RMD files from Daves ftp site
+** DONE download the RMD files from Daves ftp site
    SCHEDULED: <2017-06-22 Thu>
    [2017-06-20 Tue]
    [[file:/c/davo/notes/time-tracker-davo.txt::Florida%20Solid%20Waste%20dev][file:/c/davo/notes/time-tracker-davo.txt::Florida Solid Waste dev]]
-** TODO Read 123 General and Library
+** DONE Read 123 General and Library
    SCHEDULED: <2017-06-22 Thu>
    [2017-06-21 Wed]
    [[https://www.portfolio123.com/doc/tutorials.jsp][portfolio 123 tutorials]]
@@ -25,7 +25,7 @@
 ** TODO write script to run ag on common dirs
    [2017-06-22 Thu]
    /{e,j,f}/notes
-** TODO learn more: ag
+** DONE learn more: ag
    SCHEDULED: <2017-06-22 Thu>
    [2017-06-22 Thu]
    read the man page
