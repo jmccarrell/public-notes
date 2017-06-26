@@ -385,9 +385,10 @@ Outside of tables, these bindings may have other functionality.
 
 ** Org mode bindings
 
-| key   | description                                  |
-|-------+----------------------------------------------|
-| C-c % | Push the current position onto the mark ring |
+| key       | description                                  |
+|-----------+----------------------------------------------|
+| C-c %     | Push the current position onto the mark ring |
+| C-c C-v d | demarcate a block (select region first)      |
 
 
 ** Agenda view bindings
