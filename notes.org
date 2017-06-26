@@ -2,22 +2,6 @@
 #+SEQ_TODO: NEXT(n) TODO(t) WAITING(w) SOMEDAY(s) PROJ(p) | DONE(d) CANCELLED(c) DEFERRED(D)
 
 * Tasks
-** DONE download the RMD files from Daves ftp site
-   SCHEDULED: <2017-06-22 Thu>
-   [2017-06-20 Tue]
-   [[file:/c/davo/notes/time-tracker-davo.txt::Florida%20Solid%20Waste%20dev][file:/c/davo/notes/time-tracker-davo.txt::Florida Solid Waste dev]]
-** DONE Read 123 General and Library
-   SCHEDULED: <2017-06-22 Thu>
-   [2017-06-21 Wed]
-   [[https://www.portfolio123.com/doc/tutorials.jsp][portfolio 123 tutorials]]
-   - [X] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D11][Walk Through Guide]]
-   - [X] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D13][Special ETF-CEF Functions and Factors]]
-   - [ ] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D1][Fed Model]]
-   - [ ] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D59][Canadian Data]]
-   - [ ] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D30][Glossary of Risk Statistics]]
-   - [ ] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D27][Peer Comparison on Portfolio123]]
-   - [X] [[https://www.portfolio123.com/doc/side_help_item.jsp?id%3D61][Recommended Books]]
-
 ** TODO create portfolio 123 account
    SCHEDULED: <2017-06-24 Sat>
    [2017-06-21 Wed]
@@ -25,19 +9,12 @@
 ** TODO write script to run ag on common dirs
    [2017-06-22 Thu]
    /{e,j,f}/notes
-** DONE learn more: ag
-   SCHEDULED: <2017-06-22 Thu>
-   [2017-06-22 Thu]
-   read the man page
-** DONE talk to Peter
-   SCHEDULED: <2017-06-22 Thu>
-   [2017-06-22 Thu]
-   future davo work
-   mail catcher
-   florida: where are we?
 ** TODO research mysql ctas create table as
    [2017-06-22 Thu]
 ** TODO consider reading The Little Book That Beats the Market (Little Books. Big Profits) Kindle Edition
    [[https://smile.amazon.com/Little-Beats-Market-Books-Profits-ebook/dp/B000YIUWFQ/ref%3Dtmm_kin_swatch_0?_encoding%3DUTF8&qid%3D&sr%3D][The Little Book That Beats the Market (Little Books. Big Profits) Kindle Edition]]
    [2017-06-22 Thu]
    [[file:/j/notes/notes.org::*Read%20123%20General%20and%20Library][Read 123 General and Library]]
+** TODO bank: NP check
+   SCHEDULED: <2017-06-26 Mon>
+   [2017-06-25 Sun]
