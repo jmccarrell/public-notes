@@ -343,7 +343,20 @@ certainly using JW's approach will improve my data flow quite a bit.
 
 What are the preconditions to using it effectively?
 
-** pick my initial categories
-** figure out how to schedule a task
-** get org-capture working
-** learn some key bindings for state transitions
+** TODO pick my initial categories
+** DONE figure out how to schedule a task
+** DONE get org-capture working
+** DONE learn some key bindings for state transitions
+
+** Move capture buffer tasks and archive to Dropbox
+
+to reduce the friction from syncing these frequently changing files.
+The tradeoff is I rely on dropbox syncing, ie, access to a network.
+Seems like a reasonable tradeoff; I imagine that > 99% of my time I work connected.
+
+** Q: NEXT vs TODO?
+
+What is the effective difference between the NEXT and TODO states?
+
+I guess that depends on your workflow.
+Where is the example of the workflow diagram?
