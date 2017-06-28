@@ -3,7 +3,7 @@
 
 * Tasks
 ** TODO create portfolio 123 account
-   SCHEDULED: <2017-06-24 Sat>
+   SCHEDULED: <2017-07-01 Sat>
    [2017-06-21 Wed]
    [[file:/j/notes/todo.org::*Portfolio%20123%20investigation][Portfolio 123 investigation]]
 ** TODO write script to run ag on common dirs
@@ -15,6 +15,9 @@
    [[https://smile.amazon.com/Little-Beats-Market-Books-Profits-ebook/dp/B000YIUWFQ/ref%3Dtmm_kin_swatch_0?_encoding%3DUTF8&qid%3D&sr%3D][The Little Book That Beats the Market (Little Books. Big Profits) Kindle Edition]]
    [2017-06-22 Thu]
    [[file:/j/notes/notes.org::*Read%20123%20General%20and%20Library][Read 123 General and Library]]
-** TODO bank: NP check
+** DONE bank: NP check
    SCHEDULED: <2017-06-26 Mon>
    [2017-06-25 Sun]
+** TODO Move capture buffer tasks and archive to Dropbox
+   [2017-06-28 Wed]
+   [[file:/j/notes/todo.org::*Move%20capture%20buffer%20tasks%20and%20archive%20to%20Dropbox][Move capture buffer tasks and archive to Dropbox]]
