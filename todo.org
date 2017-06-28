@@ -11,7 +11,7 @@
 
 * Florida autofiler
 
-** TODO create DR15-SW
+** DONE create DR15-SW
    SCHEDULED: <2017-06-24 Sat>
    [2017-06-20 Tue]
    [[file:/c/davo/notes/florida-auto-filer-dev-notes.md]]
@@ -353,6 +353,19 @@ What are the preconditions to using it effectively?
 to reduce the friction from syncing these frequently changing files.
 The tradeoff is I rely on dropbox syncing, ie, access to a network.
 Seems like a reasonable tradeoff; I imagine that > 99% of my time I work connected.
+
+so that is notes, and e-notes.
+
+- notes: Dropbox/org/notes.org
+- e-notes: Dropbox/entelo/org/e-notes.org
+
+the next question is whether to move my todo.org and entelo.org into dropbox.
+for the same friction reduction effect.
+
+I think the answer is: yes.
+
+- todo: Dropbox/org/todo.org
+- entelo: Dropbox/entelo/org/entelo.org
 
 ** Q: NEXT vs TODO?
 
