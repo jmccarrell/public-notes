@@ -375,13 +375,13 @@ Outside of tables, these bindings may have other functionality.
 
 ** Global bindings
 
-| key     | description                                              |
-|---------+----------------------------------------------------------|
-| C-c C-u | outline: move "out"; up to a higher, broader level       |
-| C-c C-s | schedule a task on a date                                |
-| C-C l   | store a link, like in a file; region becomes search text |
-| C-c C-l | create or edit an org mode link                          |
-
+| key         | description                                              |
+|-------------+----------------------------------------------------------|
+| C-c C-u     | outline: move "out"; up to a higher, broader level       |
+| C-c C-s     | schedule a task on a date                                |
+| C-C l       | store a link, like in a file; region becomes search text |
+| C-c C-l     | create or edit an org mode link                          |
+| C-c C-x C-s | archive a subtree                                        |
 
 ** Org mode bindings
 
