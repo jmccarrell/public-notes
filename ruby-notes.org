@@ -132,6 +132,11 @@ $ gem install pry pry-doc
   ...
 6 gems installed
 
+It seems that the template to create gems creates a =bin/console= script, which is
+the intended place to interactively try out the gem.
+
+That is what I used to work with the entelo logger gem.
+
 *** Inspect docs
 
 to see docs on an object
