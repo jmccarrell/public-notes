@@ -348,7 +348,8 @@ What are the preconditions to using it effectively?
 ** DONE get org-capture working
 ** DONE learn some key bindings for state transitions
 
-** Move capture buffer tasks and archive to Dropbox
+** TODO Move capture buffer tasks and archive to Dropbox
+   SCHEDULED: <2017-06-28 Wed>
 
 to reduce the friction from syncing these frequently changing files.
 The tradeoff is I rely on dropbox syncing, ie, access to a network.
