@@ -152,3 +152,93 @@ show-doc String#each_line
 *** inspect methods
 
 [14] pry(main)> show-method s.each_line
+
+* pry notes from Jason Rosendale
+
+I finally read the documentation for ruby’s “pry” debugger and I feel a fool. I have been doing some dumb, dumb stuff. Here are the three things I learned:
+
+Pinned
+[8:34]
+1) You can add new breakpoints from within pry! For a _year_ now I’ve been exiting out of the program, inserting additional “binding.pry” statements in my code, and re-running the program.
+```    1408: def get_educations
+    1409:   services_with_educations = ServicePriorities.services_by_education_priority(services)
+    1410:   binding.pry
+ => 1411:   rich_education = services_with_educations.map do |service|
+    1412:     educations = service.educations
+    1413:     break([educations]) if educations.select(&:degree).count > 0
+    1414:     next(educations)
+    1415:   end.compact.last || Education.none
+    1416:   rich_education.sort_by_started_at
+    1417: end
+```
+```pry(#<Profile>)> break 1416
+pry(#<Profile>)> continue
+```
+```    1408: def get_educations
+    1409:   services_with_educations = ServicePriorities.services_by_education_priority(services)
+    1410:   binding.pry
+    1411:   rich_education = services_with_educations.map do |service|
+    1412:     educations = service.educations
+    1413:     break([educations]) if educations.select(&:degree).count > 0
+    1414:     next(educations)
+    1415:   end.compact.last || Education.none
+=>  1416:   rich_education.sort_by_started_at
+    1417: end
+```
+You can also add breakpoints at lines in other files (including gems!), at the start of methods, or when certain conditions trigger. The docs for this are at https://github.com/nixme/pry-debugger#breakpoints (edited)
+
+Pinned
+[8:34]
+2) You can re-bind pry to a new scope at any time with `cd`. If you re-bind to an object, you call all of that object’s private methods. Until now I’ve been peeking into objects by assigning everything to a temporary variable or by chaining together absurd strings of `.send`s.
+```pry(#<ProfilesController>)> profile.index_document
+# => NoMethodError: private method `get_url' called for #<Profile:0x007fa57d85a370>
+pry(#<ProfilesController>)> cd profile
+pry(#<Profile>):1> self.class.name
+=> "Profile"
+pry(#<Profile>):1> index_document
+=> [ indexes the heck out of that document]
+```
+The command `ls -cli` is pretty useful when you’re inside an object. It will list all of the (c)onstants, (l)ocal variables, and (i)nstance variables defined for that instance. (edited)
+
+Pinned
+[8:36]
+3) The `!!!` command will exit the pry session and terminate the ruby interpreter. I’ve been using a combination of `exit-program` and trying to frantically hit Ctrl-C before the program can loop back around to another binding-pry.
+
+And a fourth thing that I didn’t learn today but is still useful:
+
+4) The command `$ foo` will show the definition of `foo` and the exact location of the source code containing that definition. It works whether `foo` is a class, module, or method. You can use it to view method definitions:
+```pry(#<ProfilesController>)> $ profile.get_url
+
+From: /Users/jrosenda/Documents/code/reputedly/app/concerns/assets.rb @ line 30:
+Owner: Assets
+Visibility: private
+Number of lines: 3
+
+def get_url(url, is_profile = true)
+  [configatron.asset_host_url, get_path(url, is_profile)].join
+end
+```
+
+It can be used to peek into gems:
+```pry(#<ProfilesController>)> $ REDIS.flushdb
+
+From: /Users/jrosenda/.rvm/gems/ruby-2.1.8@rails31/gems/redis-3.1.0/lib/redis.rb @ line 174:
+Owner: Redis
+Visibility: public
+Number of lines: 5
+
+def flushdb
+  synchronize do |client|
+    client.call([:flushdb])
+  end
+end
+```
+And god help us all, it will also list all monkeypatches if you give it the `-a` flag. For a true horror show try loading up Reputedly and do a `$ -a String`: there are 30 monkeypatches for that class when Rails first loads and at least seven more can get loaded under some circumstances.
+
+
+
+* Ruby emacs env
+
+looks like Howard Abrams has a [[https://github.com/howardabrams/dot-files/blob/master/emacs-ruby.org][well laid out ruby setup]]
+
+the ssh tunnel Cole recommended  [[https://www.opoet.com/pyro/][Secure Pipes]] to solve bastion host timeouts
