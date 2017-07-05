@@ -385,10 +385,11 @@ Outside of tables, these bindings may have other functionality.
 
 ** Org mode bindings
 
-| key       | description                                  |
-|-----------+----------------------------------------------|
-| C-c %     | Push the current position onto the mark ring |
-| C-c C-v d | demarcate a block (select region first)      |
+| key         | description                                  |
+|-------------+----------------------------------------------|
+| C-c %       | Push the current position onto the mark ring |
+| C-c C-v d   | demarcate a block (select region first)      |
+| C-c C-x C-s | move subtree to archive file                 |
 
 
 ** Agenda view bindings
@@ -398,3 +399,30 @@ Outside of tables, these bindings may have other functionality.
 | t      | move a task through its states |
 | z      | add a note to a task           |
 | a or $ | archive done tasks             |
+
+** Company bindings
+
+*** While completing
+
+| key         | description                  |
+|-------------+------------------------------|
+| M-n/p       | next/prev in completion list |
+| C-s C-r C-o | search in completions        |
+| M-(digit)   | pick the nth item in list    |
+
+*** When a completion is selected
+
+| key  | description                  |
+|------+------------------------------|
+| <f1> | display docs                 |
+| C-w  | see source of completed item |
+
+** projectile bindings
+
+bbatsov's [[https://github.com/bbatsov/projectile/blob/master/doc/usage.md#interactive-commands][key bindings table]]
+
+| key       | description             |
+|-----------+-------------------------|
+| C-c p f   | list files in project   |
+| C-c p s s | grep project for string |
+| C-c p k   | kill project buffers    |
