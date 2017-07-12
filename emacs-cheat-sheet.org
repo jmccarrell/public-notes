@@ -101,7 +101,7 @@ when active, the region-rectangle is highlighted and can be shrunk/grown.  the s
 | C-c -              | turn (head)line into item, cycle item type |
 | C-c *              | turn item/line into headline               |
 | M-LEFT/RIGHT       | promote/demote heading                     |
-| M-S-LEFT/RIGHT     | promote/demote current subtree             |
+| C-c C-</C->        | promote / demote sub tree                  |
 | M-S-UP/DOWN        | move subtree/list item up/down             |
 | C-c ^              | sort subtree/region/plain-list             |
 | C-c C-x c          | clone a subtree                            |
