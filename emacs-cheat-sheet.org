@@ -371,6 +371,39 @@ Outside of tables, these bindings may have other functionality.
 | C-c a C     | configure custom commands [1]             |
 | C-c C-o     | agenda for date at cursor                 |
 
+
+* Register key bindings
+
+recall registers are named: [a-z][A-Z][0-9], denoted as R in the keybindings
+
+| key                     | description                                                         |
+|-------------------------+---------------------------------------------------------------------|
+| C-x r <SPC> R           | record position of point and the current buffer in R                |
+| C-x r j R               | jump to the position and buffer saved in R                          |
+|-------------------------+---------------------------------------------------------------------|
+| C-x r s R               | copy region into R                                                  |
+| C-u C-x r s R           | copy region into R; then delete it from buffer                      |
+| C-x r i R               | insert text from region R                                           |
+| M-x append-to-register  | append region to text in register R; with prefix delete from buffer |
+| M-x prepend-to-register | prepend                                                             |
+|-------------------------+---------------------------------------------------------------------|
+| C-x r r R               | copy region into register                                           |
+| C-x r i R               | insert rectangle                                                    |
+|-------------------------+---------------------------------------------------------------------|
+| C-x r w R               | save the state of selected frames windows to R                      |
+| C-x r f R               | save the state of all frames                                        |
+| C-x r j R               | restore window or frame positions; same as position                 |
+|-------------------------+---------------------------------------------------------------------|
+| C-x r n R               | store 0 in register                                                 |
+| C-u NUMBER C-x r n R    | store NUMBER in register                                            |
+| C-x r + R               | increment by 1                                                      |
+| C-u NUMBER C-x r + R    | if R contains a number, increment by NUMBER                         |
+| C-x r i R               | insert the number                                                   |
+|-------------------------+---------------------------------------------------------------------|
+| C-x C-k x R             | store last keyboard macro in register                               |
+| C-x r j R               | execute the keyboard macro                                          |
+
+
 * Jeffs Frequently Used Bindings
 
 ** Global bindings
