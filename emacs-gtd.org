@@ -1,0 +1,8 @@
+#+TITLE: How Jeff uses emacs org to get things done
+
+* Tagging and organizing
+
+I use a lot of tags.
+
+GTD contexts are represented as tags with the =@= prefix, following [[https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html#tags][this guy]].
+My contexts:  @home, @office, @train, @phone, @email, @errands
