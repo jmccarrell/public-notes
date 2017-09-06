@@ -382,3 +382,28 @@ Enter password:
 **Wed Apr 19 12:42:21 PDT 2017**
 
 - after I moved back to mysql, I restored `--login-path`.
+
+**Thu Aug 31 08:19:19 PDT 2017**
+
+## mysql copy table as CTAS
+
+using LIKE will copy indices, but not foreign keys
+
+```sql
+create [temporary] table like 
+```
+
+with AS SELECT, you just get structure and data, no indices
+
+
+- here is a reasonable article about the [use of temp tables as caches](http://www.databasejournal.com/features/mysql/article.php/3844811/Make-Your-MySQL-Queries-More-Efficient-with-Temporary-Tables.htm)
+
+## Rick James mysql hints
+
+this guy Rick James ([him on dba stackexchange](https://dba.stackexchange.com/users/1876/rick-james)) has put together a set of mysql notes that are quite helpful.
+
+[MySQL docs by Rick James](http://mysql.rjweb.org/)
+
+I found his [Ricks Rules of Thumb](http://mysql.rjweb.org/doc.php/ricksrots) particularly helpful
+
+and there is a lot more there.
