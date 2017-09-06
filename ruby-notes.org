@@ -1,6 +1,7 @@
 * Jeffs Ruby Notes.
 
 identifiers that begin with Capital letters are constants
+but strings are mutable, so constants are a convention, not a mechanism.
 
 prefer snake_case
 
@@ -24,7 +25,7 @@ prefer snake_case
 `shell-cmd`
 
 implemented as the Kernel.` method, so
-files = Kernel.`('ls');
+files = Kernel.`('ls')`;
 
 ** strings
 
@@ -234,7 +235,6 @@ def flushdb
 end
 ```
 And god help us all, it will also list all monkeypatches if you give it the `-a` flag. For a true horror show try loading up Reputedly and do a `$ -a String`: there are 30 monkeypatches for that class when Rails first loads and at least seven more can get loaded under some circumstances.
-
 
 
 * Ruby emacs env
