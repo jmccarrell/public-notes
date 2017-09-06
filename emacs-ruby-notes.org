@@ -1,0 +1,37 @@
+TITLE: Jeffs notes on felicity between emacs and ruby
+
+* Resources
+
+- [[https://lorefnon.me/2014/02/02/configuring-emacs-for-rails.html][Configuring Emacs as a productive development environment for Rails development]]
+- [[https://github.com/JoshCheek/seeing_is_believing][Seeing is Believing]]
+  - the [[https://github.com/jcinnamond/seeing-is-believing][emacs minor mode for SiB]]
+- Horace Williams' Getting started with Emacs for Ruby
+  - [[http://webcache.googleusercontent.com/search?q%3Dcache:5070HNNw-dcJ:worace.works/2016/06/07/getting-started-with-emacs-for-ruby/%2B&cd%3D1&hl%3Den&ct%3Dclnk&gl%3Dus][google cached version]]
+
+* rbenv
+
+clearly I want rbenv support in my emacs, since that is what we use at entelo.
+
+the package is rbenv; not updated since 2014.  ouch.
+
+I set it up just like the package author uses it.
+
+
+* seeing is believing
+
+- choose not to deploy this
+- seems like a kiddy thing, not used for real work
+
+* robe
+- what does howard do?
+
+Ouch:
+
+  However, it seldom works with any of the Ruby code that I use, so I
+  currently have it turned off.
+
+however, [[https://github.com/dgutov/robe][robe is actively maintained]] and seems worth a shot, since I really want the ability to navigate to the defn of the thing at point.
+
+here is the [[https://github.com/dgutov/robe#features][list of features]]
+
+* projectile-rails

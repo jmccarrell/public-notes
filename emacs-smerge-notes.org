@@ -1,0 +1,28 @@
+
+`smerge-mode' Minor Mode Bindings Starting With C-c ^:
+key             binding
+---             -------
+
+C-c ^ RET       smerge-keep-current
+C-c ^ =         Prefix Command
+C-c ^ C         smerge-combine-with-next
+C-c ^ E         smerge-ediff
+C-c ^ R         smerge-refine
+C-c ^ a         smerge-keep-all
+C-c ^ b         smerge-keep-base
+C-c ^ m         smerge-keep-mine
+C-c ^ n         smerge-next
+C-c ^ o         smerge-keep-other
+C-c ^ p         smerge-prev
+C-c ^ r         smerge-resolve
+
+C-c ^ = <       smerge-diff-base-mine
+C-c ^ = =       smerge-diff-mine-other
+C-c ^ = >       smerge-diff-base-other
+
+
+Global Bindings Starting With C-c ^:
+key             binding
+---             -------
+
+
