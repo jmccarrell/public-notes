@@ -1,0 +1,67 @@
+#+TITLE: Jeffs notes on org mode
+
+org supports a separate mark ring for navigating.
+the commands are:
+
+‘C-c %     (org-mark-ring-push)’
+Push the current position onto the mark ring
+
+‘C-c &     (org-mark-ring-goto)’
+Jump back to a recorded position.
+
+NB: [[info:org#Using%20links%20outside%20Org][Info: Using links outside Org]]
+
+this claims that org links can be used in any emacs buffer by setting up some global bindings.
+Do I have those global bindings set up?
+
+org links look particularly powerful, with <<target>> and search options.
+
+** Todos
+
+Looks quite useful for the big picture work.
+also looking quite useful:
+
+‘C-c / t     (org-show-todo-tree)’
+
+     View TODO items in a _sparse tree_ (*note Sparse trees::). Folds the entire buffer, but shows all TODO
+     items (with not-DONE state) and the headings hierarchy above them. With a prefix argument (or by using
+     ‘C-c / T’), search for a specific TODO. You will be prompted for the keyword, and you can also give a
+     list of keywords like ‘KWD1|KWD2|...’ to list entries that match any one of these keywords. With a
+     numeric prefix argument N, show the tree for the Nth keyword in the option ‘org-todo-keywords’. With
+     two prefix arguments, find all TODO states, both un-done and done.
+
+‘C-c a t     (org-todo-list)’
+
+     Show the global TODO list. Collects the TODO items (with not-DONE states) from all agenda files (*note
+Agenda Views::) into a single buffer. The new buffer will be in ‘agenda-mode’, which provides commands to
+examine and manipulate the TODO entries from the new buffer (*note Agenda commands::). *Note Global TODO
+list::, for more information.
+
+** TODO learn how to write a definition list in org mode.  Apply that these key bindings commands here in this buffer.
+
+To make sure you are using the correct keyword, type ‘#+’ into the buffer and then use ‘M-<TAB>’ completion.
+
+   In the timeline (*note Timeline::) and in the agenda (*note
+Weekly/daily agenda::), you can then use the ‘l’ key to display the TODO
+items with a ‘CLOSED’ timestamp on each day, giving you an overview of
+what has been done.
+
+How do I convert checkboxes to subtrees and back again?
+A:
+
+‘C-c *’
+     Turn a plain list item into a headline (so that it becomes a
+     subheading at its location).  *Note Structure editing::, for a
+     detailed explanation.
+‘C-c C-*’
+     Turn the whole plain list into a subtree of the current heading.
+     Checkboxes (*note Checkboxes::) will become TODO (resp.  DONE)
+     keywords when unchecked (resp.  checked).
+
+* Refiling
+
+the default command is C-c C-w (org-refile)
+The default targets are all of the level 1 headlines in the current buffer.
+
+C-u C-c C-w
+will use the org heading interface to jump to an entry.
