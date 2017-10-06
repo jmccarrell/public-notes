@@ -1,0 +1,3 @@
+#+TITLE Jeffs Notes on _[[http://ruby-doc.com/docs/ProgrammingRuby/html/index.html][Pragmatic Programmers Guide: Ruby]]_
+
+[[http://ruby-doc.com/docs/ProgrammingRuby/html/index.html][Pragmatic Programmers Guide: Ruby]]
