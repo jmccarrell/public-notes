@@ -872,3 +872,14 @@ git log -p ./app/.../whatever.rb
 Alex Deeb added:
 
 One command I like to use to see the names of all files changed in a particular commit: `git diff-tree --no-commit-id --name-only -r {commit_sha}`u
+
+----
+
+[git scm blog on reset](https://git-scm.com/blog/2011/07/11/reset.html)
+
+nicely identifies the 3 git trees:
+
+Tree Roles
+The HEAD	last commit snapshot, next parent
+The Index	proposed next commit snapshot
+The Working Directory	sandbox
