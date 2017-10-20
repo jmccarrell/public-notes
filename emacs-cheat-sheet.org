@@ -404,6 +404,14 @@ recall registers are named: [a-z][A-Z][0-9], denoted as R in the keybindings
 | C-x r j R               | execute the keyboard macro                                          |
 
 
+* Bookmark key bindings
+
+| key binding | description              |
+|-------------+--------------------------|
+| C-x r l     | list available bookmarks |
+| C-x r m     | set a bookmark           |
+| C-x r b     | jump to a bookmark       |
+
 * Jeffs Frequently Used Bindings
 
 ** Global bindings
