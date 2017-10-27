@@ -1,0 +1,20 @@
+* How to delete a set of rows
+
+recall that mysql cannot update or delete to a table named in a subquery
+
+so you have to do the join, like this:
+
+#+name: delete-long-191-rows
+#+comment: against utf8
+#+header: :engine mysql
+#+header: :cmdline --login-path=utf8 entelo_production
+#+begin_src sql
+delete a1 from ats_imports a1
+inner join
+ (
+  select id
+    from ats_imports
+   where length(work_email) > 191
+ ) a_191
+where a_191.id = a1.id
+#+end_src
