@@ -1,0 +1,55 @@
+* dtrace
+** enabling dtrace OS X
+how to overcome OS X System Integrity Protection to [[https://apple.stackexchange.com/questions/208762/now-that-el-capitan-is-rootless-is-there-any-way-to-get-dtrace-working/208763#208763][enable dtrace]]
+
+** learn dtrace by example
+*** [[http://www.brendangregg.com/dtrace.html][Dtrace tools]]
+the main site to explore and learn; from (one of?) the dtrace authors?
+*** [[https://8thlight.com/blog/colin-jones/2015/11/06/dtrace-even-better-than-strace-for-osx.html][DTrace: {even better than} strace for OS X]]
+just an Ok page, has some 'convert strace to dtrace' kind of stuff.
+not that great.
+*** [[https://8thlight.com/blog/colin-jones/2017/02/02/dtrace-gotchas-on-osx.html][A few DTrace gotchas and workarounds on OS X]]
+shows the limitations of trying to run anything that uses anything from an apple system protected directory,
+ie: /usr/bin/env
+
+** dtrace results
+Ok, I was able to enable drace; iotop worked for me.
+
+#+begin_src sh
+❯ csrutil status
+System Integrity Protection status: enabled (Custom Configuration).
+
+Configuration:
+	Apple Internal: disabled
+	Kext Signing: enabled
+	Filesystem Protections: enabled
+	Debugging Restrictions: enabled
+	DTrace Restrictions: disabled
+	NVRAM Protections: enabled
+	BaseSystem Verification: enabled
+
+This is an unsupported configuration, likely to break in the future and leave your machine in an unknown state.
+#+end_src
+
+** dtrace mysql client to find which .cnf files are loaded
+the simplest case:
+
+#+begin_src sh
+❯ sudo dtruss mysql --login-path=local
+#+end_src
+
+which dumped out the below, which answered my questions.
+
+#+begin_src sh
+stat64("/etc/my.cnf\0", 0x7FFF52E2DC00, 0x7FFF52E3186C)		 = -1 Err#2
+stat64("/etc/mysql/my.cnf\0", 0x7FFF52E2DC00, 0x7FFF52E3186C)		 = -1 Err#2
+stat64("/usr/local/etc/my.cnf\0", 0x7FFF52E2DC00, 0x7FFF52E3186C)		 = 0 0
+open_nocancel("/usr/local/etc/my.cnf\0", 0x0, 0x1B6)		 = 3 0
+fstat64(0x3, 0x7FFF52E2CA98, 0x1B6)		 = 0 0
+read_nocancel(0x3, "# use 4 byte unicode everywhere.\n[client]\ndefault-character-set = utf8mb4\n\n[mysql]\ndefault-character-set = utf8mb4\n\n[mysqld]\ncharacter-set-client-handshake = FALSE\ncharacter-set-server = utf8mb4\ncollation-server = utf8mb4_unicode_ci\n# Only allow connection", 0x1000)		 = 299 0
+read_nocancel(0x3, "\0", 0x1000)		 = 0 0
+close_nocancel(0x3)		 = 0 0
+stat64("/Users/jeff/.my.cnf\0", 0x7FFF52E2DC00, 0x1000)		 = -1 Err#2
+stat64("/Users/jeff/.mylogin.cnf\0", 0x7FFF52E2DC00, 0x1000)		 = 0 0
+open_nocancel("/Users/jeff/.mylogin.cnf\0", 0x0, 0x1B6)		 = 3 0
+#+end_src
