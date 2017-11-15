@@ -432,6 +432,22 @@ recall registers are named: [a-z][A-Z][0-9], denoted as R in the keybindings
 | C-c C-v d   | demarcate a block (select region first)      |
 | C-c C-x C-s | move subtree to archive file                 |
 
+** Register, Bookmark & Mark bindings
+
+| key binding | description                                  |
+|-------------+----------------------------------------------|
+| C-x r l     | list available bookmarks                     |
+| C-x r m     | set a bookmark                               |
+| C-x r b     | jump to a bookmark                           |
+|-------------+----------------------------------------------|
+| C-x r s     | store region in register                     |
+| C-x r i     | insert contents of register                  |
+| C-x r SPC   | store point in register                      |
+| C-x r j     | jump to register                             |
+|-------------+----------------------------------------------|
+| C-SPC       | set the mark                                 |
+| C-u C-SPC   | jump to mark; repeat to go back in mark ring |
+
 
 ** Agenda view bindings
 

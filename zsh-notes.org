@@ -134,3 +134,108 @@ cdpath=(  )
 manpath=(  )
 #+end_src
 
+* zsh users guide notes
+
+prefer ~[[~ over ~[~ in all cases.
+the zsh manual calls this a "compound command"
+it is a ksh-era improvement over some of the issues with ~[~, ie
+
+- string expansions need not be guarded for the empty string, ie
+
+#+begin_src sh
+[ "${var}X" == "somestringX" ]
+#+end_src
+
+is not needed.
+
+** prefer ~print --~
+
+recommended idiom: pass -- after every print so print will work even if the text begins with ~-~.
+this saves grief when the printed text may look like an option to be parsed.
+ie, prefer:
+
+#+begin_src sh
+print -- ${msg}
+#+end_src
+
+over
+
+#+begin_src sh
+print ${msg}
+#+end_src
+
+** SH_WORD_SPLIT
+
+by default, zsh will not split the expansion of a multi word parameter on spaces as sh does
+because it treats it as an array
+but this shows that there are other places where expansion happens
+
+to split an arg by spaces, use ~${=foo}~
+
+#+begin_src sh :results output verbatim
+zsh -s <<'eos'
+function show_args() {
+  echo num args: $#
+  echo $@
+}
+foo=(every good boy does fine)
+show_args $foo
+show_args "$foo"
+show_args ${foo[3]} $foo[5]
+eos
+#+end_src
+
+#+RESULTS:
+: num args: 5
+: every good boy does fine
+: num args: 1
+: every good boy does fine
+: num args: 2
+: boy fine
+
+** things to check out
+
+zargs: a version of xargs that makes the find command redundant
+zmv: a command for renaming files by means of shell patterns
+
+** coprocesses
+
+- [[https://www.zsh.org/mla/users/2011/msg00095.html][tutorial of sorts]]
+
+** redirection
+
+if the word behind a redirection symbol (eg ~<~) expands to multiple words, each of them is treated as a file and they are opened one by one to provide the input
+
+#+begin_src sh :results output replace
+zsh -s <<'eos'
+echo every >! /tmp/one; echo good >! /tmp/two; files=(/tmp/{one,two}); cat -n <${files}; rm ${files};
+eos
+#+end_src
+
+#+RESULTS:
+:      1	every
+:      2	good
+
+the same effect can be had when multios are in effect without the use of an array:
+
+#+begin_src sh :results output replace
+zsh -s <<'eos'
+setopt MULTIOS
+echo every >! /tmp/one; echo good >! /tmp/two; cat -n < /tmp/one < /tmp/two; rm /tmp/{one,two};
+eos
+#+end_src
+
+#+RESULTS:
+:      1	every
+:      2	good
+
+*** here string
+
+~<<< word~
+
+#+BEGIN_QUOTE
+Perform shell expansion on word and pass the result to standard input. This is known as a here-string.
+Compare the use of word in here-documents above, where word does not undergo shell expansion
+#+END_QUOTE
+
+#+STARTUP: showall
