@@ -134,7 +134,7 @@ cdpath=(  )
 manpath=(  )
 #+end_src
 
-* zsh users guide notes
+* zsh users guide notes / zsh dash info pages notes
 
 prefer ~[[~ over ~[~ in all cases.
 the zsh manual calls this a "compound command"
@@ -239,3 +239,35 @@ Compare the use of word in here-documents above, where word does not undergo she
 #+END_QUOTE
 
 #+STARTUP: showall
+
+** arithmetic operations
+
+zsh can natively show thousands, millions separators -- like my commify -- using an output base specifier. eg
+
+#+BEGIN_SRC sh :results output replace
+zsh <<-'eos'
+print $(( [#_] 178316242 ))
+eos
+#+END_SRC
+
+#+RESULTS:
+: 178_316_242
+
+this, of course, works with all of the bases (2 - 36) that zsh supports
+
+#+BEGIN_SRC sh :results output replace
+zsh <<-'eos'
+setopt cbases
+print $(( [#16_4] 65536 ** 2 ))
+eos
+#+END_SRC
+
+#+RESULTS:
+: 0x1_0000_0000
+
+> An arithmetic expression uses nearly the same syntax and associativity of expressions as in C.
+
+in particular ~++~, ~--~ and all the bitwise operators are supported.
+the ternary operator is supported, as well as the comma operator.
+
+> the operators ~&&~, ~||~, ~&&=~ and ~||=~ are short circuiting, and only one of the two of the latter expressions in a ternary operator is evaluated.
