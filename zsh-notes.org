@@ -1,4 +1,5 @@
 #+TITLE: Jeffs notes on zsh
+#+STARTUP: showall
 
 * Interesting snippets / idioms
 
@@ -238,7 +239,56 @@ Perform shell expansion on word and pass the result to standard input. This is k
 Compare the use of word in here-documents above, where word does not undergo shell expansion
 #+END_QUOTE
 
-#+STARTUP: showall
+*** redirecting stdout and stderr
+
+well, it would be nice to record the outputs here in org-mode, but the way org-mode executes the shell,
+[[http://kitchingroup.cheme.cmu.edu/blog/2015/01/04/Redirecting-stderr-in-org-mode-shell-blocks/][it discards stderr]], apparently by design.
+
+so these experiments are best done at the shell itself.
+
+#+BEGIN_SRC sh :results output replace
+zsh -s <<-'eos'
+{
+   print "stdout foo" >&1;
+   print "stderr foo" >&2; 
+}
+eos
+#+END_SRC
+
+gives
+
+#+BEGIN_EXAMPLE
+stderr foo
+stdout foo
+#+END_EXAMPLE
+
+we can redirect these separately:
+
+#+BEGIN_SRC sh
+{ print "stderr foo" >&2; print "stdout foo" >&1; } > /dev/null;
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+stderr foo
+#+END_EXAMPLE
+
+#+BEGIN_SRC sh
+{ print "stderr foo" >&2; print "stdout foo" >&1; } 2> /dev/null;
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+stdout foo
+#+END_EXAMPLE
+
+or both together:
+
+#+BEGIN_SRC sh
+{ print "stderr foo" >&2; print "stdout foo" >&1; } |& > /dev/null;
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+<empty; no output>
+#+END_EXAMPLE
 
 ** arithmetic operations
 
@@ -264,6 +314,18 @@ eos
 
 #+RESULTS:
 : 0x1_0000_0000
+
+or with commas
+
+#+BEGIN_SRC sh :results output replace
+zsh <<-'eos'
+print $(( [#,] 178316242 ))
+eos
+#+END_SRC
+
+#+RESULTS:
+: 178_316_242
+
 
 > An arithmetic expression uses nearly the same syntax and associativity of expressions as in C.
 
