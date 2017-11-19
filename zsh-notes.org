@@ -319,13 +319,12 @@ or with commas
 
 #+BEGIN_SRC sh :results output replace
 zsh <<-'eos'
-print $(( [#,] 178316242 ))
+print $(( [#_] 178316242 ))
 eos
 #+END_SRC
 
 #+RESULTS:
 : 178_316_242
-
 
 > An arithmetic expression uses nearly the same syntax and associativity of expressions as in C.
 
@@ -333,3 +332,41 @@ in particular ~++~, ~--~ and all the bitwise operators are supported.
 the ternary operator is supported, as well as the comma operator.
 
 > the operators ~&&~, ~||~, ~&&=~ and ~||=~ are short circuiting, and only one of the two of the latter expressions in a ternary operator is evaluated.
+** string manipulation
+*** reverse a string
+#+BEGIN_SRC sh :results output
+zsh <<-'eos'
+function rev () {
+    declare -a out
+    while (( $# > 0 )); do
+        s=$1; shift
+        # split $1 on character boundaries
+        declare -a source=(${(ps..)s})
+        declare -a result=()
+        while (( $#source > 0 )); do
+            result+=($source[-1])
+            shift -p source
+        done;
+        # join the result array back down to a string
+        r=${(j::)result}
+        out+=($r)
+    done
+    print $out
+    return 0
+}
+
+function show_rev() {
+    print "$#:" $@
+    print '>>' $(rev $@)
+}
+declare -a egbdf=(every good boy does fine)
+show_rev $egbdf
+show_rev "$egbdf"
+eos
+#+END_SRC
+
+#+RESULTS:
+: 5: every good boy does fine
+: >> yreve doog yob seod enif
+: 1: every good boy does fine
+: >> enif seod yob doog yreve
