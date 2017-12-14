@@ -1,0 +1,2 @@
+egrep has word bound operators: \< and \>.  eg
+$ egrep '\<the\>' journal.org

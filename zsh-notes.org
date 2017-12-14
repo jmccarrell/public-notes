@@ -250,7 +250,7 @@ so these experiments are best done at the shell itself.
 zsh -s <<-'eos'
 {
    print "stdout foo" >&1;
-   print "stderr foo" >&2; 
+   print "stderr foo" >&2;
 }
 eos
 #+END_SRC
@@ -332,24 +332,28 @@ in particular ~++~, ~--~ and all the bitwise operators are supported.
 the ternary operator is supported, as well as the comma operator.
 
 > the operators ~&&~, ~||~, ~&&=~ and ~||=~ are short circuiting, and only one of the two of the latter expressions in a ternary operator is evaluated.
+** functions
+to see the names of all declared functions: ~functions +~
+to see names and function bodies: ~functions~
 ** string manipulation
 *** reverse a string
 #+BEGIN_SRC sh :results output
 zsh <<-'eos'
+#!/usr/bin/env zsh
+
 function rev () {
     declare -a out
     while (( $# > 0 )); do
-        s=$1; shift
         # split $1 on character boundaries
-        declare -a source=(${(ps..)s})
+        declare -a source=(${(ps..)1})
+        shift
         declare -a result=()
         while (( $#source > 0 )); do
             result+=($source[-1])
             shift -p source
         done;
         # join the result array back down to a string
-        r=${(j::)result}
-        out+=($r)
+        out+=(${(j::)result})
     done
     print $out
     return 0
@@ -362,14 +366,26 @@ function show_rev() {
 declare -a egbdf=(every good boy does fine)
 show_rev $egbdf
 show_rev "$egbdf"
+declare -a racing_emoji=(racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇)
+show_rev $racing_emoji
+show_rev "$racing_emoji"
+# the empty string
+show_rev
 eos
 #+END_SRC
 
-#+RESULTS:
-: 5: every good boy does fine
-: >> yreve doog yob seod enif
-: 1: every good boy does fine
-: >> enif seod yob doog yreve
+#+begin_example
+5: every good boy does fine
+>> yreve doog yob seod enif
+1: every good boy does fine
+>> enif seod yob doog yreve
+3: racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇
+>> 🏎_rac_gnicar 🏍_elcycrotom_gnicar 🏇_gnicar_esroh
+1: racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇
+>> 🏇_gnicar_esroh 🏍_elcycrotom_gnicar 🏎_rac_gnicar
+0:
+>>
+#+end_example
 
 * idiom to recursively list all files, including hidden files
 
