@@ -370,3 +370,7 @@ eos
 : >> yreve doog yob seod enif
 : 1: every good boy does fine
 : >> enif seod yob doog yreve
+
+* idiom to recursively list all files, including hidden files
+
+> ( setopt globdots; print -l **/*(.) )
