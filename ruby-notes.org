@@ -242,3 +242,17 @@ And god help us all, it will also list all monkeypatches if you give it the `-a`
 looks like Howard Abrams has a [[https://github.com/howardabrams/dot-files/blob/master/emacs-ruby.org][well laid out ruby setup]]
 
 the ssh tunnel Cole recommended  [[https://www.opoet.com/pyro/][Secure Pipes]] to solve bastion host timeouts
+
+* rbenv vs rvm
+I prefer rbenv.
+
+jmon said:
+#+BEGIN_QUOTE
+rvm is bloated
+they have this concept of “gemsets” where it installs gems for each project in a different place
+but that’s what bundler is for…
+it installs the versions needed for your project
+it’s ok… projects know how to share gems if they happen to use the same versions
+i don’t need 5 of the same thing installed on my machine at once
+i used to use rvm for a long time and had all kinds of issues that were complicated to solve. and then i switched and never had a problem again.
+#+END_QUOTE
