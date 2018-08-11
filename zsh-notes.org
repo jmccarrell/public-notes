@@ -390,3 +390,151 @@ eos
 * idiom to recursively list all files, including hidden files
 
 > ( setopt globdots; print -l **/*(.) )
+
+* example parse mysql output: write to slack
+#+BEGIN_SRC zsh
+#!/usr/bin/env zsh
+# set -e # exit on any error
+# set -x # echo every command
+
+## Exit unless we have all the env vars we need to operate.
+##
+[ -z "${MYSQL_HOST}" ] && echo 'MYSQL_HOST not set -- set it and retry.' && exit 10
+echo " - MYSQL_HOST: ${MYSQL_HOST}"
+
+[ -z "${MYSQL_TCP_PORT}" ] && echo 'MYSQL_TCP_PORT not set -- set it and retry.' && exit 11
+echo " - MYSQL_TCP_PORT: ${MYSQL_TCP_PORT}"
+
+[ -z "${MYSQL_DATABASE}" ] && echo 'MYSQL_DATABASE not set -- set it and retry.' && exit 12
+echo " - MYSQL_DATABASE: ${MYSQL_DATABASE}"
+
+[ -z "${MYSQL_USER}" ] && echo 'MYSQL_USER not set -- set it and retry.' && exit 12
+echo " - MYSQL_USER: ${MYSQL_USER}"
+
+# allow for empty passwords in testing.
+if [[ ! -z "${MYSQL_PWD}" ]]; then
+    echo " - MYSQL_PWD: is set, but not shown here"
+fi
+
+[ -z "${SLACK_CHANNEL}" ] && echo 'SLACK_CHANNEL not set -- set it and retry.' && exit 14
+echo " - SLACK_CHANNEL: ${SLACK_CHANNEL}"
+
+[ -z "${CREDIT_THRESHOLD}" ] && echo 'CREDIT_THRESHOLD not set -- set it and retry.' && exit 15
+echo " - CREDIT_THRESHOLD: ${CREDIT_THRESHOLD}"
+
+echo
+
+## Slack config
+##
+# delivers to #dev-core-data-alerts
+#  configured here: https://entelo.slack.com/services/BB7DJJD89
+SLACK_URL="https://hooks.slack.com/services/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"
+SLACK_USERNAME=AlertBot
+
+# return all organizations that are under the alert credit limit to $mysql_out
+#  format is tab delimited
+#  customer_id   current_balance   limit
+#  mysql exit status stored in $msyql_status
+declare -ga mysql_args=()
+declare -gi mysql_status=0
+declare -g  mysql_out=$(mktemp /tmp/credit-lim-out.XXXXXXXX)
+trap "rm -f ${mysql_out};" EXIT
+function under_credit_limit_rows () {
+    gen_mysql_args
+
+    mysql ${mysql_args} >${mysql_out} 2>&1 <<-EOSQL
+set @api_credit_limit=${CREDIT_THRESHOLD};
+select api_cust.org_id
+  , api_credits_balance(api_cust.org_id)
+  , @api_credit_limit
+  from
+  (
+    select 620 as org_id
+    union all
+    select 2403 as org_id
+  ) api_cust
+ where api_credits_balance(api_cust.org_id) <= @api_credit_limit;
+EOSQL
+
+    mysql_status=$?
+}
+
+function gen_mysql_args () {
+    mysql_args=()
+    mysql_args+=(--protocol=TCP)
+    mysql_args+=(--host=${MYSQL_HOST})
+    mysql_args+=(--port=${MYSQL_TCP_PORT})
+    mysql_args+=(--database=${MYSQL_DATABASE})
+    mysql_args+=(--user=${MYSQL_USER})
+    if [[ ! -z "${MYSQL_PWD}" ]]; then
+        mysql_args+=(--password=${MYSQL_PWD})
+    fi
+    mysql_args+=(--batch)
+    mysql_args+=(--silent)
+}
+
+function count_accounts_under_limit () {
+    declare -i n_over=0
+    cat $mysql_out | while read; do (( n_over += 1 )); done
+    print ${n_over}
+}
+
+function notify_slack_curl () {
+    # send a message to a slack channel
+    num_accounts=$1
+
+    declare -a notify_fields=()
+    declare -i org_id balance limit
+    declare balance_comma limit_comma
+    # convert mysql tab separted query results into json of the form:
+    #  { "title": "Org Id", "value": "620", "short": false }
+    #  , { "title": "Org Id", "value": "2403", "short": false }
+    #    ...
+    # the slack integration docs say the json values must be strings, not ints
+    cat $mysql_out | while read org_id balance limit; do
+        notify_fields+='{"title":"Organization Id","value":"'$org_id'","short":false}'
+        balance_comma=$(printf "%'d" $balance)
+        notify_fields+='{"title":"API balance","value":"'$balance_comma'","short":false}'
+        limit_comma=$(printf "%'d" $limit)
+        notify_fields+='{"title":"limit","value":"'$limit_comma'","short":false}'
+    done
+
+    # send the notification
+    # cat <<EOF 1>&2
+    curl -X POST -H 'Content-type: application/json' --fail --silent --data @- $SLACK_URL <<EOF
+{
+  "fallback": "Found ${num_accounts} Data API customers with low credit balances.",
+  "pretext": "Found ${num_accounts} Data API customers with low credit balances.",
+  "username": "AlertBot",
+  "channel": "${SLACK_CHANNEL}",
+  "fields":[
+    ${(j:,:)notify_fields}
+  ]
+}
+EOF
+    print $?
+}
+
+under_credit_limit_rows
+if (( $mysql_status != 0 )); then
+    cat - ${mysql_out} >&2 <<EOF
+mysql query failed; exit status: $mysql_status
+EOF
+    exit 23;
+fi
+
+declare -i num_accounts_under_limit=$(count_accounts_under_limit)
+if (( ${num_accounts_under_limit} == 0 )); then
+    print -- No accounts were found with low Data API credits.
+    exit 0
+fi
+
+print Found ${num_accounts_under_limit} accounts with low Data API credits.
+declare -i curl_exit=$(notify_slack_curl ${num_accounts_under_limit})
+if [[ -z "$curl_exit" ]] || (( ${curl_exit} != 0 )); then
+    print -- Failed to notify slack via curl
+    exit $curl_exit
+fi
+exit 0
+
+#+END_SRC

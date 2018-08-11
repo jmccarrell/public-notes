@@ -1,0 +1,25 @@
+** XPath coding assistants
+the chrome inspector will show XPath to any selected node in the tree
+
+*** Xpath helper
+a chrome extension that also shows the path to any node.
+
+*** [[http://www.xpathtester.com/xpath][XPath tester]]
+input an XML document, then use this interactive tool to show matches.
+
+** writing data
+once you are yield()ing the data, just specify the extension of the file type you want
+
+scrapy crawl quotes -o quotes.csv
+(scrapy-udemy-tutorial) ❯ scrapy crawl quotes -o quotes.xml
+or .json
+
+** other interesting xpath expressions
+*** contains
+#+BEGIN_SRC python
+    rating = response.xpath('//*[contains(@class, "star-rating")]/@class').extract_first()
+#+END_SRC
+*** following-sibling
+#+BEGIN_SRC python
+    description = response.xpath('//*[@id="product_descriprtion"]/following-sibing::p/text()').extract_first()
+#+END_SRC
