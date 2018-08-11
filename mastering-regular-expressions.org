@@ -1,2 +1,42 @@
+referring to egrep on mac os x, where I tested these.
+
 egrep has word bound operators: \< and \>.  eg
 $ egrep '\<the\>' journal.org
+
+egrep has no 'ignore whitespace' option.
+
+egrep does support the interval quantifier; eg
+$ egrep '[en]{3}' journal.org
+matches both need and been
+
+egrep does support backreferences:
+this example finds duplicate words
+$ egrep '\<([A-Za-z]+) +\1\>' *.or
+gives, eg:
+todo.org:try using with with try
+
+matching urls
+this simple approach does ok;
+it fails to match a trailing / on some urls
+$ egrep -i '\<https?://[-a-z0-9_.]+/[-a-z0-9_:@&?=+,.!/~*%$#]*\>' *org
+
+** 24 hour clock matching
+
+#+begin_src bash :results output replace
+egrep '\<((0?|1)[0-9]|2[0-3]):[0-5][0-9]\>' <<-EOF
+-- should match
+every 20:54
+good 12:23
+boy 04:33
+  9:23
+-- should not match
+25:23
+12:72
+EOF
+#+end_src
+
+#+RESULTS:
+: every 20:54
+: good 12:23
+: boy 04:33
+:   9:23
