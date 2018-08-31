@@ -236,7 +236,58 @@ end
 ```
 And god help us all, it will also list all monkeypatches if you give it the `-a` flag. For a true horror show try loading up Reputedly and do a `$ -a String`: there are 30 monkeypatches for that class when Rails first loads and at least seven more can get loaded under some circumstances.
 
+* hash with default value notes from Jason Rosendale
+Ruby’s `Hash.new` method takes an optional block that controls what happens when you access a non-existent key. I’ve only known about it since yesterday (YIL) but I’m finding uses for it everywhere.
 
+*Example 1*: Using a hash like a memoizable method
+```results = Hash.new { |h, k| h[k] = some_expensive_method(k) }```
+The first time you try to access `results[n]` it will call the block, calculate `some_expensive_method(n)`, *store the result in the hash*, and then return that result. The next time you call `results[n]` it will immediately return the result. Example:
+
+```require 'prime'
+divisors = Hash.new { |h, k| hash[k] = Prime.prime_division(k) }
+divisors[841321872791401] # returns in 2.2 seconds
+divisors[841321872791401] # returns in 0.00002 seconds```
+
+*Example 2*: keeping track of already-seen keys
+
+I’m sure you’ve seen code like this:
+```already_seen = {}
+
+profiles.each do |profile|
+  if already_seen[profile.email]
+    next
+  else
+    already_seen[profile.email] = true
+  end
+  verify_email(profile)
+end```
+We can save a few lines by creating a hash that automatically sets its value after it is accessed for the first time:
+
+```already_seen = Hash.new { |hash, key| hash[key] = true; false }
+profiles.each do |profile|
+  verify_email(profile) unless already_seen[profile.email]
+end```
+The first time you try to access `already_seen[key]` it will execute the block, which sets the value to `true` but returns `false`. The next time you call `already_seen[key]` it will return the stored value of `true`.
+
+
+*Example 3*
+We have a lot of code that establishes default values for hashes by having a bajillion lines like
+```location = params['location'] || nil
+email    = params['email']    || "unknown"
+seen_at  = params['seen_at']  || Date.today
+...```
+
+and these are often repeated in each place that the hash is accessed. An alternative would be to define a `default_value_for(key)` method that contains a case statement and then create the hash like
+```hash_with_custom_defaults = Hash.new { |hash, key| hash[key] = default_value_for(key) }```
+
+*Example 4*
+Lazy hash duplication! Instead of copying every key/value from the old hash, copy individual key/value pairs at the time that they’re first accessed.
+```old_hash = {a: 1, b: { x: 10, y: 20 } }
+subhash = Hash.new { |hash, key| hash[key] = old_hash[key] }
+
+subhash         # => {}
+subhash[:b][:x] # => 10
+subhash         # => {:b => {:x=>10, :y=>20}}```
 * Ruby emacs env
 
 looks like Howard Abrams has a [[https://github.com/howardabrams/dot-files/blob/master/emacs-ruby.org][well laid out ruby setup]]
