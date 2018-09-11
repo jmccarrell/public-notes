@@ -1,6 +1,7 @@
 * helm-kill-selection-and-quit
 super useful to copy the helm mini buffer to the kill ring, as in selecting a file where I want to copy that path.
 bound to C-c C-k.
+found [[https://emacs.stackexchange.com/questions/19819/how-can-i-use-helm-file-finder-to-copy-a-file-path-to-a-buffer][on stackexchange]]
 
 without a prefix: C-c C-k I get:
 ~uncompress-datasync.sh~
