@@ -1,3 +1,12 @@
+* helm-kill-selection-and-quit
+super useful to copy the helm mini buffer to the kill ring, as in selecting a file where I want to copy that path.
+bound to C-c C-k.
+
+without a prefix: C-c C-k I get:
+~uncompress-datasync.sh~
+
+with a prefix: C-u C-c C-k, I get:
+~/ssh:10.0.2.8:/home/jeff/ds-ingestion-20180815/uncompress-datasync.sh~
 * No specific help for this source at this time.
 
 It may appear after first results popup in helm buffer.
@@ -328,4 +337,3 @@ C-M-S-v         helm-scroll-other-window-down
 M-r             previous-matching-history-element
 M-s             next-matching-history-element
   (that binding is currently shadowed by another mode)
-
