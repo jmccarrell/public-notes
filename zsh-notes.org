@@ -136,8 +136,7 @@ manpath=(  )
 #+end_src
 
 * zsh users guide notes / zsh dash info pages notes
-
-prefer ~[[~ over ~[~ in all cases.
+** prefer ~[[~ over ~[~ in all cases.
 the zsh manual calls this a "compound command"
 it is a ksh-era improvement over some of the issues with ~[~, ie
 
