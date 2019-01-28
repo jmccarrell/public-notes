@@ -1,0 +1,23 @@
+# Notes on using IntelliJ
+
+## Important commands
+
+| Shift-Cmd-O      | Navigate to File  | Search by filename                                                                   |
+|                  |                   | put a leading / in their to narrow the search to folder names                        |
+| Shift-Shift      | Search everywhere | Tab within results list between Classes, Files, etc.                                 |
+| Shift-Option-F12 | Hide all windows  | Make the editing pane the focus of attention by getting rid of the rest of the stuff |
+| Shift-Cmd-A      | Lookup command    | Lookup a keybinding for a command by name, eg 'rename'                               |
+
+| Option-Up            | Select                 | Context aware                             |
+|                      |                        | select again to select more by context    |
+| Option-Down          | Shrink selection       |                                           |
+| Shift-Option-Up/Down | Move selection up/down | Prefer movement operations over cut/paste |
+| Option-d             | Duplicate a line       |                                           |
+| Option-y             | delete a line          |                                           |
+
+
+## Options I may want to set
+- consider `autoscroll from source` and/or `autoscroll to source` in the project settings to control how the left-hand nav pane is synced with a file in the editor pane.
+  - the author I was reading preferred `autoscroll from source`
+
+- [ ] check out the 'Productivity Guide' under 'Help' to see cooler features and get help on when/how to use them.
