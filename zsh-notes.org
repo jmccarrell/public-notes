@@ -1,6 +1,22 @@
 #+TITLE: Jeffs notes on zsh
 #+STARTUP: showall
 
+* bash array syntax summary
+| syntax          | result                                 |
+|-----------------+----------------------------------------|
+| arr=()          | Create empty array                     |
+| arr=(1 2 3)     | Initialize array                       |
+| ${arr[2]}       | Retrieve third element                 |
+| ${arr[@]}       | Retrieve all elements                  |
+| ${!arr[@]}      | Retrieve array indices                 |
+| ${#arr[@]}      | Calculate array size                   |
+| arr[0]=3        | Overwrite 1st element                  |
+| arr+=(4)        | Append value(s)                        |
+| str=$(ls)       | Save ls output as string               |
+| arr=( $(ls) )   | Save ls output as array of files       |
+| ${arr[@]:s:n}   | Elements at indices n to s+n           |
+| ${str//ab/c}    | For a given string, replace ab with c  |
+| ${arr[@]//ab/c} | For each array item, replace ab with c |
 * Interesting snippets / idioms
 
 use of ? expansion (which is the many expansions is this?) to produce newline separated path:
@@ -39,12 +55,12 @@ EPOCHSECONDS
 
 to see the attributes of a parameter, use +m
 
-#+BEGIN_SRC ZSH
-❯ TYPESET +M PATH
-ARRAY PATH
+#+BEGIN_SRC zsh
+❯ typeset +m path
+array unique tied PATH path
 #+END_SRC
 
-show all the params with a given attribute, like array, or associative array:
+show all the params with a given attribute, like array (+a), or associative array (+A):
 
 #+begin_src zsh
 ❯ declare +m +a
@@ -314,7 +330,7 @@ eos
 #+RESULTS:
 : 0x1_0000_0000
 
-or with commas
+another example:
 
 #+BEGIN_SRC sh :results output replace
 zsh <<-'eos'
