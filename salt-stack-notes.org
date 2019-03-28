@@ -1,0 +1,45 @@
+* Jeffs notes on using Salt
+
+** Targeting nodes
+There are several ways to name which nodes to affect.  As well, these can be combined using a _type_ ~@~ prefix with boolean operators.  Eg:
+#+BEGIN_SRC bash
+salt -C 'G@os:Ubuntu and I@role:web and S@192.168.100.0/24' test.ping
+#+END_SRC
+Note the use of ~-C~ for Compound targeting
+
+Here is the table of type target types and what they affect
+| Prefix | Target type                   |
+|--------+-------------------------------|
+| G      | Grains                        |
+| E      | PCRE over minion id           |
+| P      | PCRE over grains              |
+| L      | explicit comma separated list |
+| I      | Pillar                        |
+| J      | PCR over Pillar               |
+| S      | Subnet / IPv4 CIDR            |
+| R      | SECO range                    |
+
+*** batch size
+Additionally, one can control how many of the matched hosts are operated on at a time using ~--batch-size~, which can be an integer or a %.
+
+Here 10 machines at a time are pinged
+#+BEGIN_SRC bash
+salt '*' -b 10 test.ping
+#+END_SRC
+and here we restart the web servers in a rolling 25% window
+#+BEGIN_SRC bash
+salt -G 'os:RedHat' --batch-size 25% apache.signal restart
+#+END_SRC
+
+*** Nodegroups
+Alternatively, one can configure named sets of nodes in the master config file.  As an example:
+#+BEGIN_SRC yaml
+nodegroups:
+    webdev:  'I@role:web and G:cluster:dev'
+    webqa:   'I@role:web and G:cluster:qa'
+    webprod: 'I@role:web and G:cluster:prod'
+#+END_SRC
+Then use ~-N~ to target these nodes
+#+BEGIN_SRC bash
+salt -N webqa test.ping
+#+END_SRC
