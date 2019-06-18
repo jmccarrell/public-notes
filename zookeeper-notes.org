@@ -1,0 +1,7 @@
+** TODO migrate zookeeper investigation
+  <2019-06-18 Tue>
+
+search `migrate zookeeper data`
+
+- [[https://engineeringblog.yelp.com/2019/01/migrating-kafkas-zookeeper-with-no-downtime.html][yelp blog on migrating zook with no downtime]]
+- [[https://zookeeper.apache.org/doc/r3.4.8/zookeeperOver.html#Implementation][zookeeper overview]]
