@@ -883,3 +883,12 @@ Tree Roles
 The HEAD	last commit snapshot, next parent
 The Index	proposed next commit snapshot
 The Working Directory	sandbox
+
+**Fri Jul  5 16:24:17 PDT 2019 **
+To reset a branch, eg, staging to master, do something like this:
+
+```
+git checkout staging
+git reset --hard master
+git push origin -u staging --force
+```
