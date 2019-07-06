@@ -5,7 +5,7 @@
 | Shift-Cmd-O      | Navigate to File  | Search by filename                                                                   |
 |                  |                   | put a leading / in their to narrow the search to folder names                        |
 | Shift-Shift      | Search everywhere | Tab within results list between Classes, Files, etc.                                 |
-| Shift-Option-F12 | Hide all windows  | Make the editing pane the focus of attention by getting rid of the rest of the stuff |
+| Shift-Cmd-F12    | Hide all windows  | Make the editing pane the focus of attention by getting rid of the rest of the stuff |
 | Shift-Cmd-A      | Lookup command    | Lookup a keybinding for a command by name, eg 'rename'                               |
 
 | Option-Up            | Select                 | Context aware                             |
