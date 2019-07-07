@@ -1,0 +1,10 @@
+* Initial notes while studying pipenv
+** design center of pipenv
+Q: What is the design center of pipenv?  Ie, what role is it meant to fill in the python eco system?
+From the [[https://docs.pipenv.org/en/latest/][top level docs]]:
+#+BEGIN_QUOTE
+Pipenv is primarily meant to provide users and developers of applications with an easy method to setup a working environment
+#+END_QUOTE
+Also cited there are the security vulnerabilities from locking versions in place.  This practice reduces the movement forward in the release cycle.
+** to investigate:
+- use of ~.env~ files
