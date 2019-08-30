@@ -1,0 +1,100 @@
+#+TITLE: Notes on the Emacs Lisp Tutorial
+#+AUTHOR: jeff@mccarrell.org
+
+* Lists
+** the Empty List
+
+   Unlike anything else, an empty list is considered both an atom and a list at the same time. In Lisp,
+   =nil= is used to mean false, and is a synonym for the empty list ='()=
+
+   #+BEGIN_SRC emacs-lisp
+   (listp '())
+   #+END_SRC
+
+   #+RESULTS:
+   : t
+
+   #+BEGIN_SRC elisp
+   (listp 'nil)
+   #+END_SRC
+
+   #+RESULTS:
+   : t
+
+** Besides Lists
+   We have
+     - Variables
+     - Special forms, like
+       - =if=
+     - Macros
+       - =defun=
+       - =when=
+
+** Order of evaluation
+
+   #+BEGIN_QUOTE
+         The final complication is this: if the function that the Lisp
+      interpreter is looking at is not a special form, and if it is part of a
+      list, the Lisp interpreter looks to see whether the list has a list
+      inside of it.  If there is an inner list, the Lisp interpreter first
+      figures out what it should do with the inside list, and then it works on
+      the outside list.  If there is yet another list embedded inside the
+      inner list, it works on that one first, and so on.  It always works on
+      the innermost list first.  The interpreter works on the innermost list
+      first, to evaluate the result of that list.  The result may be used by
+      the enclosing expression.
+
+         Otherwise, the interpreter works left to right, from one expression
+      to the next.
+   #+END_QUOTE
+
+* Variables
+
+  A symbol can have both a function definition and a value associated with it.
+
+  Example =fill-column= as value or variable
+
+  #+BEGIN_SRC emacs-lisp
+  fill-column
+  #+END_SRC
+
+  #+RESULTS:
+  : 108
+
+* Message
+
+  Example of expanding =%s=
+
+  #+BEGIN_SRC elisp
+  (message "The name of this buffer is: %s." (buffer-name))
+  #+END_SRC
+
+  #+RESULTS:
+  : The name of this buffer is: emacs-lisp-tutorial-notes.org.
+
+* =set= and =setq=
+** set
+   rarely used; =setq= is preferred
+
+  #+BEGIN_SRC elisp
+  (set 'flowers '(rose tulip gladiola))
+  #+END_SRC
+
+  #+RESULTS:
+  | rose | tulip | gladiola |
+
+  #+BEGIN_SRC elisp
+  flowers
+  #+END_SRC
+
+  #+RESULTS:
+  | rose | tulip | gladiola |
+
+** setq
+
+   Multiple values can be bound in a single =setq=
+
+   #+BEGIN_SRC elisp
+     (setq fast-bikes (quote ktm)
+           slow-bikes '(bsa))
+   #+END_SRC
