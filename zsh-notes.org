@@ -152,6 +152,12 @@ manpath=(  )
 #+end_src
 
 * zsh users guide notes / zsh dash info pages notes
+** zsh startup sequence
+is well documented in zsh 5 Files
+#+BEGIN_SRC shell
+open dash://zsh:5Files
+#+END_SRC
+
 ** prefer ~[[~ over ~[~ in all cases.
 the zsh manual calls this a "compound command"
 it is a ksh-era improvement over some of the issues with ~[~, ie
@@ -407,7 +413,7 @@ eos
 > ( setopt globdots; print -l **/*(.) )
 
 * example parse mysql output: write to slack
-#+BEGIN_SRC zsh
+#+BEGIN_SRC shell
 #!/usr/bin/env zsh
 # set -e # exit on any error
 # set -x # echo every command
@@ -551,5 +557,4 @@ if [[ -z "$curl_exit" ]] || (( ${curl_exit} != 0 )); then
     exit $curl_exit
 fi
 exit 0
-
 #+END_SRC
