@@ -1,8 +1,0 @@
-John wants 500 names
-
-uniqueness will be by first name, last name and primary phone number.
-
-sorted by frequency and recency.
-
-from a list of zip codes he will send me.
-
