@@ -1,1 +1,0 @@
-../proj/ansible/ansible-notes.md
