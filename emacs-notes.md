@@ -459,7 +459,7 @@ x
 
 ```lisp
 (getenv "PATH")
-"/c/davo/tmp/venvs/auto_filer/bin:/Users/jeff/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/TeX/texbin:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/bin-x86_64-10_9:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/libexec-x86_64-10_9"
+"/tmp/venvs/auto_filer/bin:/Users/jeff/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/X11/bin:/Library/TeX/texbin:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/bin-x86_64-10_9:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/libexec-x86_64-10_9"
 ```
 
 - looks like there is a package [exec-path-from-shell](https://github.com/purcell/exec-path-from-shell) to help with this specific issue.
@@ -478,11 +478,11 @@ x
 - found [pyvenv](https://github.com/jorgenschaefer/pyvenv), available via melpa
 - seems to do just what I want, via `pyvenv-activate`
 
-- M-x pyvenv-activate /c/davo/tmp/venvs/autofiler
+- M-x pyvenv-activate /tmp/venvs/autofiler
 
 ```lisp
 (getenv "PATH")
-"/c/davo/tmp/venvs/auto_filer/bin:/Users/jeff/bin/:/usr/local/bin/:/usr/bin/:/bin/:/usr/sbin/:/sbin/:/opt/X11/bin/:/Library/TeX/texbin/:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/libexec/"
+"/tmp/venvs/auto_filer/bin:/Users/jeff/bin/:/usr/local/bin/:/usr/bin/:/bin/:/usr/sbin/:/sbin/:/opt/X11/bin/:/Library/TeX/texbin/:/opt/homebrew-cask/Caskroom/emacs/24.5-1/Emacs.app/Contents/MacOS/libexec/"
 ```
 
 - does the right thing.  Problem solved.
@@ -1196,7 +1196,7 @@ $ brew cask install emacs
 
 **Sat Mar 11 13:22:47 PST 2017**
 
-- √ Davo work
+- √ work
 - write Peter K linkedin reference
 - write Peter Malutta tax prep email
 - √ update emacs env enough to be productive on vega

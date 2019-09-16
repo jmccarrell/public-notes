@@ -57,7 +57,7 @@ The summary:
 
         vega-> git branch -vv
         * develop 57c7b9c [origin/develop] Add doc_type to ProductLoader interface.  doc_type is now a required parameter.
-          master  672e2fe [origin/master] Merge pull request #107 from witlee/develop
+          master  672e2fe [origin/master] Merge pull request #107 from mccarrell/develop
 
 - n.b. that this information is from the local copy only; to sync up all remotes
   for the completely up to date picture, do something like:
@@ -67,7 +67,7 @@ The summary:
         Fetching upstream
           ...
         * develop 57c7b9c [origin/develop] Add doc_type to ProductLoader interface.  doc_type is now a required parameter.
-          master  672e2fe [origin/master] Merge pull request #107 from witlee/develop
+          master  672e2fe [origin/master] Merge pull request #107 from mccarrell/develop
 
 - deleting remote branchs
     - add the --delete option to git push

@@ -378,9 +378,9 @@ And run some unit tests:
 But I get failures because I don't have a project home, and I don't install the modules
 under development in my virtualenv.
 
-If I try from teh root of the tree (/c/witlee/src), I get:
+If I try from teh root of the tree (/c/mccarrell/src), I get:
 
-        (pldev3) vega-> python3 -m unittest witlee/data/product_loader/tests/test_product_loader.py
+        (pldev3) vega-> python3 -m unittest mccarrell/data/product_loader/tests/test_product_loader.py
           ...
           File "/Users/jeff/.pyenv/versions/3.4.3/lib/python3.4/unittest/loader.py", line 114, in loadTestsFromName
             parent, obj = obj, getattr(obj, part)
@@ -388,30 +388,30 @@ If I try from teh root of the tree (/c/witlee/src), I get:
 
 If I try from down in the test directory, it is worse:
 
-        (pldev3) vega-> pushd witlee/data/product_loader/tests/
-        /c/witlee/src/witlee/data/product_loader/tests /c/witlee/src
+        (pldev3) vega-> pushd mccarrell/data/product_loader/tests/
+        /c/mccarrell/src/mccarrell/data/product_loader/tests /c/mccarrell/src
         (pldev3) vega-> python3 -m unittest test_product_loader.py
           ...
         Traceback (most recent call last):
           File "/Users/jeff/.pyenv/versions/3.4.3/lib/python3.4/unittest/loader.py", line 105, in loadTestsFromName
             module = __import__('.'.join(parts_copy))
-          File "/c/witlee/src/witlee/data/product_loader/tests/test_product_loader.py", line 16, in <module>
-            from witlee.settings import BASE_DIR
-        ImportError: No module named 'witlee'
+          File "/c/mccarrell/src/mccarrell/data/product_loader/tests/test_product_loader.py", line 16, in <module>
+            from mccarrell.settings import BASE_DIR
+        ImportError: No module named 'mccarrell'
 
 So I think the first error is telling me that data has no __init__.py?
 
 but this test worked before on the virtualenvwrapper side when I had a .project:
 
         vega-> cat ~/.virtualenvs/pldev2/.project
-        /c/witlee/src
+        /c/mccarrell/src
 
 So associate the project directory with the virtualenv with `setvirtualproject`, which is
 [defined by virtualenvwrapper](http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html#project-directory-management), and I suppose, re-implemented by pyenv-virtualenvwrapper.
 
-        (pldev3) vega-> cd /c/witlee/src/
+        (pldev3) vega-> cd /c/mccarrell/src/
         (pldev3) vega-> setvirtualenvproject
-        Setting project for pldev3 to /c/witlee/src
+        Setting project for pldev3 to /c/mccarrell/src
 
 Now the unit test should run:
 
@@ -419,7 +419,7 @@ No, same error.
 
 Ok, I want [path management](http://virtualenvwrapper.readthedocs.org/en/latest/command_ref.html#path-management), not rpoject management.
 
-        (pldev3) vega-> add2virtualenv /c/witlee/src
+        (pldev3) vega-> add2virtualenv /c/mccarrell/src
         Traceback (most recent call last):
           File "<string>", line 1, in <module>
         AttributeError: 'module' object has no attribute 'sysconfig'
@@ -836,7 +836,7 @@ with python 3.5 or maybe 3.6, support for the `venv` module is standard.
 so to create a venv I did:
 
 ``` shell
-$ python3 -m venv /c/davo/tmp/venvs/autofiler
-$ source /c/davo/tmp/venvs/autofiler/bin/activate
-(autofiler) jeff at vega in /c/davo/wke on develop
+$ python3 -m venv /tmp/venvs/autofiler
+$ source /tmp/venvs/autofiler/bin/activate
+(autofiler) jeff at vega in /tmp/wke on develop
 ```

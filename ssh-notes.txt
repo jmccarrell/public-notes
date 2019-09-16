@@ -3,7 +3,7 @@ which is affiliated with http://nmap.org/
 
 Here is the command I used to set up a local tunnel to a port-blocked mysql:
 
-ssh -N -f jwm@dev2.invino.com -L 33306:127.0.0.1:3306
+ssh -N -f jwm@dev2.mccarrell.com -L 33306:127.0.0.1:3306
 
 and to tunnel to my perforce p4 instance:
 

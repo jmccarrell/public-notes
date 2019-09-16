@@ -368,7 +368,7 @@ SHOW VARIABLES WHERE Variable_name LIKE 'character\_set\_%' OR Variable_name LIK
 
 ## [mysql_config_editor](http://dev.mysql.com/doc/refman/5.7/en/mysql-config-editor.html)
 
-- to set up my davo access on vega, I did:
+- to set up my access on vega, I did:
 
 ```
 $ mysql_config_editor set --login-path=local --host=localhost --user=root --password

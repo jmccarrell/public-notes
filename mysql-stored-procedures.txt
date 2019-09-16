@@ -47,7 +47,7 @@ To see the stored procs/funcs defined, use this:
 
 select routine_type, routine_name
   from information_schema.routines
- where routine_schema = 'invino';
+ where routine_schema = 'mccarrell';
 +--------------+----------------------------------+
 | routine_type | routine_name                     |
 +--------------+----------------------------------+

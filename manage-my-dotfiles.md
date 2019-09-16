@@ -59,7 +59,6 @@
         NO  -rw-r--r--   1 jeff  staff     27 Mar 19  2013 .hgignore_global
         NO  -rw-------   1 jeff  staff    631 Jun  3 18:11 .lesshst
         NO  -rw-r--r--   1 jeff  staff     25 Feb 28 18:04 .my.cnf
-        NO  -rw-r--r--   1 jeff  staff    298 Mar 18  2013 .my.invino.cnf
         NO  -rw-------   1 jeff  staff    280 Feb 28 18:31 .mylogin.cnf
         NO  -rw-------   1 jeff  staff   2024 May 30 14:47 .mysql_history
         NO  drwxr-xr-x   3 jeff  staff    102 Apr 16  2014 .pip

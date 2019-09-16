@@ -737,11 +737,11 @@ And, in fact, the github help recommends exactly that: [fork a repo](https://hel
 $ git st
   ...
         modified:   filing/autofile/ca.py
-$ git update-index --assume-unchanged davotech/dev_settings.py
-$ mv ~/Downloads/dev_settings.py  davotech
+$ git update-index --assume-unchanged tech/dev_settings.py
+$ mv ~/Downloads/dev_settings.py  tech
 $ git st
   ...
-        modified:   davotech/dev_settings.py
+        modified:   tech/dev_settings.py
         modified:   filing/autofile/ca.py
 ```
 
@@ -752,15 +752,15 @@ $ git st
 $ git st
   ...
         modified:   filing/autofile/ca.py
-$ mv /c/davo/tmp/dev_settings.py davotech/dev_settings.py
+$ mv /c/davo/tmp/dev_settings.py tech/dev_settings.py
 $ git st
   ...
-        modified:   davotech/dev_settings.py
+        modified:   tech/dev_settings.py
         modified:   filing/autofile/ca.py
-$ git update-index --assume-unchanged davotech/dev_settings.py
+$ git update-index --assume-unchanged tech/dev_settings.py
 $ git st
   ...
-        modified:   davotech/dev_settings.py
+        modified:   tech/dev_settings.py
         modified:   filing/autofile/ca.py
 ```
 
@@ -771,12 +771,12 @@ $ git st
 $ git st
   ...
         modified:   filing/autofile/ca.py
-$ cp -p ~/Downloads/dev_settings.py davotech/
+$ cp -p ~/Downloads/dev_settings.py tech/
 $ git st
   ...
-        modified:   davotech/dev_settings.py
+        modified:   tech/dev_settings.py
         modified:   filing/autofile/ca.py
-$ git update-index --skip-worktree davotech/dev_settings.py
+$ git update-index --skip-worktree tech/dev_settings.py
 $ git st
   ...
         modified:   filing/autofile/ca.py
