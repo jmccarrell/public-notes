@@ -182,7 +182,7 @@ would sum the Q2 values for the Insurance through Travel expense categories
     - Insert -> Name -> Define
     - in the reference field, enter a formula that evaluates to a constant:
         - `=42`
-        - `="McCarrell Consulting"`
+        - `="McCarrell Org"`
 - Names that do not refer to ranges do not appear in the Name box
 
 ## Relative References in Names
