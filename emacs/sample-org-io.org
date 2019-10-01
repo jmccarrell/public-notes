@@ -1,0 +1,83 @@
+#+TITLE: Develop an idiom passing buffers to commands; like unix stdin / stdout
+
+* Goals
+
+  Develop a literate approach to running shell commands, like awk, jq, etc to develop idioms and explore
+  those languages leveraging stdin / stdout.
+
+* References
+
+- [[https://emacs.stackexchange.com/questions/20001/is-it-possible-to-read-user-input-from-stdin-while-tangling-a-source-block][Is it possible to read user input from STDIN while tangling a source block?]]
+  - Shows a technique to tangle a bash script, then pass through a lisp string into the bash script
+  - includes an example [[info:org#shebang][=:shebang= usage]]
+- [[https://emacs.stackexchange.com/a/51734/9834][Some code that evaluates json as a pass-through]]
+  - I *guess* this code may be useful when the source block generates json?
+    - like in a multi stage pipe?
+      - =cmd | cmd2=
+      - where =cmd= generates json and =cmd2= is a separate org babel block?
+
+* An attempt
+
+#+NAME: some-json
+#+BEGIN_QUOTE
+{"label": "Hello json"}
+#+END_QUOTE
+
+#+NAME: some-json-2
+#+BEGIN_EXAMPLE
+{"label": "ehlo json"}
+#+END_EXAMPLE
+
+#+NAME: the-code
+#+HEADER: :stdin some-json
+#+BEGIN_SRC shell
+jq .label
+#+END_SRC
+
+#+RESULTS: the-code
+: Hello json
+
+#+RESULTS:
+: Hello json
+
+** From the org-babel header arguments page
+
+here is how to [[info:org#var][pass an example into emacs-lisp]]
+
+#+BEGIN_SRC emacs-lisp :var x=some-json-2
+  (concatenate 'string x "json with some stuff")
+#+END_SRC
+
+#+RESULTS:
+: {"label": "ehlo json"}
+: json with some stuff
+
+** another example to follow
+
+#+BEGIN_SRC shell :var filename=(buffer-file-name) :exports both
+  wc -w $filename
+#+END_SRC
+
+#+RESULTS:
+: 135 /Users/jeff/Dropbox/org/sample-org-io.org
+
+what does the =:exports both= do here?
+A: nothing as far as I can tell.
+
+#+BEGIN_SRC shell :var filename=(buffer-file-name)
+  wc -w $filename
+#+END_SRC
+
+#+RESULTS:
+: 166 /Users/jeff/Dropbox/org/sample-org-io.org
+
+WHat does =:results output= do for this example?
+
+#+BEGIN_SRC shell :results output :var filename=(buffer-file-name)
+  wc -w $filename
+  wc -w $filename
+#+END_SRC
+
+#+RESULTS:
+:      194 /Users/jeff/Dropbox/org/sample-org-io.org
+:      194 /Users/jeff/Dropbox/org/sample-org-io.org
