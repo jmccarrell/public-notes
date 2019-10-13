@@ -1,0 +1,78 @@
+#+TITLE: Jeffs notes from the python functional programming book: Ch 1
+
+# Introduction notes
+
+Show that the named lambda can be passed in:
+
+#+BEGIN_SRC python :session named-lambda
+  mult_3_5 = lambda x: x % 3 == 0 or x % 5 == 0
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC python :session named-lambda :results output
+  def until(n, filter_func, v):
+      if v == n: return []
+      if filter_func(v):
+          return [v] + until(n, filter_func, v+1)
+      else:
+          return until(n, filter_func, v+1)
+#+END_SRC
+
+#+RESULTS:
+
+#+BEGIN_SRC python :session named-lambda
+  until(10, mult_3_5, 0)
+#+END_SRC
+
+#+RESULTS:
+| 0 | 3 | 5 | 6 | 9 |
+
+
+#+BEGIN_SRC python :session named-lambda
+  def sumr(seq):
+      """recursively sum the elements in the sequence"""
+      if len(seq) == 0: return 0
+      return seq[0] + sumr(seq[1:])
+#+END_SRC
+
+#+RESULTS:
+
+tests the empty list
+#+BEGIN_SRC python :session named-lambda
+  10 + sumr([])
+#+END_SRC
+
+#+RESULTS:
+: 10
+
+test the one element list
+#+BEGIN_SRC python :session named-lambda
+  7 + sumr([3])
+#+END_SRC
+
+#+RESULTS:
+: 10
+
+test the 2 element list
+#+BEGIN_SRC python :session named-lambda
+  sumr([3, 7])
+#+END_SRC
+
+#+RESULTS:
+: 10
+
+the value we we trying to compute:
+#+BEGIN_SRC python :session named-lambda :results output
+  sumr(until(10, mult_3_5, 0))
+#+END_SRC
+
+#+RESULTS:
+: 23
+
+#+BEGIN_SRC python :session named-lambda :results output
+  sumr([])
+#+END_SRC
+
+#+RESULTS:
+: 0
