@@ -16,7 +16,7 @@
       - =cmd | cmd2=
       - where =cmd= generates json and =cmd2= is a separate org babel block?
 
-* An attempt
+* First attempt
 
 #+NAME: some-json
 #+BEGIN_QUOTE
@@ -81,3 +81,30 @@ WHat does =:results output= do for this example?
 #+RESULTS:
 :      194 /Users/jeff/Dropbox/org/sample-org-io.org
 :      194 /Users/jeff/Dropbox/org/sample-org-io.org
+* Explore results: header
+
+#+BEGIN_SRC python
+import random
+
+return random.random()
+#+END_SRC
+
+#+RESULTS:
+: 0.0167257317087
+
+#+BEGIN_SRC python
+import sysconfig
+return sysconfig.get_python_version()
+#+END_SRC
+
+#+RESULTS:
+: 3.7
+
+#+BEGIN_SRC python
+import sys
+return sys.version
+#+END_SRC
+
+#+RESULTS:
+: 3.7.4 (default, Sep  7 2019, 18:27:02)
+: [Clang 10.0.1 (clang-1001.0.46.4)]
