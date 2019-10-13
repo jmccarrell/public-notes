@@ -1,0 +1,256 @@
+* Messing around with detecting primes
+** as a lambda
+
+#+BEGIN_SRC python :session prime-lambda :results output
+  import math
+  is_prime = lambda n: not any(n%p == 0  for p in range(2, int(math.sqrt(n))+1))
+#+END_SRC
+
+#+RESULTS:
+
+test
+
+#+BEGIN_SRC python :session prime-lambda
+list((n, is_prime(n)) for n in (9, 13, 113, 9839, 31477, 131073))
+#+END_SRC
+
+#+RESULTS:
+|      9 | False |
+|     13 | True  |
+|    113 | True  |
+|   9839 | True  |
+|  31477 | True  |
+| 131073 | False |
+
+** as a recursive definition
+
+following the mathematical definition:
+
+#+BEGIN_QUOTE
+coprime(n, [a, b)) ==
+case 1: True
+  if a == b
+case 2: n mod a != 0
+         and
+        coprime(n, [a+1, b))
+  if a < b
+#+END_QUOTE
+
+#+BEGIN_SRC python :session recur-p :results none
+  def is_prime_r(n: int) -> bool:
+      def is_prime(k: int, coprime: int) -> bool:
+          """Is k relatively coprime to the value coprime?"""
+          if k < coprime * coprime: return True
+          if k % coprime == 0: return False
+          return is_prime(k, coprime + 2)
+      if n < 2: return False
+      if n == 2: return True
+      if n % 2 == 0: return False
+      return is_prime(n, 3)
+#+END_SRC
+
+test the recursive defn
+
+#+BEGIN_SRC python :session recur-p
+list((n, is_prime_r(n)) for n in (9, 13, 113, 9839, 31477, 131073))
+#+END_SRC
+
+#+RESULTS:
+|      9 | False |
+|     13 | True  |
+|    113 | True  |
+|   9839 | True  |
+|  31477 | True  |
+| 131073 | False |
+
+** count down instead of up
+
+the previous definition explictly counts up the half-closed range [a, b) from a to b.
+as an exercise, the author challenges us to consider what has to change counting down using [a, b-1) instead
+
+so that would make the mathematical definition more like:
+
+#+BEGIN_QUOTE
+coprime(n, [a, b)) ==
+case 1: True
+  if a == b
+case 2: n mod b != 0
+         and
+        coprime(n, [a, b-1))
+  if a < b
+#+END_QUOTE
+
+I don't know enough about the interval
+
+#+BEGIN_QUOTE
+coprime(n, [a, b-1))
+#+END_QUOTE
+
+to make progress here, and I am more interested in functional programming than I am in prime algorithms.  So move on.
+** debug the recursion
+
+two ideas to help debug what is going on in the recursion:
+
+1. return the count of recursive calls made
+2. return the list of coprime values called
+
+*** return the count of recursive calls made
+
+Ok, so I need to learn how to do a type annotation for a 2-tuple
+that data is given in then [[https://mypy.readthedocs.io/en/latest/cheat_sheet_py3.html][type annotations cheat sheet]]
+
+#+BEGIN_SRC python :session recur-debug-count :results none
+  from typing import Tuple
+
+  def is_prime_r(n: int) -> Tuple[bool, int]:
+      """return whether n is prime, and the count of recursive calls made to determine that."""
+      def is_prime(k: int, coprime: int, num_iters: int) -> Tuple[bool, int]:
+          """Is k relatively coprime to the value coprime?"""
+          if k < coprime * coprime: return (True, num_iters)
+          if k % coprime == 0: return (False, num_iters)
+          return is_prime(k, coprime + 2, num_iters + 1)
+      if n < 2: return (False, 0)
+      if n == 2: return (True, 0)
+      if n % 2 == 0: return (False, 0)
+      return is_prime(n, 3, 1)
+#+END_SRC
+
+#+BEGIN_SRC python :session recur-debug-count
+list((n, is_prime_r(n)) for n in (6, 9, 13, 113, 9839, 31477, 131073))
+#+END_SRC
+
+#+RESULTS:
+|      6 | (False 0) |
+|      9 | (False 1) |
+|     13 | (True 2)  |
+|    113 | (True 5)  |
+|   9839 | (True 50) |
+|  31477 | (True 89) |
+| 131073 | (False 1) |
+
+*** return the list of coprime factors attempted
+
+#+BEGIN_SRC python :session recur-debug-list :results none
+  from typing import Tuple, List
+
+  def is_prime_r(n: int) -> Tuple[bool, List[int]]:
+      """return whether n is prime, and the list of coprimes checked to determine that."""
+      def is_prime(k: int, coprime: int, coprimes: List) -> Tuple[bool, List[int]]:
+          """Is k relatively coprime to the value coprime?"""
+          if k < coprime * coprime: return (True, coprimes)
+          if k % coprime == 0: return (False, coprimes)
+          return is_prime(k, coprime + 2, coprimes + [coprime])
+      if n < 2: return (False, [])
+      if n == 2: return (True, [])
+      if n % 2 == 0: return (False, [])
+      return is_prime(n, 3, [])
+#+END_SRC
+
+#+BEGIN_SRC python :session recur-debug-list
+list((n, is_prime_r(n)) for n in (6, 9, 13, 113, 9839, 31477, 131073))
+#+END_SRC
+
+#+RESULTS:
+|      6 | (False nil)                                                                                                                                                                                                                                                                                                         |
+|      9 | (False nil)                                                                                                                                                                                                                                                                                                         |
+|     13 | (True (3))                                                                                                                                                                                                                                                                                                          |
+|    113 | (True (3 5 7 9))                                                                                                                                                                                                                                                                                                    |
+|   9839 | (True (3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53 55 57 59 61 63 65 67 69 71 73 75 77 79 81 83 85 87 89 91 93 95 97 99))                                                                                                                                                             |
+|  31477 | (True (3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53 55 57 59 61 63 65 67 69 71 73 75 77 79 81 83 85 87 89 91 93 95 97 99 101 103 105 107 109 111 113 115 117 119 121 123 125 127 129 131 133 135 137 139 141 143 145 147 149 151 153 155 157 159 161 163 165 167 169 171 173 175 177)) |
+| 131073 | (False nil)                                                                                                                                                                                                                                                                                                         |
+** default limits of recursion in python
+python does not perform tail call optimization, and it has a relatively low recursion limit at 1,000:
+
+#+BEGIN_SRC python
+import sys
+return sys.getrecursionlimit()
+#+END_SRC
+
+#+RESULTS:
+: 1000
+
+while it is possible to set the recursion limit higher, this is of course a global change.
+
+#+BEGIN_SRC python
+import sys
+sys.setrecursionlimit(2_000)
+return sys.getrecursionlimit()
+#+END_SRC
+
+#+RESULTS:
+: 2000
+
+*** what does the python interpreter do when it exceed the recursion limit?
+
+#+BEGIN_SRC python :session recur-p :results output
+  tuple((k, is_prime_r(k)) for k in (15_485_863, 15_485_867))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 1, in <genexpr>
+  File "<stdin>", line 10, in is_prime_r
+  File "<stdin>", line 6, in is_prime
+  File "<stdin>", line 6, in is_prime
+  File "<stdin>", line 6, in is_prime
+  [Previous line repeated 992 more times]
+  File "<stdin>", line 4, in is_prime
+RecursionError: maximum recursion depth exceeded in comparison
+#+end_example
+
+** refactoring the coprime alg to iterative using generators
+
+with the limit of 1_000 recursive calls on our alg that checks every odd number as a coprime, we are pretty
+limited in the primes we can explore.
+
+So we can refactor the prime recursive calculation as iterative, using generator expressions.
+
+#+BEGIN_SRC python :session prime-iter-gen-expr :results none
+  import math
+
+  def is_prime(n: int) -> bool:
+      """return whether n is prime
+
+      >>> is_prime(2)
+      True
+      >>> tuple(is_prime(k) for k in range(3, 12))
+      (True, False, True, False, True, False, False, False, True)
+      """
+      if n < 2: return False
+      if n == 2: return True
+      if n % 2 == 0: return False
+      for k in range(3, 1 + int(math.sqrt(n)), 2):
+          if n % k == 0: return False
+      return True
+#+END_SRC
+
+#+BEGIN_SRC python :session prime-iter-gen-expr
+  tuple((k, is_prime(k)) for k in range(1, 12))
+#+END_SRC
+
+#+RESULTS:
+|  1 | False |
+|  2 | True  |
+|  3 | True  |
+|  4 | False |
+|  5 | True  |
+|  6 | False |
+|  7 | True  |
+|  8 | False |
+|  9 | False |
+| 10 | False |
+| 11 | True  |
+
+according to this [[https://primes.utm.edu/lists/small/millions/][list of primes]], the one millionth prime is 15,485,863
+
+#+BEGIN_SRC python :session prime-iter-gen-expr
+  millionth_prime = 15_485_863
+  tuple((k, is_prime(k)) for k in (millionth_prime, millionth_prime+4, millionth_prime+6))
+#+END_SRC
+
+#+RESULTS:
+| 15485863 | True  |
+| 15485867 | True  |
+| 15485869 | False |
