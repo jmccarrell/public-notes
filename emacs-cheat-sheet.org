@@ -64,7 +64,6 @@
    | ...     | many others that are not terribly releveant in org mode          |
 
 * Org key bindings
-
 ** References
 
    - textual reference card [http://orgmode.org/orgcard.txt]
