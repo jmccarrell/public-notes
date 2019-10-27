@@ -1,0 +1,51 @@
+* Explore the prime factors alg
+
+** explore the _yield from_ construct
+- [[https://docs.python.org/3/whatsnew/3.3.html#pep-380-syntax-for-delegating-to-a-subgenerator][new in python 3.3]]
+
+an example (straight from the documentation):
+
+#+BEGIN_SRC python
+  def g(x: int):
+      yield range(x, 0, -1)
+      yield range(x)
+
+  return list(g(3))
+#+END_SRC
+
+#+RESULTS:
+| range | (3 0 -1) | range | (0 3) |
+
+#+BEGIN_SRC python
+  def g(x: int):
+      yield from range(x, 0, -1)
+      yield from range(x)
+
+  return list(g(3))
+#+END_SRC
+
+#+RESULTS:
+| 3 | 2 | 1 | 0 | 1 | 2 |
+
+so I infer this has to do with the time at which these generator functions are evaluated.
+
+** simple prime factors alg
+
+#+BEGIN_SRC python
+  import math
+  from typing import Iterator
+
+  def p_factors_l(x: int) -> Iterator[int]:
+      if x % 2 == 0:
+          yield 2
+          if x//2 > 1:
+              yield from p_factors_l(x//2)
+          return
+      for i in range(3, int(math.sqrt(x) + 0.5), 2):
+          if x % i == 0:
+              yield i
+              if x//i > 1:
+                  yield from p_factors_l(x//i)
+              return
+      yield x
+#+END_SRC
