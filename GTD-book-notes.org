@@ -1,0 +1,33 @@
+* Jeffs notes from the Getting Things Done book
+
+** Chapter 7: Organizing
+
+There are 7 main types of data I need to manage from an organizational and operational perspective:
+
+1. A projects list
+2. Project support materials
+3. Calendar actions and information
+4. Next actions list
+5. a Waiting for list
+6. Reference material
+7. a Someday/Maybe list
+
+*** Organizing NonActionable Data
+
+#+BEGIN_QUOTE
+Interestingly, one of the biggest problems with most people's personal management system is that they blend a few actionable things with a large amount of data and material that has value but no action attached.
+
+Having good, consistent structures with whichto manage the nonactionable items in our work and lives is as important as managing our action and project reminders.
+#+END_QUOTE
+pg 171
+
+The 3 categories of non-actionable items:
+
+1. Reference materials
+2. Reminders of things that need no action now, but might at a later date
+3. Trash
+
+#+BEGIN_QUOTE
+The value of Someday/Maybe disappears if you don't put your conscious awareness back onto it with some consistency.
+#+END_QUOTE
+pg 179
