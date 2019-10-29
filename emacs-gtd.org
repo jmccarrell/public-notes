@@ -6,3 +6,87 @@ I use a lot of tags.
 
 GTD contexts are represented as tags with the =@= prefix, following [[https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html#tags][this guy]].
 My contexts:  @home, @office, @train, @phone, @email, @errands
+* Refresh my org / gtd mapping and skills
+** notes from the 2017: [[https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html][Emacs cafe: Orgmode for GTD]]
+
+Nicholas Petton: this author uses 4 files:
+
+inbox.org: where I collect everything
+gtd.org: holds all projects
+someday.org: the someday/maybe list
+tickler.org: entries with a timestamp for later
+
+His ticker file:
+
+- has only one heading: * Tickler
+- entries are timestamped with =C-c .= and refiled as subheadings in the tickler file
+- since every entry in the tickler file has a timestamp, they will appears at the appropriate moment in the agenda view
+
+here is one way to set up a tickler file / capture template:
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-capture-templates '(("t" "Todo [inbox]" entry
+                                 (file+headline "~/gtd/inbox.org" "Tasks")
+                                 "* TODO %i%?")
+                                ("T" "Tickler" entry
+                                 (file+headline "~/gtd/tickler.org" "Tickler")
+                                 "* %i%? \n %U")))
+#+END_SRC
+
+He refiles his inbox every day to get to inbox zero, refiling as appropriate.
+
+Here is his refile targets:
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-refile-targets '(("~/gtd/gtd.org" :maxlevel . 3)
+                             ("~/gtd/someday.org" :level . 1)
+                             ("~/gtd/tickler.org" :maxlevel . 2)))
+#+END_SRC
+
+this way =refile= asks him for one of these targets.
+
+What is my current =org-refile-targets=?
+
+#+BEGIN_SRC emacs-lisp
+  org-refile-targets
+#+END_SRC
+
+#+RESULTS:
+: ((nil :maxlevel . 2))
+
+Seems like some obvious room for improvement there.
+
+for contexts, which are implemented as =@= tags, the author mostly uses:
+
+- @home
+- @office
+- @travelling
+- @phone
+- @email
+- @errands
+
+the author minimizes scheduling:
+
+#+BEGIN_QUOTE
+I tend to avoid using timestamps in my projects as much as possible. The reason is simple: unless an entry is an appointment (to the dentist for instance) or has a fixed deadline (a release scheduled with a customer), I should decide what to work on depending on the current context (among other things). This also keeps my agenda clean, free of any fake or self-imposed deadline or schedule.
+#+END_QUOTE
+
+this makes sense to me based on my experience to date scheduling (and re-scheduling) tasks.
+
+** notes from the 2009: [[http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html][How I use emacs and org-mode to implement GTD]]
+
+the author Charles Cave uses these main org mode files:
+
+newgtd.org: contains TODOs, projects, appointments and reminders
+someday.org:
+journal.org: everthing else; managed by (the obsolete) remember mode.
+birthday.org: birthdays and anniversaries.  An agenda file.
+
+The author uses a TODO state of APPT, like John Wiegley does, to connote scheduled blocks of time.
+
+This author has an example of using time estimates to give him a sense of how much time has allocated in a given agenda view.
+
+He also talks about "Column view" with =C-c C-x C-c= as the best way to enter time estimates on tasks.
+
+Weekly review
+He has a weekly review checklist that he executes against, and a repeating scheduled item.  He clocks in and out the time he spends on the weekly review.
