@@ -90,3 +90,67 @@ He also talks about "Column view" with =C-c C-x C-c= as the best way to enter ti
 
 Weekly review
 He has a weekly review checklist that he executes against, and a repeating scheduled item.  He clocks in and out the time he spends on the weekly review.
+** notes from the 2019: gtd forums: [[https://forum.gettingthingsdone.com/threads/emacs-org-mode-is-the-perfect-tool-for-gtd.15028/][Emacs org-mode is the perfect tool for GTD]]
+   - [X] sign up for an account so I can see the images etc in this post.
+
+some key ideas from this author/implementation:
+
+the top level GTD areas are:
+
+- inbox
+- waiting tasks
+- tasks without context
+- active projects
+- stuck projects
+
+a project is a TODO with subtasks
+
+a project is active if it has a NEXT, else it is a stuck project
+
+the top level files containing the data are:
+
+- my/inbox
+- my/projects
+- my/someday
+- my/birthdays
+
+apparently there is no explicit tickler file.
+
+here are the settings he imports into every org file he manages?  except someday?
+
+=gtd-settings.org=:
+
+#+BEGIN_QUOTE
+#+TAGS: { @home(h) @errand(e) @review(r) @read_watch_listen(R) } work(w) daily(d)
+#+SEQ_TODO: HOLD(h) TODO(t) NEXT(n) WAITING(w) | DONE(d) CANCELLED(c)
+#+PRIORITIES: A G D
+#+STARTUP: nologrepeat
+#+END_QUOTE
+
+to do this, he co-locates all files in one directory, and puts this at the top of the org files:
+
+#+BEGIN_QUOTE
+#+SETUPFILE: gtd-settings.org
+#+END_QUOTE
+
+*** notes from [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-inode-and-root%20()][reading the code]]
+
+he uses the org-checklist package; check out what this offers
+
+here is [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::#'my/repeated-task-template)][an idiom]] for inserting a repeated? template. No not repeated.
+
+Apparently he only has my/project in his org agenda files
+
+#+BEGIN_SRC emacs-lisp
+      org-agenda-files (list my/project)
+#+END_SRC
+
+9 levels of refile targets; that is kind of interesting:
+
+#+BEGIN_SRC emacs-lisp
+      org-refile-targets '((my/project :maxlevel . 9)
+                           (my/someday :maxlevel . 9))
+#+END_SRC
+
+and 136 lines of custom agenda functions to produce the views he espouses.
+
