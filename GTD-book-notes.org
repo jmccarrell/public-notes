@@ -17,7 +17,7 @@ There are 7 main types of data I need to manage from an organizational and opera
 #+BEGIN_QUOTE
 Interestingly, one of the biggest problems with most people's personal management system is that they blend a few actionable things with a large amount of data and material that has value but no action attached.
 
-Having good, consistent structures with whichto manage the nonactionable items in our work and lives is as important as managing our action and project reminders.
+Having good, consistent structures with which to manage the nonactionable items in our work and lives is as important as managing our action and project reminders.
 #+END_QUOTE
 pg 171
 
