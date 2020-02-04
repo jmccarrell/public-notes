@@ -43,6 +43,8 @@
 
 *** Textual Support Materials
 
+    Treated the same as [[*Larger or Longer Lived Projects][Larger or Longer Lived Projects]].
+
 *** Rich Text Project Support Data
 
     Thus far, I have not had a great deal of need nor success with collecting this type of data.
@@ -78,8 +80,11 @@
 ** Someday/Maybe List
 
    This follows the [[*Projects List][Projects]] model, ie, 4 =someday= files split by public vs private and personal vs work.
+
    Similarly, long lived projects that are not active are stored in the =proj= directory adjacent to each
-   =someday= file.
+   =someday= file.  They can be made active by adding them to =org-agenda-files= so their tasks come into an
+   agenda view.
+
 
 * Tagging and organizing
 ** Contexts
