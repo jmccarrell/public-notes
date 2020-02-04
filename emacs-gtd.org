@@ -1,7 +1,6 @@
 #+TITLE: How Jeff uses emacs org to get things done
 
 * Tagging and organizing
-
 ** Contexts
 
 I use a lot of tags.
@@ -19,202 +18,172 @@ My contexts:  @home, @office, @train, @phone, @email, @errands
 - DEFERRED
 - CANCELLED
 
-* Refresh my org / gtd mapping and skills
-** notes from the 2017: [[https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html][Emacs cafe: Orgmode for GTD]]
+* References
+** How others use emacs to implement GTD
+*** notes from the 2017: [[https://emacs.cafe/emacs/orgmode/gtd/2017/06/30/orgmode-gtd.html][Emacs cafe: Orgmode for GTD]]
 
-Nicholas Petton: this author uses 4 files:
+ Nicholas Petton: this author uses 4 files:
 
-inbox.org: where I collect everything
-gtd.org: holds all projects
-someday.org: the someday/maybe list
-tickler.org: entries with a timestamp for later
+ inbox.org: where I collect everything
+ gtd.org: holds all projects
+ someday.org: the someday/maybe list
+ tickler.org: entries with a timestamp for later
 
-His ticker file:
+ His ticker file:
 
-- has only one heading: * Tickler
-- entries are timestamped with =C-c .= and refiled as subheadings in the tickler file
-- since every entry in the tickler file has a timestamp, they will appears at the appropriate moment in the agenda view
+ - has only one heading: * Tickler
+ - entries are timestamped with =C-c .= and refiled as subheadings in the tickler file
+ - since every entry in the tickler file has a timestamp, they will appears at the appropriate moment in the agenda view
 
-here is one way to set up a tickler file / capture template:
+ here is one way to set up a tickler file / capture template:
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-capture-templates '(("t" "Todo [inbox]" entry
-                                 (file+headline "~/gtd/inbox.org" "Tasks")
-                                 "* TODO %i%?")
-                                ("T" "Tickler" entry
-                                 (file+headline "~/gtd/tickler.org" "Tickler")
-                                 "* %i%? \n %U")))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-capture-templates '(("t" "Todo [inbox]" entry
+                                  (file+headline "~/gtd/inbox.org" "Tasks")
+                                  "* TODO %i%?")
+                                 ("T" "Tickler" entry
+                                  (file+headline "~/gtd/tickler.org" "Tickler")
+                                  "* %i%? \n %U")))
+ #+END_SRC
 
-He refiles his inbox every day to get to inbox zero, refiling as appropriate.
+ He refiles his inbox every day to get to inbox zero, refiling as appropriate.
 
-Here is his refile targets:
+ Here is his refile targets:
 
-#+BEGIN_SRC emacs-lisp
-  (setq org-refile-targets '(("~/gtd/gtd.org" :maxlevel . 3)
-                             ("~/gtd/someday.org" :level . 1)
-                             ("~/gtd/tickler.org" :maxlevel . 2)))
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   (setq org-refile-targets '(("~/gtd/gtd.org" :maxlevel . 3)
+                              ("~/gtd/someday.org" :level . 1)
+                              ("~/gtd/tickler.org" :maxlevel . 2)))
+ #+END_SRC
 
-this way =refile= asks him for one of these targets.
+ this way =refile= asks him for one of these targets.
 
-What is my current =org-refile-targets=?
+ What is my current =org-refile-targets=?
 
-#+BEGIN_SRC emacs-lisp
-  org-refile-targets
-#+END_SRC
+ #+BEGIN_SRC emacs-lisp
+   org-refile-targets
+ #+END_SRC
 
-#+RESULTS:
-: ((nil :maxlevel . 2))
+ #+RESULTS:
+ : ((nil :maxlevel . 2))
 
-Seems like some obvious room for improvement there.
+ Seems like some obvious room for improvement there.
 
-for contexts, which are implemented as =@= tags, the author mostly uses:
+ for contexts, which are implemented as =@= tags, the author mostly uses:
 
-- @home
-- @office
-- @travelling
-- @phone
-- @email
-- @errands
+ - @home
+ - @office
+ - @travelling
+ - @phone
+ - @email
+ - @errands
 
-the author minimizes scheduling:
+ the author minimizes scheduling:
 
-#+BEGIN_QUOTE
-I tend to avoid using timestamps in my projects as much as possible. The reason is simple: unless an entry is an appointment (to the dentist for instance) or has a fixed deadline (a release scheduled with a customer), I should decide what to work on depending on the current context (among other things). This also keeps my agenda clean, free of any fake or self-imposed deadline or schedule.
-#+END_QUOTE
+ #+BEGIN_QUOTE
+ I tend to avoid using timestamps in my projects as much as possible. The reason is simple: unless an entry is an appointment (to the dentist for instance) or has a fixed deadline (a release scheduled with a customer), I should decide what to work on depending on the current context (among other things). This also keeps my agenda clean, free of any fake or self-imposed deadline or schedule.
+ #+END_QUOTE
 
-this makes sense to me based on my experience to date of scheduling (and re-scheduling) tasks.
+ this makes sense to me based on my experience to date of scheduling (and re-scheduling) tasks.
 
-** notes from the 2009: [[http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html][How I use emacs and org-mode to implement GTD]]
+*** notes from the 2009: [[http://members.optusnet.com.au/~charles57/GTD/gtd_workflow.html][How I use emacs and org-mode to implement GTD]]
 
-the author Charles Cave uses these main org mode files:
+ the author Charles Cave uses these main org mode files:
 
-newgtd.org: contains TODOs, projects, appointments and reminders
-someday.org:
-journal.org: everthing else; managed by (the obsolete) remember mode.
-birthday.org: birthdays and anniversaries.  An agenda file.
+ newgtd.org: contains TODOs, projects, appointments and reminders
+ someday.org:
+ journal.org: everthing else; managed by (the obsolete) remember mode.
+ birthday.org: birthdays and anniversaries.  An agenda file.
 
-The author uses a TODO state of APPT, like John Wiegley does, to connote scheduled blocks of time.
+ The author uses a TODO state of APPT, like John Wiegley does, to connote scheduled blocks of time.
 
-This author has an example of using time estimates to give him a sense of how much time has allocated in a given agenda view.
+ This author has an example of using time estimates to give him a sense of how much time has allocated in a given agenda view.
 
-He also talks about "Column view" with =C-c C-x C-c= as the best way to enter time estimates on tasks.
+ He also talks about "Column view" with =C-c C-x C-c= as the best way to enter time estimates on tasks.
 
-Weekly review
-He has a weekly review checklist that he executes against, and a repeating scheduled item.  He clocks in and out the time he spends on the weekly review.
-** notes from the 2019: gtd forums: [[https://forum.gettingthingsdone.com/threads/emacs-org-mode-is-the-perfect-tool-for-gtd.15028/][Emacs org-mode is the perfect tool for GTD]]
-   - [X] sign up for an account so I can see the images etc in this post.
+ Weekly review
+ He has a weekly review checklist that he executes against, and a repeating scheduled item.  He clocks in and out the time he spends on the weekly review.
+*** notes from the 2019: gtd forums: [[https://forum.gettingthingsdone.com/threads/emacs-org-mode-is-the-perfect-tool-for-gtd.15028/][Emacs org-mode is the perfect tool for GTD]]
+ some key ideas from this author/implementation:
 
-some key ideas from this author/implementation:
+ the top level GTD project definitions are:
 
-the top level GTD project definitions are:
+ - inbox
+ - waiting tasks
+ - tasks without context
+ - active projects
+ - stuck projects
 
-- inbox
-- waiting tasks
-- tasks without context
-- active projects
-- stuck projects
+ a project is a TODO with subtasks
 
-a project is a TODO with subtasks
+ a project is active if it has a NEXT, else it is a stuck project
 
-a project is active if it has a NEXT, else it is a stuck project
+ the top level files containing the data are:
 
-the top level files containing the data are:
+ - my/inbox
+ - my/projects
+ - my/someday
+ - my/birthdays
 
-- my/inbox
-- my/projects
-- my/someday
-- my/birthdays
+ apparently there is no explicit tickler file.
 
-apparently there is no explicit tickler file.
+ here are the settings he imports into every org file he manages?  except someday?
 
-here are the settings he imports into every org file he manages?  except someday?
+ =gtd-settings.org=:
 
-=gtd-settings.org=:
+ #+BEGIN_QUOTE
+ #+TAGS: { @home(h) @errand(e) @review(r) @read_watch_listen(R) } work(w) daily(d)
+ #+SEQ_TODO: HOLD(h) TODO(t) NEXT(n) WAITING(w) | DONE(d) CANCELLED(c)
+ #+PRIORITIES: A G D
+ #+STARTUP: nologrepeat
+ #+END_QUOTE
 
-#+BEGIN_QUOTE
-#+TAGS: { @home(h) @errand(e) @review(r) @read_watch_listen(R) } work(w) daily(d)
-#+SEQ_TODO: HOLD(h) TODO(t) NEXT(n) WAITING(w) | DONE(d) CANCELLED(c)
-#+PRIORITIES: A G D
-#+STARTUP: nologrepeat
-#+END_QUOTE
+ to do this, he co-locates all files in one directory, and puts this at the top of the org files:
 
-to do this, he co-locates all files in one directory, and puts this at the top of the org files:
+ #+BEGIN_QUOTE
+ #+SETUPFILE: gtd-settings.org
+ #+END_QUOTE
 
-#+BEGIN_QUOTE
-#+SETUPFILE: gtd-settings.org
-#+END_QUOTE
+**** notes from [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-inode-and-root%20()][reading the code]]
 
-*** notes from [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-inode-and-root%20()][reading the code]]
+ there are several functions that likely find/implement his project definitions:
+ - [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-inode-and-root%20()][org-skip-inode-and-root]]
+ - [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-leaves%20()][org-skip-leaves]]
+ - [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-non-root-task-subtree%20()][org-skip-non-root-task-subtree]]
 
-there are several functions that likely find/implement his project definitions:
-- [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-inode-and-root%20()][org-skip-inode-and-root]]
-- [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-leaves%20()][org-skip-leaves]]
-- [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::(defun%20my/org-skip-non-root-task-subtree%20()][org-skip-non-root-task-subtree]]
+ he uses the org-checklist package; check out what this offers
 
-he uses the org-checklist package; check out what this offers
+ here is [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::#'my/repeated-task-template)][an idiom]] for inserting a repeated? template. No not repeated.
 
-here is [[file:~/thirdparty/emacs-configs/greendog-gtd/emacs-org-mode.el::#'my/repeated-task-template)][an idiom]] for inserting a repeated? template. No not repeated.
+ Apparently he only has my/project in his org agenda files
 
-Apparently he only has my/project in his org agenda files
+ #+BEGIN_SRC emacs-lisp
+       org-agenda-files (list my/project)
+ #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
-      org-agenda-files (list my/project)
-#+END_SRC
+ 9 levels of refile targets; that is kind of interesting:
 
-9 levels of refile targets; that is kind of interesting:
+ #+BEGIN_SRC emacs-lisp
+       org-refile-targets '((my/project :maxlevel . 9)
+                            (my/someday :maxlevel . 9))
+ #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
-      org-refile-targets '((my/project :maxlevel . 9)
-                           (my/someday :maxlevel . 9))
-#+END_SRC
+ and 136 lines of custom agenda functions to produce the views he espouses.
 
-and 136 lines of custom agenda functions to produce the views he espouses.
+*** notes from the 2007: [[http://newartisans.com/2007/08/using-org-mode-as-a-day-planner/][Using org-mode as a Day Planner]] by John Wiegley
+ John uses these states:
+ - CANCELLED DONE DEFERRED DELEGATED STARTED WAITING
 
-** notes from the 2007: [[http://newartisans.com/2007/08/using-org-mode-as-a-day-planner/][Using org-mode as a Day Planner]] by John Wiegley
-John uses these states:
-- CANCELLED DONE DEFERRED DELEGATED STARTED WAITING
+ he has only todo.org in his agenda list
+ so no separate tickler file
+ he uses =org-default-notes-file=
 
-he has only todo.org in his agenda list
-so no separate tickler file
-he uses =org-default-notes-file=
+ his agenda view functions make use of =org-agenda-skip-entry-if=, which has been superceded by =org-agenda-skip-if=
 
-his agenda view functions make use of =org-agenda-skip-entry-if=, which has been superceded by =org-agenda-skip-if=
-** notes from the 2008: [[http://members.optusnet.com.au/~charles57/GTD/Natural_Project_Planning.html][Natural Project Planning with org-mode]]
-Really an overview of the GTD process, with light application of org-mode techniques.
-** notes from investigation of John W dot files Nov 2019
-It looks like his [[file:~/thirdparty/emacs-configs/jwiegley-dotemacs/dot-org.el::(defvar%20org-mode-completion-keys][current states include]]:
-DONE DELEGATED NOTE DEFFERED STARTED TODO EPIC STORY WAITING CANCELED SOMEDAY
-but it looks more complicated than that.  He appears to use the package [[file:~/thirdparty/emacs-configs/jwiegley-dotemacs/dot-org.el::(:todo%20("SOMEDAY"%20"TO-READ"%20"CHECK"%20"TO-WATCH"%20"WATCHING")][org-super-agenda]]
+*** notes from the 2008: [[http://members.optusnet.com.au/~charles57/GTD/Natural_Project_Planning.html][Natural Project Planning with org-mode]]
+ Really an overview of the GTD process, with light application of org-mode techniques.
 
-* Refine my use of GTD in emacs
-
-** Map the [[file:GTD-book-notes.org::*Chapter%207:%20Organizing][7 main GTD data types]] onto a structure I can use
-for reference, here are the types:
-
-1. A projects list
-2. Project support materials
-3. Calendar actions and information
-4. Next actions list
-5. a Waiting for list
-6. Reference material
-7. a Someday/Maybe list
-
-** Problems to Solve
-1. I don't have any way to mark what is the next task up for projects; everything is in one flat list
-2. No weekly review.  Not enough filtering, moving, coalescing of todos into projects.
-3. I don't have enough separation between Someday and current projects
-   - I imagine moving projects in/out of Someday as things gain/lose my attention
-4. I have not applied my tags in a systematic fashion
-5. My use of Dropbox to share context between emacs at home and work has failed with Sift's Dropbox policy
-   - is this worth addressing?
-6. I often conflate todo items and reference material; it is all in one kind of smushy bucket: todo.org and its archives.
-7. I don't know enough about how John W organizes himself to inform what I do
-   - Specifically:
-     - Does he do weekly reviews?  What support in org does he use for this?
-     - How does John map the 7 kinds of info onto org?
-8. Figure out the syntax of the states, ie ="WAITING(w@/!)"= what do the =@/!= mean?
-
-** Projects list
-Right now I have projects and tasks in a single file: =todo.org=
+*** notes from investigation of John W dot files Nov 2019
+ It looks like his [[file:~/thirdparty/emacs-configs/jwiegley-dotemacs/dot-org.el::(defvar%20org-mode-completion-keys][current states include]]:
+ DONE DELEGATED NOTE DEFFERED STARTED TODO EPIC STORY WAITING CANCELED SOMEDAY
+ but it looks more complicated than that.  He appears to use the package [[file:~/thirdparty/emacs-configs/jwiegley-dotemacs/dot-org.el::(:todo%20("SOMEDAY"%20"TO-READ"%20"CHECK"%20"TO-WATCH"%20"WATCHING")][org-super-agenda]]
