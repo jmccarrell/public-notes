@@ -1,5 +1,86 @@
 #+TITLE: How Jeff uses emacs org to get things done
 
+* Jeffs Mapping of the [[file:GTD-book-notes.org::*Chapter%207:%20Organizing][7 Main GTD Data Types]] onto org-mode
+  for reference, here are the types:
+
+  1. A projects list
+  2. Project support materials
+  3. Calendar actions and information
+  4. Next actions list
+  5. a Waiting for list
+  6. Reference material
+  7. a Someday/Maybe list
+
+** Projects List
+
+   Projects are stored in my main =todo.org= file as the top-level heading =* Projects=.
+   Tasks not associated with a project are in the same file under the top-level heading =* Tasks=.
+
+   But I have several todo files, corresponding to different scopes, and different privacy levels:
+
+   - a public personal todo: todo.org
+   - a private personal todo: p-todo.org
+   - a work public todo: /company/.org
+   - a private work todo: p-/company/.org
+
+   The public data have no restrictions on who could or should read them; these data could be published with
+   no issue.  By contrast, the private data are not intended to be shared or read by the public.
+
+*** Larger or Longer Lived Projects
+
+    Adjacent in the file system to each todo is a directory named =proj=.  For smaller projects, all of the
+    support material may simply be stored in the main todo file.  However, for larger or longer projects,
+    those data can be broken out =proj=.  This is especially helpful for long-running projects that are
+    cyclical, eg, year-end accounting and taxes.  Leveraging the =org-agenda-files= here also makes this
+    more useful.
+
+** Project Support Materials
+
+   With respect to emacs/org-mode, there are two types of data here:
+
+   1. Pure text and links that are handled superbly by emacs
+   2. So-called "rich text data", like PDFs
+
+*** Textual Support Materials
+
+*** Rich Text Project Support Data
+
+    Thus far, I have not had a great deal of need nor success with collecting this type of data.
+
+    I have experimented with [[https://c-command.com/eaglefiler/][EagleFiler]], but I have not used it enough to have an actual opinion of it.  I
+    suppose plain old mac os X file indexing could be an option here, although I don't have a lot of faith
+    in Apple maintaining the consistency of any one UX and thus the time commitment on me to keep up.  More
+    work is needed here.
+
+    Another open question is how to associate projects with reference data in EagleFiler.  I suppose some
+    combination of tags could work.  I guess that would mean I would have to get much better at tagging my
+    project work in org-mode.
+
+** Calendar Actions and Information, Next Actions, Waiting Actions
+
+   Well satisfied by org-mode out-of-the-box agenda views.
+
+** Reference Material
+
+   Again there are 2 kinds of reference materials:
+   1. Textual
+   2. Rich text
+
+*** Textual Reference Materials
+
+    My goal is to coalesce my reference materials into =notes=, structured as org files.  Again, the private
+    vs. public and the personal vs. work distinctions apply.  So I typically have 4 =notes= directories.
+
+*** Rich Text Reference Materials
+
+    I don't really have an answer here.  [[*Rich Text Project Support Data][EagleFiler might help]].
+
+** Someday/Maybe List
+
+   This follows the [[*Projects List][Projects]] model, ie, 4 =someday= files split by public vs private and personal vs work.
+   Similarly, long lived projects that are not active are stored in the =proj= directory adjacent to each
+   =someday= file.
+
 * Tagging and organizing
 ** Contexts
 
