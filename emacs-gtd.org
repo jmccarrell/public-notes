@@ -85,7 +85,6 @@
    =someday= file.  They can be made active by adding them to =org-agenda-files= so their tasks come into an
    agenda view.
 
-
 * Tagging and organizing
 ** Contexts
 
