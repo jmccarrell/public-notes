@@ -6,6 +6,8 @@
 
 
 # these 2 methods to_str and to_bytes are from _Effective Python_, by Brett Slatkin
+#  Item 3: Know the difference between bytes, str and unicode
+#  _Effective Python_, by Brett Slatkin
 def to_str(bytes_or_str):
     """convert arg to string, decoding bytes via utf-8 if needed.
 
