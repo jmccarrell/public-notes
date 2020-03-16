@@ -1,0 +1,33 @@
+#+title: experiments with org stdin
+#+author: Jeff McCarrell
+#+description: Attempts to pass stdin around for literate pipeline programming
+
+#+name: vega_df
+#+begin_src text
+Filesystem      Size   Used  Avail Capacity iused      ifree %iused  Mounted on
+/dev/disk1s5    500G    11G   214G     5%  484663 4882992257    0%   /
+devfs           201k   201k     0B   100%     678          0  100%   /dev
+/dev/disk1s1    500G   207G   214G    50% 1949479 4881527441    0%   /System/Volumes/Data
+/dev/disk1s4    500G    68G   214G    25%      64 4883476856    0%   /private/var/vm
+map auto_home     0B     0B     0B   100%       0          0  100%   /System/Volumes/Data/home
+#+end_src
+
+#+begin_src shell :results output :noweb yes
+  cat <<EOF | awk '{s += $6} END {print s}'
+  <<vega_df>>
+  EOF
+#+end_src
+
+#+RESULTS:
+: 2434984
+
+I guess I don't need =:results output= here.
+
+#+begin_src shell :noweb yes
+  cat <<EOF | awk '{s += $6} END {print s}'
+  <<vega_df>>
+  EOF
+#+end_src
+
+#+RESULTS:
+: 2434984
