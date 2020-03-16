@@ -358,7 +358,7 @@ to see the names of all declared functions: ~functions +~
 to see names and function bodies: ~functions~
 ** string manipulation
 *** reverse a string
-#+BEGIN_SRC sh :results output
+#+BEGIN_SRC shell :results output
 zsh <<-'eos'
 #!/usr/bin/env zsh
 
@@ -395,6 +395,7 @@ show_rev
 eos
 #+END_SRC
 
+#+RESULTS:
 #+begin_example
 5: every good boy does fine
 >> yreve doog yob seod enif
@@ -407,6 +408,42 @@ eos
 0:
 >>
 #+end_example
+
+
+*** remove vowels from a string
+#+BEGIN_SRC shell :results output
+  #!/usr/bin/env zsh
+
+  function remove_vowels() {
+      declare -A vowels=(a 1 e 1 i 1 o 1 u 1)
+      declare -a out
+      while (( $# > 0 )); do
+          # split $1 on character boundaries
+          declare -a source=(${(ps..)1})
+          shift
+          declare -a result=()
+          while (( $#source > 0 )); do
+              # is this char in the zsh vowels associative array?
+              if (( ${+vowels[$source[1]]} )); then
+                  ;
+              else
+                  result+=($source[1])
+              fi
+              shift source
+          done
+          # join the result back down into a string
+          out+=(${(j::)result})
+      done
+      print $out
+      return 0
+  }
+
+  declare -a egbdf=(every good boy does fine)
+  remove_vowels $egbdf
+#+END_SRC
+
+#+RESULTS:
+: vry gd by ds fn
 
 * idiom to recursively list all files, including hidden files
 
