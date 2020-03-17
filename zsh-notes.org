@@ -445,9 +445,23 @@ eos
 #+RESULTS:
 : vry gd by ds fn
 
+** associative arrays
+   Here is a table mapping hash idioms from perl onto zsh.  From the [[http://zsh.sourceforge.net/Guide/zshguide05.html#l122][zsh user guide: Using associative arrays]]
+
+  | perl                           | zsh                                      |
+  |--------------------------------+------------------------------------------|
+  | %hash = qw(key value);         | typeset -A hash; hash=(key value)        |
+  | $hash{key}                     | ${hash[key]}                             |
+  | keys %hash                     | ${(k)hash}                               |
+  | values %hash                   | ${(v)hash}                               |
+  | %hash2 = %hash;                | typeset -A hash2; hash2=("${(@kv)hash}") |
+  | unset %hash;                   | unset hash                               |
+  | if (exists $hash{key}) { ... } | if (( ${+hash[key]} )); then ... fi      |
+
+
 * idiom to recursively list all files, including hidden files
 
-> ( setopt globdots; print -l **/*(.) )
+  > ( setopt globdots; print -l **/*(.) )
 
 * example parse mysql output: write to slack
 #+BEGIN_SRC shell
