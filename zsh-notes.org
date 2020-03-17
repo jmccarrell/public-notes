@@ -366,40 +366,39 @@
 ** string manipulation
 *** reverse a string
     #+begin_src shell :results output
-    zsh <<-'eos'
-    #!/usr/bin/env zsh
+      #!/usr/bin/env zsh -norcs
 
-    function rev () {
-        declare -a out
-        while (( $# > 0 )); do
-            # split $1 on character boundaries
-            declare -a source=(${(ps..)1})
-            shift
-            declare -a result=()
-            while (( $#source > 0 )); do
-                result+=($source[-1])
-                shift -p source
-            done;
-            # join the result array back down to a string
-            out+=(${(j::)result})
-        done
-        print $out
-        return 0
-    }
+      function rev () {
+          declare -a out
+          while (( $# > 0 )); do
+              # split $1 on character boundaries
+              declare -a source=(${(ps..)1})
+              shift
+              declare -a result=()
+              while (( $#source > 0 )); do
+                  result+=($source[-1])
+                  shift -p source
+              done;
+              # join the result array back down to a string
+              out+=(${(j::)result})
+          done
+          print $out
 
-    function show_rev() {
-        print "$#:" $@
-        print '>>' $(rev $@)
-    }
-    declare -a egbdf=(every good boy does fine)
-    show_rev $egbdf
-    show_rev "$egbdf"
-    declare -a racing_emoji=(racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇)
-    show_rev $racing_emoji
-    show_rev "$racing_emoji"
-    # the empty string
-    show_rev
-    eos
+          return 0
+      }
+
+      function show_rev() {
+          print "$#:" $@
+          print '>>' $(rev $@)
+      }
+      declare -a egbdf=(every good boy does fine)
+      show_rev $egbdf
+      show_rev "$egbdf"
+      declare -a racing_emoji=(racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇)
+      show_rev $racing_emoji
+      show_rev "$racing_emoji"
+      # the empty string
+      show_rev
     #+end_src
 
     #+RESULTS:
@@ -418,7 +417,7 @@
 
 *** remove vowels from a string
     #+begin_src shell :results output
-      #!/usr/bin/env zsh
+      #!/usr/bin/env zsh -norcs
 
       function remove_vowels() {
           declare -A vowels=(a 1 e 1 i 1 o 1 u 1)
@@ -452,17 +451,19 @@
     : vry gd by ds fn
 
 ** associative arrays
-   Here is a table mapping hash idioms from perl onto zsh.  From the [[http://zsh.sourceforge.net/Guide/zshguide05.html#l122][zsh user guide: Using associative arrays]]
+   Here is a table mapping hash idioms from perl onto zsh.
 
-  | perl                           | zsh                                      |
-  |--------------------------------+------------------------------------------|
-  | %hash = qw(key value);         | typeset -A hash; hash=(key value)        |
-  | $hash{key}                     | ${hash[key]}                             |
-  | keys %hash                     | ${(k)hash}                               |
-  | values %hash                   | ${(v)hash}                               |
-  | %hash2 = %hash;                | typeset -A hash2; hash2=("${(@kv)hash}") |
-  | unset %hash;                   | unset hash                               |
-  | if (exists $hash{key}) { ... } | if (( ${+hash[key]} )); then ... fi      |
+   From the [[http://zsh.sourceforge.net/Guide/zshguide05.html#l122][zsh user guide: Using associative arrays]].
+
+   | perl                           | zsh                                      |
+   |--------------------------------+------------------------------------------|
+   | %hash = qw(key value);         | typeset -A hash; hash=(key value)        |
+   | $hash{key}                     | ${hash[key]}                             |
+   | keys %hash                     | ${(k)hash}                               |
+   | values %hash                   | ${(v)hash}                               |
+   | %hash2 = %hash;                | typeset -A hash2; hash2=("${(@kv)hash}") |
+   | unset %hash;                   | unset hash                               |
+   | if (exists $hash{key}) { ... } | if (( ${+hash[key]} )); then ... fi      |
 
 * example parse mysql output: write to slack
 
