@@ -2,448 +2,454 @@
 #+STARTUP: showall
 
 * bash array syntax summary
-| syntax          | result                                 |
-|-----------------+----------------------------------------|
-| arr=()          | Create empty array                     |
-| arr=(1 2 3)     | Initialize array                       |
-| ${arr[2]}       | Retrieve third element                 |
-| ${arr[@]}       | Retrieve all elements                  |
-| ${!arr[@]}      | Retrieve array indices                 |
-| ${#arr[@]}      | Calculate array size                   |
-| arr[0]=3        | Overwrite 1st element                  |
-| arr+=(4)        | Append value(s)                        |
-| str=$(ls)       | Save ls output as string               |
-| arr=( $(ls) )   | Save ls output as array of files       |
-| ${arr[@]:s:n}   | Elements at indices n to s+n           |
-| ${str//ab/c}    | For a given string, replace ab with c  |
-| ${arr[@]//ab/c} | For each array item, replace ab with c |
+
+  | syntax          | result                                 |
+  |-----------------+----------------------------------------|
+  | arr=()          | Create empty array                     |
+  | arr=(1 2 3)     | Initialize array                       |
+  | ${arr[2]}       | Retrieve third element                 |
+  | ${arr[@]}       | Retrieve all elements                  |
+  | ${!arr[@]}      | Retrieve array indices                 |
+  | ${#arr[@]}      | Calculate array size                   |
+  | arr[0]=3        | Overwrite 1st element                  |
+  | arr+=(4)        | Append value(s)                        |
+  | str=$(ls)       | Save ls output as string               |
+  | arr=( $(ls) )   | Save ls output as array of files       |
+  | ${arr[@]:s:n}   | Elements at indices n to s+n           |
+  | ${str//ab/c}    | For a given string, replace ab with c  |
+  | ${arr[@]//ab/c} | For each array item, replace ab with c |
+
 * Interesting snippets / idioms
 
-use of ? expansion (which is the many expansions is this?) to produce newline separated path:
+  use of ? expansion (which of the many expansions is this?) to produce newline separated path:
 
-#+begin_src zsh
-❯ type path
-path is an alias for echo -e ${PATH//:/\\n}
+  #+begin_example
+  ❯ type path
+  path is an alias for echo -e ${PATH//:/\\n}
 
-~
-❯ path
-/Users/jeff/bin/MacOS
-/Users/jeff/bin
-/usr/local/bin
-/usr/bin
-/bin
-/usr/sbin
-/sbin
-/opt/X11/bin
-#+end_src
+  ❯ path
+  /Users/jeff/bin/MacOS
+  /Users/jeff/bin
+  /usr/local/bin
+  /usr/bin
+  /bin
+  /usr/sbin
+  /sbin
+  /opt/X11/bin
+  #+end_example
 
-show read-only parameters
+  show read-only parameters
 
-#+begin_src zsh
-❯ typeset -r
-'!'=0
-'#'=0
-'$'=3588
-'*'=(  )
--=059CDEJNQRTWXZghilms
-'?'=0
-@=(  )
-ARGC=0
-EPOCHREALTIME
-EPOCHSECONDS
-#+end_src
+  #+begin_example
+  ❯ typeset -r
+  '!'=0
+  '#'=0
+  '$'=3588
+  '*'=(  )
+  -=059CDEJNQRTWXZghilms
+  '?'=0
+  @=(  )
+  ARGC=0
+  EPOCHREALTIME
+  EPOCHSECONDS
+  #+end_example
 
-to see the attributes of a parameter, use +m
+  to see the attributes of a parameter, use +m
 
-#+BEGIN_SRC zsh
-❯ typeset +m path
-array unique tied PATH path
-#+END_SRC
+  #+begin_example
+  ❯ typeset +m path
+  array unique tied PATH path
+  #+END_EXAMPLE
 
-show all the params with a given attribute, like array (+a), or associative array (+A):
+  show all the params with a given attribute, like array (+a), or associative array (+A):
 
-#+begin_src zsh
-❯ declare +m +a
-*
-@
-ZSH_HIGHLIGHT_HIGHLIGHTERS
-argv
-cdpath
-comppostfuncs
-compprefuncs
-dirstack
-dis_patchars
-dis_reswords
-epochtime
-fignore
-fpath
-  ...
-#+end_src
+  #+begin_example
+  ❯ declare +m +a
+  *
+  @
+  ZSH_HIGHLIGHT_HIGHLIGHTERS
+  argv
+  cdpath
+  comppostfuncs
+  compprefuncs
+  dirstack
+  dis_patchars
+  dis_reswords
+  epochtime
+  fignore
+  fpath
+    ...
+  #+end_example
 
-#+begin_src zsh
-❯ declare +m +A
-BG
-FG
-FX
-ZSH_HIGHLIGHT_PATTERNS
-ZSH_HIGHLIGHT_STYLES
-aliases
-builtins
-commands
-dis_aliases
-dis_builtins
-dis_functions
-dis_functions_source
-dis_galiases
-dis_saliases
-editor_info
-functions
-functions_source
-galiases
-history
-#+end_src
+  #+begin_example
+  ❯ declare +m +A
+  BG
+  FG
+  FX
+  ZSH_HIGHLIGHT_PATTERNS
+  ZSH_HIGHLIGHT_STYLES
+  aliases
+  builtins
+  commands
+  dis_aliases
+  dis_builtins
+  dis_functions
+  dis_functions_source
+  dis_galiases
+  dis_saliases
+  editor_info
+  functions
+  functions_source
+  galiases
+  history
+  #+end_example
 
-show the attribute info of all params
+  show the attribute info of all params
 
-#+begin_src zsh
-❯ declare +
-integer 10 readonly !
-integer 10 readonly #
-integer 10 readonly $
-array readonly *
-readonly -
-  ...
-#+end_src
+  #+begin_example
+  ❯ declare +
+  integer 10 readonly !
+  integer 10 readonly #
+  integer 10 readonly $
+  array readonly *
+  readonly -
+    ...
+  #+end_example
 
-show parameters with the uniqueness attribute declared:
+  show parameters with the uniqueness attribute declared:
 
-#+begin_src zsh
-❯ typeset -U +
-_comp_assocs
-cdpath
-fpath
-mailpath
-path
-prompt_themes
-#+end_src
+  #+begin_example
+  ❯ typeset -U +
+  _comp_assocs
+  cdpath
+  fpath
+  mailpath
+  path
+  prompt_themes
+  #+end_example
 
-show the types of parameters matching a pattern:
+  show the types of parameters matching a pattern:
 
-#+begin_src zsh
-❯ declare +m "*path"
-array cdpath
-array fpath
-array mailpath
-array manpath
-array module_path
-array path
-#+end_src
+  #+begin_example
+  ❯ declare +m "*path"
+  array cdpath
+  array fpath
+  array mailpath
+  array manpath
+  array module_path
+  array path
+  #+end_example
 
-show all parameters and values matching a pattern:
+  show all parameters and values matching a pattern:
 
-#+begin_src zsh
-❯ declare -m "*path"
-path=( /Users/jeff/bin/MacOS /Users/jeff/bin /usr/local/bin /usr/bin /bin /usr/sbin /sbin /opt/X11/bin )
-module_path=( /usr/local/Cellar/zsh/5.4.2_1/lib )
-mailpath=(  )
-fpath=( /Users/jeff/.zprezto/modules/helper/functions /Users/jeff/.zprezto/modules/completion/external/src /Users/jeff/.zprezto/modules/osx/functions /Users/jeff/.zprezto/modules/git/functions /Users/jeff/.zprezto/modules/utility/functions /Users/jeff/.zprezto/modules/prompt/functions /usr/local/share/zsh/site-functions /usr/local/Cellar/zsh/5.4.2_1/share/zsh/functions )
-cdpath=(  )
-manpath=(  )
-#+end_src
+  #+begin_example
+  ❯ declare -m "*path"
+  path=( /Users/jeff/bin/MacOS /Users/jeff/bin /usr/local/bin /usr/bin /bin /usr/sbin /sbin /opt/X11/bin )
+  module_path=( /usr/local/Cellar/zsh/5.4.2_1/lib )
+  mailpath=(  )
+  fpath=( /Users/jeff/.zprezto/modules/helper/functions /Users/jeff/.zprezto/modules/completion/external/src /Users/jeff/.zprezto/modules/osx/functions /Users/jeff/.zprezto/modules/git/functions /Users/jeff/.zprezto/modules/utility/functions /Users/jeff/.zprezto/modules/prompt/functions /usr/local/share/zsh/site-functions /usr/local/Cellar/zsh/5.4.2_1/share/zsh/functions )
+  cdpath=(  )
+  manpath=(  )
+  #+end_example
+
+** idiom to recursively list all files, including hidden files
+
+  > ( setopt globdots; print -l **/*(.) )
 
 * zsh users guide notes / zsh dash info pages notes
 ** zsh startup sequence
-is well documented in zsh 5 Files
-#+BEGIN_SRC shell
-open dash://zsh:5Files
-#+END_SRC
+   is well documented in zsh 5 Files
+   #+BEGIN_SRC shell
+   open dash://zsh:5Files
+   #+END_SRC
 
 ** prefer ~[[~ over ~[~ in all cases.
-the zsh manual calls this a "compound command"
-it is a ksh-era improvement over some of the issues with ~[~, ie
+   the zsh manual calls this a "compound command"
+   it is a ksh-era improvement over some of the issues with ~[~, ie
 
-- string expansions need not be guarded for the empty string, ie
+   - string expansions need not be guarded for the empty string, ie
 
-#+begin_src sh
-[ "${var}X" == "somestringX" ]
-#+end_src
+   #+begin_src shell
+   [ "${var}X" == "somestringX" ]
+   #+end_src
 
-is not needed.
+   is not needed.
 
 ** prefer ~print --~
 
-recommended idiom: pass -- after every print so print will work even if the text begins with ~-~.
-this saves grief when the printed text may look like an option to be parsed.
-ie, prefer:
+   recommended idiom: pass -- after every print so print will work even if the text begins with ~-~.
+   this saves grief when the printed text may look like an option to be parsed.
+   ie, prefer:
 
-#+begin_src sh
-print -- ${msg}
-#+end_src
+   #+begin_src shell
+   print -- ${msg}
+   #+end_src
 
-over
+   over
 
-#+begin_src sh
-print ${msg}
-#+end_src
+   #+begin_src shell
+   print ${msg}
+   #+end_src
 
 ** SH_WORD_SPLIT
 
-by default, zsh will not split the expansion of a multi word parameter on spaces as sh does
-because it treats it as an array
-but this shows that there are other places where expansion happens
+   by default, zsh will not split the expansion of a multi word parameter on spaces as sh does
+   because it treats it as an array
+   but this shows that there are other places where expansion happens
 
-to split an arg by spaces, use ~${=foo}~
+   to split an arg by spaces, use ~${=foo}~
 
-#+begin_src sh :results output verbatim
-zsh -s <<'eos'
-function show_args() {
-  echo num args: $#
-  echo $@
-}
-foo=(every good boy does fine)
-show_args $foo
-show_args "$foo"
-show_args ${foo[3]} $foo[5]
-eos
-#+end_src
+   #+begin_src shell :results output verbatim
+   zsh -s <<'eos'
+   function show_args() {
+     echo num args: $#
+     echo $@
+   }
+   foo=(every good boy does fine)
+   show_args $foo
+   show_args "$foo"
+   show_args ${foo[3]} $foo[5]
+   eos
+   #+end_src
 
-#+RESULTS:
-: num args: 5
-: every good boy does fine
-: num args: 1
-: every good boy does fine
-: num args: 2
-: boy fine
+   #+RESULTS:
+   : num args: 5
+   : every good boy does fine
+   : num args: 1
+   : every good boy does fine
+   : num args: 2
+   : boy fine
 
 ** things to check out
 
-zargs: a version of xargs that makes the find command redundant
-zmv: a command for renaming files by means of shell patterns
+   zargs: a version of xargs that makes the find command redundant
+   zmv: a command for renaming files by means of shell patterns
 
 ** coprocesses
 
-- [[https://www.zsh.org/mla/users/2011/msg00095.html][tutorial of sorts]]
+   - [[https://www.zsh.org/mla/users/2011/msg00095.html][tutorial of sorts]]
 
 ** redirection
 
-if the word behind a redirection symbol (eg ~<~) expands to multiple words, each of them is treated as a file and they are opened one by one to provide the input
+   if the word behind a redirection symbol (eg ~<~) expands to multiple words, each of them is treated as a
+   file and they are opened one by one to provide the input
 
-#+begin_src sh :results output replace
-zsh -s <<'eos'
-echo every >! /tmp/one; echo good >! /tmp/two; files=(/tmp/{one,two}); cat -n <${files}; rm ${files};
-eos
-#+end_src
+   #+begin_src shell :results output replace
+   zsh -s <<'eos'
+   echo every >! /tmp/one; echo good >! /tmp/two; files=(/tmp/{one,two}); cat -n <${files}; rm ${files};
+   eos
+   #+end_src
 
-#+RESULTS:
-:      1	every
-:      2	good
+   #+RESULTS:
 
-the same effect can be had when multios are in effect without the use of an array:
+   the same effect can be had when multios are in effect without the use of an array:
 
-#+begin_src sh :results output replace
-zsh -s <<'eos'
-setopt MULTIOS
-echo every >! /tmp/one; echo good >! /tmp/two; cat -n < /tmp/one < /tmp/two; rm /tmp/{one,two};
-eos
-#+end_src
+   #+begin_src shell :results output replace
+   zsh -s <<'eos'
+   setopt MULTIOS
+   echo every >! /tmp/one; echo good >! /tmp/two; cat -n < /tmp/one < /tmp/two; rm /tmp/{one,two};
+   eos
+   #+end_src
 
-#+RESULTS:
-:      1	every
-:      2	good
+   #+RESULTS:
+   :      1	every
+   :      2	good
 
 *** here string
 
-~<<< word~
+    ~<<< word~
 
-#+BEGIN_QUOTE
-Perform shell expansion on word and pass the result to standard input. This is known as a here-string.
-Compare the use of word in here-documents above, where word does not undergo shell expansion
-#+END_QUOTE
+    #+begin_quote
+    Perform shell expansion on word and pass the result to standard input. This is known as a here-string.
+    Compare the use of word in here-documents above, where word does not undergo shell expansion
+    #+end_quote
 
 *** redirecting stdout and stderr
 
-well, it would be nice to record the outputs here in org-mode, but the way org-mode executes the shell,
-[[http://kitchingroup.cheme.cmu.edu/blog/2015/01/04/Redirecting-stderr-in-org-mode-shell-blocks/][it discards stderr]], apparently by design.
+    well, it would be nice to record the outputs here in org-mode, but the way org-mode executes the shell,
+    [[http://kitchingroup.cheme.cmu.edu/blog/2015/01/04/Redirecting-stderr-in-org-mode-shell-blocks/][it discards stderr]], apparently by design.
 
-so these experiments are best done at the shell itself.
+    so these experiments are best done at the shell itself.
 
-#+BEGIN_SRC sh :results output replace
-zsh -s <<-'eos'
-{
-   print "stdout foo" >&1;
-   print "stderr foo" >&2;
-}
-eos
-#+END_SRC
+    #+begin_src shell :results output replace
+    zsh -s <<-'eos'
+    {
+       print "stdout foo" >&1;
+       print "stderr foo" >&2;
+    }
+    eos
+    #+END_SRC
 
-gives
+    gives
 
-#+BEGIN_EXAMPLE
-stderr foo
-stdout foo
-#+END_EXAMPLE
+    #+BEGIN_EXAMPLE
+    stderr foo
+    stdout foo
+    #+END_EXAMPLE
 
-we can redirect these separately:
+    we can redirect these separately:
 
-#+BEGIN_SRC sh
-{ print "stderr foo" >&2; print "stdout foo" >&1; } > /dev/null;
-#+END_SRC
+    #+BEGIN_SRC sh
+    { print "stderr foo" >&2; print "stdout foo" >&1; } > /dev/null;
+    #+END_SRC
 
-#+BEGIN_EXAMPLE
-stderr foo
-#+END_EXAMPLE
+    #+BEGIN_EXAMPLE
+    stderr foo
+    #+END_EXAMPLE
 
-#+BEGIN_SRC sh
-{ print "stderr foo" >&2; print "stdout foo" >&1; } 2> /dev/null;
-#+END_SRC
+    #+BEGIN_SRC sh
+    { print "stderr foo" >&2; print "stdout foo" >&1; } 2> /dev/null;
+    #+END_SRC
 
-#+BEGIN_EXAMPLE
-stdout foo
-#+END_EXAMPLE
+    #+BEGIN_EXAMPLE
+    stdout foo
+    #+END_EXAMPLE
 
-or both together:
+    or both together:
 
-#+BEGIN_SRC sh
-{ print "stderr foo" >&2; print "stdout foo" >&1; } |& > /dev/null;
-#+END_SRC
+    #+BEGIN_SRC sh
+    { print "stderr foo" >&2; print "stdout foo" >&1; } |& > /dev/null;
+    #+END_SRC
 
-#+BEGIN_EXAMPLE
-<empty; no output>
-#+END_EXAMPLE
+    #+BEGIN_EXAMPLE
+    <empty; no output>
+    #+END_EXAMPLE
 
 ** arithmetic operations
 
-zsh can natively show thousands, millions separators -- like my commify -- using an output base specifier. eg
+   zsh can natively show thousands, millions separators -- like my commify -- using an output base specifier. eg
 
-#+BEGIN_SRC sh :results output replace
-zsh <<-'eos'
-print $(( [#_] 178316242 ))
-eos
-#+END_SRC
+   #+begin_src shell :results output replace
+   zsh <<-'eos'
+   print $(( [#_] 178316242 ))
+   eos
+   #+END_SRC
 
-#+RESULTS:
-: 178_316_242
+   #+RESULTS:
+   : 178_316_242
 
-this, of course, works with all of the bases (2 - 36) that zsh supports
+   this, of course, works with all of the bases (2 - 36) that zsh supports
 
-#+BEGIN_SRC sh :results output replace
-zsh <<-'eos'
-setopt cbases
-print $(( [#16_4] 65536 ** 2 ))
-eos
-#+END_SRC
+   #+begin_src shell :results output replace
+   zsh <<-'eos'
+   setopt cbases
+   print $(( [#16_4] 65536 ** 2 ))
+   eos
+   #+END_SRC
 
-#+RESULTS:
-: 0x1_0000_0000
+   #+RESULTS:
+   : 0x1_0000_0000
 
-another example:
+   another example:
 
-#+BEGIN_SRC sh :results output replace
-zsh <<-'eos'
-print $(( [#_] 178316242 ))
-eos
-#+END_SRC
+   #+begin_src shell :results output replace
+   zsh <<-'eos'
+   print $(( [#_] 178316242 ))
+   eos
+   #+END_SRC
 
-#+RESULTS:
-: 178_316_242
+   #+RESULTS:
+   : 178_316_242
 
-> An arithmetic expression uses nearly the same syntax and associativity of expressions as in C.
+   > An arithmetic expression uses nearly the same syntax and associativity of expressions as in C.
 
-in particular ~++~, ~--~ and all the bitwise operators are supported.
-the ternary operator is supported, as well as the comma operator.
+   in particular ~++~, ~--~ and all the bitwise operators are supported.
+   the ternary operator is supported, as well as the comma operator.
 
-> the operators ~&&~, ~||~, ~&&=~ and ~||=~ are short circuiting, and only one of the two of the latter expressions in a ternary operator is evaluated.
+   > the operators ~&&~, ~||~, ~&&=~ and ~||=~ are short circuiting, and only one of the two of the latter
+   expressions in a ternary operator is evaluated.
+
 ** functions
-to see the names of all declared functions: ~functions +~
-to see names and function bodies: ~functions~
+   to see the names of all declared functions: ~functions +~
+   to see names and function bodies: ~functions~
+
 ** string manipulation
 *** reverse a string
-#+BEGIN_SRC shell :results output
-zsh <<-'eos'
-#!/usr/bin/env zsh
+    #+begin_src shell :results output
+    zsh <<-'eos'
+    #!/usr/bin/env zsh
 
-function rev () {
-    declare -a out
-    while (( $# > 0 )); do
-        # split $1 on character boundaries
-        declare -a source=(${(ps..)1})
-        shift
-        declare -a result=()
-        while (( $#source > 0 )); do
-            result+=($source[-1])
-            shift -p source
-        done;
-        # join the result array back down to a string
-        out+=(${(j::)result})
-    done
-    print $out
-    return 0
-}
+    function rev () {
+        declare -a out
+        while (( $# > 0 )); do
+            # split $1 on character boundaries
+            declare -a source=(${(ps..)1})
+            shift
+            declare -a result=()
+            while (( $#source > 0 )); do
+                result+=($source[-1])
+                shift -p source
+            done;
+            # join the result array back down to a string
+            out+=(${(j::)result})
+        done
+        print $out
+        return 0
+    }
 
-function show_rev() {
-    print "$#:" $@
-    print '>>' $(rev $@)
-}
-declare -a egbdf=(every good boy does fine)
-show_rev $egbdf
-show_rev "$egbdf"
-declare -a racing_emoji=(racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇)
-show_rev $racing_emoji
-show_rev "$racing_emoji"
-# the empty string
-show_rev
-eos
-#+END_SRC
+    function show_rev() {
+        print "$#:" $@
+        print '>>' $(rev $@)
+    }
+    declare -a egbdf=(every good boy does fine)
+    show_rev $egbdf
+    show_rev "$egbdf"
+    declare -a racing_emoji=(racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇)
+    show_rev $racing_emoji
+    show_rev "$racing_emoji"
+    # the empty string
+    show_rev
+    eos
+    #+end_src
 
-#+RESULTS:
-#+begin_example
-5: every good boy does fine
->> yreve doog yob seod enif
-1: every good boy does fine
->> enif seod yob doog yreve
-3: racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇
->> 🏎_rac_gnicar 🏍_elcycrotom_gnicar 🏇_gnicar_esroh
-1: racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇
->> 🏇_gnicar_esroh 🏍_elcycrotom_gnicar 🏎_rac_gnicar
-0:
->>
-#+end_example
-
+    #+RESULTS:
+    #+begin_example
+    5: every good boy does fine
+    >> yreve doog yob seod enif
+    1: every good boy does fine
+    >> enif seod yob doog yreve
+    3: racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇
+    >> 🏎_rac_gnicar 🏍_elcycrotom_gnicar 🏇_gnicar_esroh
+    1: racing_car_🏎 racing_motorcycle_🏍 horse_racing_🏇
+    >> 🏇_gnicar_esroh 🏍_elcycrotom_gnicar 🏎_rac_gnicar
+    0:
+    >>
+    #+end_example
 
 *** remove vowels from a string
-#+BEGIN_SRC shell :results output
-  #!/usr/bin/env zsh
+    #+begin_src shell :results output
+      #!/usr/bin/env zsh
 
-  function remove_vowels() {
-      declare -A vowels=(a 1 e 1 i 1 o 1 u 1)
-      declare -a out
-      while (( $# > 0 )); do
-          # split $1 on character boundaries
-          declare -a source=(${(ps..)1})
-          shift
-          declare -a result=()
-          while (( $#source > 0 )); do
-              # is this char in the zsh vowels associative array?
-              if (( ${+vowels[$source[1]]} )); then
-                  ;
-              else
-                  result+=($source[1])
-              fi
-              shift source
+      function remove_vowels() {
+          declare -A vowels=(a 1 e 1 i 1 o 1 u 1)
+          declare -a out
+          while (( $# > 0 )); do
+              # split $1 on character boundaries
+              declare -a source=(${(ps..)1})
+              shift
+              declare -a result=()
+              while (( $#source > 0 )); do
+                  # is this char in the zsh vowels associative array?
+                  if (( ${+vowels[$source[1]]} )); then
+                      ;
+                  else
+                      result+=($source[1])
+                  fi
+                  shift source
+              done
+              # join the result back down into a string
+              out+=(${(j::)result})
           done
-          # join the result back down into a string
-          out+=(${(j::)result})
-      done
-      print $out
-      return 0
-  }
+          print $out
+          return 0
+      }
 
-  declare -a egbdf=(every good boy does fine)
-  remove_vowels $egbdf
-#+END_SRC
+      declare -a egbdf=(every good boy does fine)
+      remove_vowels $egbdf
+    #+end_src
 
-#+RESULTS:
-: vry gd by ds fn
+    #+RESULTS:
+    : vry gd by ds fn
 
 ** associative arrays
    Here is a table mapping hash idioms from perl onto zsh.  From the [[http://zsh.sourceforge.net/Guide/zshguide05.html#l122][zsh user guide: Using associative arrays]]
@@ -458,154 +464,150 @@ eos
   | unset %hash;                   | unset hash                               |
   | if (exists $hash{key}) { ... } | if (( ${+hash[key]} )); then ... fi      |
 
-
-* idiom to recursively list all files, including hidden files
-
-  > ( setopt globdots; print -l **/*(.) )
-
 * example parse mysql output: write to slack
-#+BEGIN_SRC shell
-#!/usr/bin/env zsh
-# set -e # exit on any error
-# set -x # echo every command
 
-## Exit unless we have all the env vars we need to operate.
-##
-[ -z "${MYSQL_HOST}" ] && echo 'MYSQL_HOST not set -- set it and retry.' && exit 10
-echo " - MYSQL_HOST: ${MYSQL_HOST}"
+  #+begin_src shell
+    #!/usr/bin/env zsh
+    # set -e # exit on any error
+    # set -x # echo every command
 
-[ -z "${MYSQL_TCP_PORT}" ] && echo 'MYSQL_TCP_PORT not set -- set it and retry.' && exit 11
-echo " - MYSQL_TCP_PORT: ${MYSQL_TCP_PORT}"
+    ## Exit unless we have all the env vars we need to operate.
+    ##
+    [ -z "${MYSQL_HOST}" ] && echo 'MYSQL_HOST not set -- set it and retry.' && exit 10
+    echo " - MYSQL_HOST: ${MYSQL_HOST}"
 
-[ -z "${MYSQL_DATABASE}" ] && echo 'MYSQL_DATABASE not set -- set it and retry.' && exit 12
-echo " - MYSQL_DATABASE: ${MYSQL_DATABASE}"
+    [ -z "${MYSQL_TCP_PORT}" ] && echo 'MYSQL_TCP_PORT not set -- set it and retry.' && exit 11
+    echo " - MYSQL_TCP_PORT: ${MYSQL_TCP_PORT}"
 
-[ -z "${MYSQL_USER}" ] && echo 'MYSQL_USER not set -- set it and retry.' && exit 12
-echo " - MYSQL_USER: ${MYSQL_USER}"
+    [ -z "${MYSQL_DATABASE}" ] && echo 'MYSQL_DATABASE not set -- set it and retry.' && exit 12
+    echo " - MYSQL_DATABASE: ${MYSQL_DATABASE}"
 
-# allow for empty passwords in testing.
-if [[ ! -z "${MYSQL_PWD}" ]]; then
-    echo " - MYSQL_PWD: is set, but not shown here"
-fi
+    [ -z "${MYSQL_USER}" ] && echo 'MYSQL_USER not set -- set it and retry.' && exit 12
+    echo " - MYSQL_USER: ${MYSQL_USER}"
 
-[ -z "${SLACK_CHANNEL}" ] && echo 'SLACK_CHANNEL not set -- set it and retry.' && exit 14
-echo " - SLACK_CHANNEL: ${SLACK_CHANNEL}"
-
-[ -z "${CREDIT_THRESHOLD}" ] && echo 'CREDIT_THRESHOLD not set -- set it and retry.' && exit 15
-echo " - CREDIT_THRESHOLD: ${CREDIT_THRESHOLD}"
-
-echo
-
-## Slack config
-##
-# delivers to #dev-core-data-alerts
-#  configured here: https://entelo.slack.com/services/BB7DJJD89
-SLACK_URL="https://hooks.slack.com/services/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"
-SLACK_USERNAME=AlertBot
-
-# return all organizations that are under the alert credit limit to $mysql_out
-#  format is tab delimited
-#  customer_id   current_balance   limit
-#  mysql exit status stored in $msyql_status
-declare -ga mysql_args=()
-declare -gi mysql_status=0
-declare -g  mysql_out=$(mktemp /tmp/credit-lim-out.XXXXXXXX)
-trap "rm -f ${mysql_out};" EXIT
-function under_credit_limit_rows () {
-    gen_mysql_args
-
-    mysql ${mysql_args} >${mysql_out} 2>&1 <<-EOSQL
-set @api_credit_limit=${CREDIT_THRESHOLD};
-select api_cust.org_id
-  , api_credits_balance(api_cust.org_id)
-  , @api_credit_limit
-  from
-  (
-    select 620 as org_id
-    union all
-    select 2403 as org_id
-  ) api_cust
- where api_credits_balance(api_cust.org_id) <= @api_credit_limit;
-EOSQL
-
-    mysql_status=$?
-}
-
-function gen_mysql_args () {
-    mysql_args=()
-    mysql_args+=(--protocol=TCP)
-    mysql_args+=(--host=${MYSQL_HOST})
-    mysql_args+=(--port=${MYSQL_TCP_PORT})
-    mysql_args+=(--database=${MYSQL_DATABASE})
-    mysql_args+=(--user=${MYSQL_USER})
+    # allow for empty passwords in testing.
     if [[ ! -z "${MYSQL_PWD}" ]]; then
-        mysql_args+=(--password=${MYSQL_PWD})
+        echo " - MYSQL_PWD: is set, but not shown here"
     fi
-    mysql_args+=(--batch)
-    mysql_args+=(--silent)
-}
 
-function count_accounts_under_limit () {
-    declare -i n_over=0
-    cat $mysql_out | while read; do (( n_over += 1 )); done
-    print ${n_over}
-}
+    [ -z "${SLACK_CHANNEL}" ] && echo 'SLACK_CHANNEL not set -- set it and retry.' && exit 14
+    echo " - SLACK_CHANNEL: ${SLACK_CHANNEL}"
 
-function notify_slack_curl () {
-    # send a message to a slack channel
-    num_accounts=$1
+    [ -z "${CREDIT_THRESHOLD}" ] && echo 'CREDIT_THRESHOLD not set -- set it and retry.' && exit 15
+    echo " - CREDIT_THRESHOLD: ${CREDIT_THRESHOLD}"
 
-    declare -a notify_fields=()
-    declare -i org_id balance limit
-    declare balance_comma limit_comma
-    # convert mysql tab separted query results into json of the form:
-    #  { "title": "Org Id", "value": "620", "short": false }
-    #  , { "title": "Org Id", "value": "2403", "short": false }
-    #    ...
-    # the slack integration docs say the json values must be strings, not ints
-    cat $mysql_out | while read org_id balance limit; do
-        notify_fields+='{"title":"Organization Id","value":"'$org_id'","short":false}'
-        balance_comma=$(printf "%'d" $balance)
-        notify_fields+='{"title":"API balance","value":"'$balance_comma'","short":false}'
-        limit_comma=$(printf "%'d" $limit)
-        notify_fields+='{"title":"limit","value":"'$limit_comma'","short":false}'
-    done
+    echo
 
-    # send the notification
-    # cat <<EOF 1>&2
-    curl -X POST -H 'Content-type: application/json' --fail --silent --data @- $SLACK_URL <<EOF
-{
-  "fallback": "Found ${num_accounts} Data API customers with low credit balances.",
-  "pretext": "Found ${num_accounts} Data API customers with low credit balances.",
-  "username": "AlertBot",
-  "channel": "${SLACK_CHANNEL}",
-  "fields":[
-    ${(j:,:)notify_fields}
-  ]
-}
-EOF
-    print $?
-}
+    ## Slack config
+    ##
+    # delivers to #dev-core-data-alerts
+    #  configured here: https://entelo.slack.com/services/BB7DJJD89
+    SLACK_URL="https://hooks.slack.com/services/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"
+    SLACK_USERNAME=AlertBot
 
-under_credit_limit_rows
-if (( $mysql_status != 0 )); then
-    cat - ${mysql_out} >&2 <<EOF
-mysql query failed; exit status: $mysql_status
-EOF
-    exit 23;
-fi
+    # return all organizations that are under the alert credit limit to $mysql_out
+    #  format is tab delimited
+    #  customer_id   current_balance   limit
+    #  mysql exit status stored in $msyql_status
+    declare -ga mysql_args=()
+    declare -gi mysql_status=0
+    declare -g  mysql_out=$(mktemp /tmp/credit-lim-out.XXXXXXXX)
+    trap "rm -f ${mysql_out};" EXIT
+    function under_credit_limit_rows () {
+        gen_mysql_args
 
-declare -i num_accounts_under_limit=$(count_accounts_under_limit)
-if (( ${num_accounts_under_limit} == 0 )); then
-    print -- No accounts were found with low Data API credits.
+        mysql ${mysql_args} >${mysql_out} 2>&1 <<-EOSQL
+    set @api_credit_limit=${CREDIT_THRESHOLD};
+    select api_cust.org_id
+      , api_credits_balance(api_cust.org_id)
+      , @api_credit_limit
+      from
+      (
+        select 620 as org_id
+        union all
+        select 2403 as org_id
+      ) api_cust
+     where api_credits_balance(api_cust.org_id) <= @api_credit_limit;
+    EOSQL
+
+        mysql_status=$?
+    }
+
+    function gen_mysql_args () {
+        mysql_args=()
+        mysql_args+=(--protocol=TCP)
+        mysql_args+=(--host=${MYSQL_HOST})
+        mysql_args+=(--port=${MYSQL_TCP_PORT})
+        mysql_args+=(--database=${MYSQL_DATABASE})
+        mysql_args+=(--user=${MYSQL_USER})
+        if [[ ! -z "${MYSQL_PWD}" ]]; then
+            mysql_args+=(--password=${MYSQL_PWD})
+        fi
+        mysql_args+=(--batch)
+        mysql_args+=(--silent)
+    }
+
+    function count_accounts_under_limit () {
+        declare -i n_over=0
+        cat $mysql_out | while read; do (( n_over += 1 )); done
+        print ${n_over}
+    }
+
+    function notify_slack_curl () {
+        # send a message to a slack channel
+        num_accounts=$1
+
+        declare -a notify_fields=()
+        declare -i org_id balance limit
+        declare balance_comma limit_comma
+        # convert mysql tab separted query results into json of the form:
+        #  { "title": "Org Id", "value": "620", "short": false }
+        #  , { "title": "Org Id", "value": "2403", "short": false }
+        #    ...
+        # the slack integration docs say the json values must be strings, not ints
+        cat $mysql_out | while read org_id balance limit; do
+            notify_fields+='{"title":"Organization Id","value":"'$org_id'","short":false}'
+            balance_comma=$(printf "%'d" $balance)
+            notify_fields+='{"title":"API balance","value":"'$balance_comma'","short":false}'
+            limit_comma=$(printf "%'d" $limit)
+            notify_fields+='{"title":"limit","value":"'$limit_comma'","short":false}'
+        done
+
+        # send the notification
+        # cat <<EOF 1>&2
+        curl -X POST -H 'Content-type: application/json' --fail --silent --data @- $SLACK_URL <<EOF
+    {
+      "fallback": "Found ${num_accounts} Data API customers with low credit balances.",
+      "pretext": "Found ${num_accounts} Data API customers with low credit balances.",
+      "username": "AlertBot",
+      "channel": "${SLACK_CHANNEL}",
+      "fields":[
+        ${(j:,:)notify_fields}
+      ]
+    }
+    EOF
+        print $?
+    }
+
+    under_credit_limit_rows
+    if (( $mysql_status != 0 )); then
+        cat - ${mysql_out} >&2 <<EOF
+    mysql query failed; exit status: $mysql_status
+    EOF
+        exit 23;
+    fi
+
+    declare -i num_accounts_under_limit=$(count_accounts_under_limit)
+    if (( ${num_accounts_under_limit} == 0 )); then
+        print -- No accounts were found with low Data API credits.
+        exit 0
+    fi
+
+    print Found ${num_accounts_under_limit} accounts with low Data API credits.
+    declare -i curl_exit=$(notify_slack_curl ${num_accounts_under_limit})
+    if [[ -z "$curl_exit" ]] || (( ${curl_exit} != 0 )); then
+        print -- Failed to notify slack via curl
+        exit $curl_exit
+    fi
     exit 0
-fi
-
-print Found ${num_accounts_under_limit} accounts with low Data API credits.
-declare -i curl_exit=$(notify_slack_curl ${num_accounts_under_limit})
-if [[ -z "$curl_exit" ]] || (( ${curl_exit} != 0 )); then
-    print -- Failed to notify slack via curl
-    exit $curl_exit
-fi
-exit 0
-#+END_SRC
+  #+END_SRC
