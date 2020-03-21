@@ -1,0 +1,48 @@
+* develop a recipe to find the max value of a column
+** input stream
+   #+name: lag
+   #+begin_src text
+     primary-order-processor primary-order-updates 4          634508005       634520736       12731           consumer-4_/10.96.1.167
+     primary-order-processor primary-order-updates 23         634249935       634434991       185056          consumer-4_/10.96.2.176
+     primary-order-processor primary-order-updates 22         634465818       634465827       9               consumer-4_/10.96.0.162
+     primary-order-processor primary-order-updates 11         634510017       634524308       14291           consumer-4_/10.96.2.184
+
+   #+end_src
+
+
+   #+name: rebalancing
+   #+begin_src text
+     Consumer group `primary-order-processor` is rebalancing.
+     primary-order-processor primary-order-updates 4          634508005       634520736       12731           consumer-4_/10.96.1.167
+     primary-order-processor primary-order-updates 23         634249935       634434991       185056          consumer-4_/10.96.2.176
+     primary-order-processor primary-order-updates 22         634465818       634465827       9               consumer-4_/10.96.0.162
+     primary-order-processor primary-order-updates 11         634510017       634524308       14291           consumer-4_/10.96.2.184
+   #+end_src
+
+** code
+   #+name: max-awk
+   #+begin_src text
+     BEGIN {rebal=0} /rebalancing/ {rebal=1;} {s+=$6} END {if (rebal) print "rebalancing"; else print s;}
+   #+end_src
+
+   so we see =rebalancing= when that is what is happening
+
+   #+begin_src shell :results output :noweb yes
+     awk '<<max-awk>>' <<EOF
+     <<rebalancing>>
+     EOF
+   #+end_src
+
+   #+RESULTS:
+   : rebalancing
+
+   or the count of the lag column when that is what is happening
+
+   #+begin_src shell :results output :noweb yes
+     awk '<<max-awk>>' <<EOF
+     <<lag>>
+     EOF
+   #+end_src
+
+   #+RESULTS:
+   : 212087
