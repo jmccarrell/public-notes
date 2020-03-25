@@ -59,7 +59,7 @@
   #+RESULTS:
   : Sat Mar 21 17:41:57 PDT 2020 212087
 
-  iso8601, well, what about time zone?
+  iso8601 format
 
   #+begin_src shell :results output :noweb yes
     awk 'BEGIN {ts = strftime("%FT%T%z", systime())} {s += $6} END{print ts, s}' <<EOF
