@@ -156,6 +156,7 @@
 
   > ( setopt globdots; print -l **/*(.) )
 
+* [[http://grml.org/zsh/zsh-lovers.html][zsh-lovers]] snippets / idioms
 * zsh users guide notes / zsh dash info pages notes
 ** zsh startup sequence
    is well documented in zsh 5 Files
@@ -612,5 +613,94 @@
     fi
     exit 0
   #+END_SRC
-* example of getopt written in zsh
-  - can be found [[https://github.com/Eriner/zsh-framework-benchmark/blob/master/run.zsh#L28-L76][here in zsh-framework-benchmark]]
+* shell script option parsing
+** option parsing directly; no getopt; iterate over the positional arguments
+   - can be found [[https://github.com/Eriner/zsh-framework-benchmark/blob/master/run.zsh#L28-L76][here in zsh-framework-benchmark]]
+*** iterative option parsing with while
+    #+BEGIN_SRC shell
+      usage="${0} [options]
+      Options:
+          -h                  Show this help
+          -k                  Keep the frameworks (don't delete) after the tests are complete (default: delete)
+          -p <path>           Set the path to where the frameworks should be 'installed' (default: auto-generated)
+          -n <num>            Set the number of iterations to run for each framework (default: 100)
+          -f <framework>      Select a specific framework to benchmark (default: all; can specify more than once)
+          -F                  Forcibly delete ~/.zplug and OMZ update files when cleaning up"
+
+      while [[ ${#} -gt 0 ]]; do
+        case ${1} in
+          -h) print ${usage}
+              return 0
+              ;;
+          -k) keep_frameworks=true
+              shift
+              ;;
+          -F) force_delete=true
+              shift
+              ;;
+          -p) shift
+              mkdir -p ${1}
+              if [[ -d ${1} ]]; then
+                test_dir=${1}
+              else
+                print "${0}: directory ${1} specified by option '-p' is invalid" >&2
+                return 1
+              fi
+              shift
+              ;;
+          -n) shift
+              iterations=${1}
+              shift
+              ;;
+          -f) shift
+              if [[ ${available_frameworks[(r)${1}]} == ${1} ]]; then
+                frameworks+=${1}
+              else
+                print "${0}: framework \"${1}\" is not a valid framework.
+      Available frameworks are: ${available_frameworks}" >&2
+                return 1
+              fi
+              shift
+              ;;
+          ,*) print ${usage}
+             return 1
+             ;;
+        esac
+      done
+
+      if (( ${#} )); then
+        print ${usage}
+        return 1
+      fi
+    #+END_SRC
+** option parsing with zparseopts
+   Example taken from ZWS by Adam Chodorowski (http://www.chodorowski.com/projects/zws/) via [[http://grml.org/zsh/zsh-lovers.html][zsh-lovers]]
+   #+BEGIN_SRC shell
+     parse_options()
+     {
+         o_port=(-p 9999)
+         o_root=(-r WWW)
+         o_log=(-d ZWS.log)
+
+         zparseopts -K -- p:=o_port r:=o_root l:=o_log h=o_help
+         if [[ $? != 0 || "$o_help" != "" ]]; then
+             echo Usage: $(basename "$0") "[-p PORT] [-r DIRECTORY]"
+             exit 1
+         fi
+
+         port=$o_port[2]
+         root=$o_root[2]
+         log=$o_log[2]
+
+         if [[ $root[1] != '/' ]]; then root="$PWD/$root"; fi
+     }
+     # now use the function:
+     parse_options $*
+   #+END_SRC
+   each of the =o_= values are arrays that leverage the global namespace
+   #+begin_example
+     ❯ o_port=(-p 9999)
+
+     ❯ typeset +m o_port
+     array o_port
+   #+end_example
