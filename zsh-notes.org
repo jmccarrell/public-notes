@@ -612,3 +612,5 @@
     fi
     exit 0
   #+END_SRC
+* example of getopt written in zsh
+  - can be found [[https://github.com/Eriner/zsh-framework-benchmark/blob/master/run.zsh#L28-L76][here in zsh-framework-benchmark]]

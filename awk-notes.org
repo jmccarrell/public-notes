@@ -50,6 +50,10 @@
 * print a timestamp
   human readable
 
+  this really gets down to using strftime.  Here is a nice [[http://strftime.net/][interactive site for strftime]].
+
+  cache the time value once, so it is not computed each line
+
   #+begin_src shell :results output :noweb yes
     awk 'BEGIN {ts = strftime("%a %b %e %H:%M:%S %Z %Y", systime())} {s += $6} END{print ts, s}' <<EOF
     <<lag>>
@@ -59,7 +63,7 @@
   #+RESULTS:
   : Sat Mar 21 17:41:57 PDT 2020 212087
 
-  iso8601, well, what about time zone?
+  generate iso8601, including the timezone
 
   #+begin_src shell :results output :noweb yes
     awk 'BEGIN {ts = strftime("%FT%T%z", systime())} {s += $6} END{print ts, s}' <<EOF
@@ -69,3 +73,20 @@
 
   #+RESULTS:
   : 2020-03-21T17:47:43-0700 212087
+
+  now with milliseconds
+
+  #+begin_example
+    %FT%T.%L%z
+  #+end_example
+
+  well, that does not seem to work.
+
+  #+begin_src shell :results output :noweb yes
+    gawk 'BEGIN {ts = strftime("%FT%T.%L%z", systime())} {s += $6} END{print ts, s}' <<EOF
+    <<lag>>
+    EOF
+  #+END_SRC
+
+  #+RESULTS:
+  : 2020-03-22T21:30:59.L-0700 212087
