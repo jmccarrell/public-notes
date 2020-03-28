@@ -1,0 +1,17 @@
+* how to find multiple instances of a regex match in a single line
+  this one finds ENV declarations in ruby files.
+
+  ie, to find all of the ENV declarations in code like this:
+  #+BEGIN_SRC ruby
+        if ENV["EXPERIMENT"].to_s == "" or ENV["TEST_SET"].to_s == "" or \
+           ((ENV["API_GRAINS_SNAPSHOT"].to_s == "") and (ENV["MOBILE_EVENTS_SNAPSHOT"].to_s == "") and (ENV["MOBILE_EVENTS_SNAPSHOT"].to_s == ""))
+          print_usage()
+          exit 1
+        end
+  #+END_SRC
+
+  use perl like this:
+  #+begin_example
+    # from deploy/hadoop
+    # perl -n -E'{ say $1 while m/ENV\[([^]]+)/g }' < hadoop/* | tr \" \' | sort | uniq
+  #+end_example
