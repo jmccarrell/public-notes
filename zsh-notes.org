@@ -24,132 +24,132 @@
   use of ? expansion (which of the many expansions is this?) to produce newline separated path:
 
   #+begin_example
-  ❯ type path
-  path is an alias for echo -e ${PATH//:/\\n}
+    ❯ type path
+    path is an alias for echo -e ${PATH//:/\\n}
 
-  ❯ path
-  /Users/jeff/bin/MacOS
-  /Users/jeff/bin
-  /usr/local/bin
-  /usr/bin
-  /bin
-  /usr/sbin
-  /sbin
-  /opt/X11/bin
+    ❯ path
+    /Users/jeff/bin/MacOS
+    /Users/jeff/bin
+    /usr/local/bin
+    /usr/bin
+    /bin
+    /usr/sbin
+    /sbin
+    /opt/X11/bin
   #+end_example
 
   show read-only parameters
 
   #+begin_example
-  ❯ typeset -r
-  '!'=0
-  '#'=0
-  '$'=3588
-  '*'=(  )
-  -=059CDEJNQRTWXZghilms
-  '?'=0
-  @=(  )
-  ARGC=0
-  EPOCHREALTIME
-  EPOCHSECONDS
+    ❯ typeset -r
+    '!'=0
+    '#'=0
+    '$'=3588
+    '*'=(  )
+    -=059CDEJNQRTWXZghilms
+    '?'=0
+    @=(  )
+    ARGC=0
+    EPOCHREALTIME
+    EPOCHSECONDS
   #+end_example
 
   to see the attributes of a parameter, use +m
 
   #+begin_example
-  ❯ typeset +m path
-  array unique tied PATH path
+    ❯ typeset +m path
+    array unique tied PATH path
   #+END_EXAMPLE
 
   show all the params with a given attribute, like array (+a), or associative array (+A):
 
   #+begin_example
-  ❯ declare +m +a
-  *
-  @
-  ZSH_HIGHLIGHT_HIGHLIGHTERS
-  argv
-  cdpath
-  comppostfuncs
-  compprefuncs
-  dirstack
-  dis_patchars
-  dis_reswords
-  epochtime
-  fignore
-  fpath
-    ...
+    ❯ declare +m +a
+    ,*
+    @
+    ZSH_HIGHLIGHT_HIGHLIGHTERS
+    argv
+    cdpath
+    comppostfuncs
+    compprefuncs
+    dirstack
+    dis_patchars
+    dis_reswords
+    epochtime
+    fignore
+    fpath
+      ...
   #+end_example
 
   #+begin_example
-  ❯ declare +m +A
-  BG
-  FG
-  FX
-  ZSH_HIGHLIGHT_PATTERNS
-  ZSH_HIGHLIGHT_STYLES
-  aliases
-  builtins
-  commands
-  dis_aliases
-  dis_builtins
-  dis_functions
-  dis_functions_source
-  dis_galiases
-  dis_saliases
-  editor_info
-  functions
-  functions_source
-  galiases
-  history
+    ❯ declare +m +A
+    BG
+    FG
+    FX
+    ZSH_HIGHLIGHT_PATTERNS
+    ZSH_HIGHLIGHT_STYLES
+    aliases
+    builtins
+    commands
+    dis_aliases
+    dis_builtins
+    dis_functions
+    dis_functions_source
+    dis_galiases
+    dis_saliases
+    editor_info
+    functions
+    functions_source
+    galiases
+    history
   #+end_example
 
   show the attribute info of all params
 
   #+begin_example
-  ❯ declare +
-  integer 10 readonly !
-  integer 10 readonly #
-  integer 10 readonly $
-  array readonly *
-  readonly -
-    ...
+    ❯ declare +
+    integer 10 readonly !
+    integer 10 readonly #
+    integer 10 readonly $
+    array readonly *
+    readonly -
+      ...
   #+end_example
 
   show parameters with the uniqueness attribute declared:
 
   #+begin_example
-  ❯ typeset -U +
-  _comp_assocs
-  cdpath
-  fpath
-  mailpath
-  path
-  prompt_themes
+    ❯ typeset -U +
+    _comp_assocs
+    cdpath
+    fpath
+    mailpath
+    path
+    prompt_themes
   #+end_example
 
   show the types of parameters matching a pattern:
 
   #+begin_example
-  ❯ declare +m "*path"
-  array cdpath
-  array fpath
-  array mailpath
-  array manpath
-  array module_path
-  array path
+    ❯ declare +m "*path"
+    array cdpath
+    array fpath
+    array mailpath
+    array manpath
+    array module_path
+    array path
   #+end_example
 
   show all parameters and values matching a pattern:
 
   #+begin_example
-  ❯ declare -m "*path"
-  path=( /Users/jeff/bin/MacOS /Users/jeff/bin /usr/local/bin /usr/bin /bin /usr/sbin /sbin /opt/X11/bin )
-  module_path=( /usr/local/Cellar/zsh/5.4.2_1/lib )
-  mailpath=(  )
-  fpath=( /Users/jeff/.zprezto/modules/helper/functions /Users/jeff/.zprezto/modules/completion/external/src /Users/jeff/.zprezto/modules/osx/functions /Users/jeff/.zprezto/modules/git/functions /Users/jeff/.zprezto/modules/utility/functions /Users/jeff/.zprezto/modules/prompt/functions /usr/local/share/zsh/site-functions /usr/local/Cellar/zsh/5.4.2_1/share/zsh/functions )
-  cdpath=(  )
-  manpath=(  )
+    ❯ declare -m "*path"
+    path=( /Users/jeff/bin/MacOS /Users/jeff/bin /usr/local/bin /usr/bin /bin /usr/sbin /sbin /opt/X11/bin )
+    module_path=( /usr/local/Cellar/zsh/5.4.2_1/lib )
+    mailpath=(  )
+    fpath=( /Users/jeff/.zprezto/modules/helper/functions /Users/jeff/.zprezto/modules/completion/external/src /Users/jeff/.zprezto/modules/osx/functions /Users/jeff/.zprezto/modules/git/functions /Users/jeff/.zprezto/modules/utility/functions /Users/jeff/.zprezto/modules/prompt/functions /usr/local/share/zsh/site-functions /usr/local/Cellar/zsh/5.4.2_1/share/zsh/functions )
+    cdpath=(  )
+    manpath=(  )
   #+end_example
 
 ** idiom to recursively list all files, including hidden files
@@ -161,17 +161,18 @@
 ** zsh startup sequence
    is well documented in zsh 5 Files
    #+BEGIN_SRC shell
-   open dash://zsh:5Files
+     open dash://zsh:5Files
    #+END_SRC
 
 ** prefer ~[[~ over ~[~ in all cases.
    the zsh manual calls this a "compound command"
    it is a ksh-era improvement over some of the issues with ~[~, ie
 
-   - string expansions need not be guarded for the empty string, ie
+   - string expansions need not be guarded for the empty string, ie, this idiom is not needed inside ~[[~
+     pairs.
 
    #+begin_src shell
-   [ "${var}X" == "somestringX" ]
+     [ "${var}X" == "somestringX" ]
    #+end_src
 
    is not needed.
@@ -183,13 +184,13 @@
    ie, prefer:
 
    #+begin_src shell
-   print -- ${msg}
+     print -- ${msg}
    #+end_src
 
    over
 
    #+begin_src shell
-   print ${msg}
+     print ${msg}
    #+end_src
 
 ** SH_WORD_SPLIT
@@ -201,16 +202,17 @@
    to split an arg by spaces, use ~${=foo}~
 
    #+begin_src shell :results output verbatim
-   zsh -s <<'eos'
-   function show_args() {
-     echo num args: $#
-     echo $@
-   }
-   foo=(every good boy does fine)
-   show_args $foo
-   show_args "$foo"
-   show_args ${foo[3]} $foo[5]
-   eos
+     zsh -s <<'eos'
+     function show_args() {
+       echo num args: $#
+       echo $@
+     }
+
+     foo=(every good boy does fine)
+     show_args $foo
+     show_args "$foo"
+     show_args ${foo[3]} $foo[5]
+     eos
    #+end_src
 
    #+RESULTS:
@@ -236,9 +238,9 @@
    file and they are opened one by one to provide the input
 
    #+begin_src shell :results output replace
-   zsh -s <<'eos'
-   echo every >! /tmp/one; echo good >! /tmp/two; files=(/tmp/{one,two}); cat -n <${files}; rm ${files};
-   eos
+     zsh -s <<'eos'
+     echo every >! /tmp/one; echo good >! /tmp/two; files=(/tmp/{one,two}); cat -n <${files}; rm ${files};
+     eos
    #+end_src
 
    #+RESULTS:
@@ -246,10 +248,10 @@
    the same effect can be had when multios are in effect without the use of an array:
 
    #+begin_src shell :results output replace
-   zsh -s <<'eos'
-   setopt MULTIOS
-   echo every >! /tmp/one; echo good >! /tmp/two; cat -n < /tmp/one < /tmp/two; rm /tmp/{one,two};
-   eos
+     zsh -s <<'eos'
+     setopt MULTIOS
+     echo every >! /tmp/one; echo good >! /tmp/two; cat -n < /tmp/one < /tmp/two; rm /tmp/{one,two};
+     eos
    #+end_src
 
    #+RESULTS:
@@ -261,8 +263,8 @@
     ~<<< word~
 
     #+begin_quote
-    Perform shell expansion on word and pass the result to standard input. This is known as a here-string.
-    Compare the use of word in here-documents above, where word does not undergo shell expansion
+      Perform shell expansion on word and pass the result to standard input. This is known as a here-string.
+      Compare the use of word in here-documents above, where word does not undergo shell expansion
     #+end_quote
 
 *** redirecting stdout and stderr
@@ -273,47 +275,47 @@
     so these experiments are best done at the shell itself.
 
     #+begin_src shell :results output replace
-    zsh -s <<-'eos'
-    {
-       print "stdout foo" >&1;
-       print "stderr foo" >&2;
-    }
-    eos
+      zsh -s <<-'eos'
+      {
+         print "stdout foo" >&1;
+         print "stderr foo" >&2;
+      }
+      eos
     #+END_SRC
 
     gives
 
     #+BEGIN_EXAMPLE
-    stderr foo
-    stdout foo
+      stderr foo
+      stdout foo
     #+END_EXAMPLE
 
     we can redirect these separately:
 
     #+BEGIN_SRC sh
-    { print "stderr foo" >&2; print "stdout foo" >&1; } > /dev/null;
+      { print "stderr foo" >&2; print "stdout foo" >&1; } > /dev/null;
     #+END_SRC
 
     #+BEGIN_EXAMPLE
-    stderr foo
+      stderr foo
     #+END_EXAMPLE
 
     #+BEGIN_SRC sh
-    { print "stderr foo" >&2; print "stdout foo" >&1; } 2> /dev/null;
+      { print "stderr foo" >&2; print "stdout foo" >&1; } 2> /dev/null;
     #+END_SRC
 
     #+BEGIN_EXAMPLE
-    stdout foo
+      stdout foo
     #+END_EXAMPLE
 
     or both together:
 
     #+BEGIN_SRC sh
-    { print "stderr foo" >&2; print "stdout foo" >&1; } |& > /dev/null;
+      { print "stderr foo" >&2; print "stdout foo" >&1; } |& > /dev/null;
     #+END_SRC
 
     #+BEGIN_EXAMPLE
-    <empty; no output>
+      <empty; no output>
     #+END_EXAMPLE
 
 ** arithmetic operations
@@ -321,9 +323,9 @@
    zsh can natively show thousands, millions separators -- like my commify -- using an output base specifier. eg
 
    #+begin_src shell :results output replace
-   zsh <<-'eos'
-   print $(( [#_] 178316242 ))
-   eos
+     zsh <<-'eos'
+     print $(( [#_] 178316242 ))
+     eos
    #+END_SRC
 
    #+RESULTS:
@@ -332,10 +334,10 @@
    this, of course, works with all of the bases (2 - 36) that zsh supports
 
    #+begin_src shell :results output replace
-   zsh <<-'eos'
-   setopt cbases
-   print $(( [#16_4] 65536 ** 2 ))
-   eos
+     zsh <<-'eos'
+     setopt cbases
+     print $(( [#16_4] 65536 ** 2 ))
+     eos
    #+END_SRC
 
    #+RESULTS:
@@ -344,9 +346,9 @@
    another example:
 
    #+begin_src shell :results output replace
-   zsh <<-'eos'
-   print $(( [#_] 178316242 ))
-   eos
+     zsh <<-'eos'
+     print $(( [#_] 178316242 ))
+     eos
    #+END_SRC
 
    #+RESULTS:
