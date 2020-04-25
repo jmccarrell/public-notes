@@ -871,7 +871,7 @@ git log -p ./app/.../whatever.rb
 
 Alex Deeb added:
 
-One command I like to use to see the names of all files changed in a particular commit: `git diff-tree --no-commit-id --name-only -r {commit_sha}`u
+One command I like to use to see the names of all files changed in a particular commit: `git diff-tree --no-commit-id --name-only -r {commit_sha}`
 
 ----
 
