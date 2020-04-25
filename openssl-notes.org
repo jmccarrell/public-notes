@@ -6,3 +6,12 @@
 
   #+RESULTS:
   : WvJQlbeLNYlWLGOyeV9lMLzayBc=
+
+  or if you prefer hex
+
+  #+BEGIN_SRC shell :results output
+    openssl rand -hex 20
+  #+END_SRC
+
+  #+RESULTS:
+  : e25e415f33fc57b78bcb5cf1950f9ce20191e6c8
