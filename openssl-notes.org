@@ -1,0 +1,8 @@
+* generate a random number with openssl
+
+  #+BEGIN_SRC shell :results output
+    openssl rand -base64 20
+  #+END_SRC
+
+  #+RESULTS:
+  : WvJQlbeLNYlWLGOyeV9lMLzayBc=
