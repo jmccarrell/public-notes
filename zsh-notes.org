@@ -385,14 +385,14 @@
               # join the result array back down to a string
               out+=(${(j::)result})
           done
-          print $out
+          print -- $out
 
           return 0
       }
 
       function show_rev() {
-          print "$#:" $@
-          print '>>' $(rev $@)
+          print -- "$#:" $@
+          print -- '>>' $(rev $@)
       }
       declare -a egbdf=(every good boy does fine)
       show_rev $egbdf
@@ -442,7 +442,7 @@
               # join the result back down into a string
               out+=(${(j::)result})
           done
-          print $out
+          print -- $out
           return 0
       }
 
@@ -477,16 +477,16 @@
 
     ## Exit unless we have all the env vars we need to operate.
     ##
-    [ -z "${MYSQL_HOST}" ] && echo 'MYSQL_HOST not set -- set it and retry.' && exit 10
+    [[ -z "${MYSQL_HOST}" ]] && echo 'MYSQL_HOST not set -- set it and retry.' && exit 10
     echo " - MYSQL_HOST: ${MYSQL_HOST}"
 
-    [ -z "${MYSQL_TCP_PORT}" ] && echo 'MYSQL_TCP_PORT not set -- set it and retry.' && exit 11
+    [[ -z "${MYSQL_TCP_PORT}" ]] && echo 'MYSQL_TCP_PORT not set -- set it and retry.' && exit 11
     echo " - MYSQL_TCP_PORT: ${MYSQL_TCP_PORT}"
 
-    [ -z "${MYSQL_DATABASE}" ] && echo 'MYSQL_DATABASE not set -- set it and retry.' && exit 12
+    [[ -z "${MYSQL_DATABASE}" ]] && echo 'MYSQL_DATABASE not set -- set it and retry.' && exit 12
     echo " - MYSQL_DATABASE: ${MYSQL_DATABASE}"
 
-    [ -z "${MYSQL_USER}" ] && echo 'MYSQL_USER not set -- set it and retry.' && exit 12
+    [[ -z "${MYSQL_USER}" ]] && echo 'MYSQL_USER not set -- set it and retry.' && exit 12
     echo " - MYSQL_USER: ${MYSQL_USER}"
 
     # allow for empty passwords in testing.
@@ -494,10 +494,10 @@
         echo " - MYSQL_PWD: is set, but not shown here"
     fi
 
-    [ -z "${SLACK_CHANNEL}" ] && echo 'SLACK_CHANNEL not set -- set it and retry.' && exit 14
+    [[ -z "${SLACK_CHANNEL}" ]] && echo 'SLACK_CHANNEL not set -- set it and retry.' && exit 14
     echo " - SLACK_CHANNEL: ${SLACK_CHANNEL}"
 
-    [ -z "${CREDIT_THRESHOLD}" ] && echo 'CREDIT_THRESHOLD not set -- set it and retry.' && exit 15
+    [[ -z "${CREDIT_THRESHOLD}" ]] && echo 'CREDIT_THRESHOLD not set -- set it and retry.' && exit 15
     echo " - CREDIT_THRESHOLD: ${CREDIT_THRESHOLD}"
 
     echo
@@ -554,7 +554,7 @@
     function count_accounts_under_limit () {
         declare -i n_over=0
         cat $mysql_out | while read; do (( n_over += 1 )); done
-        print ${n_over}
+        print -- ${n_over}
     }
 
     function notify_slack_curl () {
@@ -590,7 +590,7 @@
       ]
     }
     EOF
-        print $?
+        print -- $?
     }
 
     under_credit_limit_rows
@@ -607,7 +607,7 @@
         exit 0
     fi
 
-    print Found ${num_accounts_under_limit} accounts with low Data API credits.
+    print -- Found ${num_accounts_under_limit} accounts with low Data API credits.
     declare -i curl_exit=$(notify_slack_curl ${num_accounts_under_limit})
     if [[ -z "$curl_exit" ]] || (( ${curl_exit} != 0 )); then
         print -- Failed to notify slack via curl
@@ -631,7 +631,7 @@
 
       while [[ ${#} -gt 0 ]]; do
         case ${1} in
-          -h) print ${usage}
+          -h) print -- ${usage}
               return 0
               ;;
           -k) keep_frameworks=true
@@ -645,7 +645,7 @@
               if [[ -d ${1} ]]; then
                 test_dir=${1}
               else
-                print "${0}: directory ${1} specified by option '-p' is invalid" >&2
+                print -- "${0}: directory ${1} specified by option '-p' is invalid" >&2
                 return 1
               fi
               shift
@@ -658,20 +658,20 @@
               if [[ ${available_frameworks[(r)${1}]} == ${1} ]]; then
                 frameworks+=${1}
               else
-                print "${0}: framework \"${1}\" is not a valid framework.
+                print -- "${0}: framework \"${1}\" is not a valid framework.
       Available frameworks are: ${available_frameworks}" >&2
                 return 1
               fi
               shift
               ;;
-          ,*) print ${usage}
+          ,*) print -- ${usage}
              return 1
              ;;
         esac
       done
 
       if (( ${#} )); then
-        print ${usage}
+        print -- ${usage}
         return 1
       fi
     #+END_SRC
