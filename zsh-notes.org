@@ -505,8 +505,8 @@
     ## Slack config
     ##
     # delivers to #dev-core-data-alerts
-    #  configured here: https://entelo.slack.com/services/BB7DJJD89
-    SLACK_URL="https://hooks.slack.com/services/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"
+    #  configured here: https://entelo.slack.com/services/XXX
+    SLACK_URL="https://hooks.slack.com/services/XXX"
     SLACK_USERNAME=AlertBot
 
     # return all organizations that are under the alert credit limit to $mysql_out
