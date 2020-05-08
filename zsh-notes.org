@@ -367,6 +367,33 @@
    to see names and function bodies: ~functions~
 
 ** string manipulation
+*** remove trailing '.' from a string
+    uses the ${NAME%PATTERN} idiom to match the end of the value at NAME
+    #+begin_src shell :results output
+      #!/usr/bin/env zsh -norcs
+
+      dns_name=classifier-rpc-kmmw.expr.us-e4.gcp.sift.com.
+      print -- ${dns_name%%.}
+    #+end_src
+
+    #+RESULTS:
+    : classifier-rpc-kmmw.expr.us-e4.gcp.sift.com
+
+    or as an element of an array:
+    #+begin_src shell :results output
+      #!/usr/bin/env zsh -norcs
+
+      declare -a vals=(every good classifier-rpc-kmmw.expr.us-e4.gcp.sift.com. does fine)
+      print -- expand from the array: ${vals[3]%%.}
+
+      vals[3]=${vals[3]%%.}
+      print -- replaced in place: ${(j:|:)vals[@]}
+    #+end_src
+
+    #+RESULTS:
+    : expand from the array: classifier-rpc-kmmw.expr.us-e4.gcp.sift.com
+    : replaced in place: every|good|classifier-rpc-kmmw.expr.us-e4.gcp.sift.com|does|fine
+
 *** reverse a string
     #+begin_src shell :results output
       #!/usr/bin/env zsh -norcs
