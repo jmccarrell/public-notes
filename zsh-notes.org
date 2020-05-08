@@ -495,6 +495,85 @@
    | unset %hash;                   | unset hash                               |
    | if (exists $hash{key}) { ... } | if (( ${+hash[key]} )); then ... fi      |
 
+   According to [[https://unix.stackexchange.com/a/52065/138583][this stackexchange]], zsh can sort the keys of an associative array.
+
+   declare the data to operate on:
+   #+name: the-boys
+   #+BEGIN_SRC text
+     declare -A A;
+     A=(
+         every Evan
+         good Gary
+         boy Ben
+         does Darren
+         fine Fred
+     );
+   #+END_SRC
+
+   So first just iterate over the keys in random order:
+   #+begin_src shell :results output :noweb yes
+     #!/usr/bin/env zsh -f
+     <<the-boys>>
+
+     for k (${(@k)A}); do
+         print -- $k X ${A[$k]}
+     done
+   #+end_src
+
+   #+RESULTS:
+   : boy X Ben
+   : every X Evan
+   : does X Darren
+   : fine X Fred
+   : good X Gary
+
+   Now in sorted order, as described in the [[info:zsh#Parameter%20Expansion][zsh manual under "Parameter Expansion Flags"]]
+   the only difference here is: =@k= vs =@ko=
+   #+begin_src shell :results output :noweb yes
+     #!/usr/bin/env zsh -f
+     <<the-boys>>
+
+     for k (${(@ko)A}); do
+         print -- $k X ${A[$k]}
+     done
+   #+end_src
+
+   #+RESULTS:
+   : boy X Ben
+   : does X Darren
+   : every X Evan
+   : fine X Fred
+   : good X Gary
+
+   or reverse sort: =@kO=
+   #+begin_src shell :results output :noweb yes
+     #!/usr/bin/env zsh -f
+     <<the-boys>>
+
+     for k (${(@kO)A}); do
+         print -- $k X ${A[$k]}
+     done
+   #+end_src
+
+   #+RESULTS:
+   : good X Gary
+   : fine X Fred
+   : every X Evan
+   : does X Darren
+   : boy X Ben
+
+** anonymous functions
+   See also: section [[info:zsh#Functions][9.2 Anonymous Functions]] in the zsh manual
+
+   here is an example of an anonymous function ([[https://stackoverflow.com/questions/34340575/zsh-alias-with-parameter/39395740#39395740][referenced from stackoverflow]]):
+
+   #+BEGIN_SRC shell
+     ❯ alias example='(){ echo Your arg was $1. ;}'
+
+     ❯ example foo
+     Your arg was foo.
+   #+END_SRC
+
 * example parse mysql output: write to slack
 
   #+begin_src shell
