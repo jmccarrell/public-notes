@@ -19,6 +19,54 @@
   | ${str//ab/c}    | For a given string, replace ab with c  |
   | ${arr[@]//ab/c} | For each array item, replace ab with c |
 
+** some array manipulation examples
+   declare the data to operate on:
+   #+name: the-keys
+   #+BEGIN_SRC text
+     declare -a A;
+     A=(
+         every
+         good
+         boy
+         does
+         fine
+     );
+   #+END_SRC
+
+   first compute total length of the array: 5
+   #+begin_src shell :results output :noweb yes
+     #!/usr/bin/env zsh -f
+     <<the-keys>>
+
+     integer a_len=${#A}
+     print -- A has ${a_len} elements.
+   #+end_src
+
+   #+RESULTS:
+   : A has 5 elements.
+
+   the last 3 elements of the array:
+   #+begin_src shell :results output :noweb yes
+     #!/usr/bin/env zsh -f
+     <<the-keys>>
+
+     print -- the last 3 elements of A: ${A: -3}
+   #+end_src
+
+   #+RESULTS:
+   : the last 3 elements of A: boy does fine
+
+   and joined via |
+   #+begin_src shell :results output :noweb yes
+     #!/usr/bin/env zsh -f
+     <<the-keys>>
+
+     print -- the last 3 elements of A: ${(j:|:)A: -3}
+   #+end_src
+
+   #+RESULTS:
+   : the last 3 elements of A: boy|does|fine
+
 * Interesting snippets / idioms
 
   use of ? expansion (which of the many expansions is this?) to produce newline separated path:
