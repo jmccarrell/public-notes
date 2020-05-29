@@ -1,0 +1,473 @@
+#+title: Jeff's notes on apt and dpkg: Debian package handling
+
+* Resources
+   - Debian Administator's Handbook
+     - [[https://www.debian.org/doc/manuals/debian-handbook/packaging-system.en.html][Packaging System: Tools and Fundamental Principles]]
+     - [[https://www.debian.org/doc/manuals/debian-handbook/apt.en.html][Maintenance and Updates: The APT Tools]]
+   - Ubuntu Server Guide
+     - [[https://ubuntu.com/server/docs/package-management][Package Management]]
+* Principles / Definitions
+
+  - binary packages :: =.deb= files, directly usable by dpkg
+  - dpkg :: program that handles .deb files, notably extracting, analyzing, and unpacking them.  dpkg is,
+            above all, the tool for installing an already available Debian package
+  - apt :: a group of programs that allows the execution of higher-level modifications to the system:
+           installing or removing a package (while keeping dependencies satisfied), updating the system,
+           listing the available packages, etc.
+  - dpkg or apt :: dpkg should be seen as a system tool (backend), and apt as a tool closer to the user,
+                   which overcomes the limitations of the former.
+  - meta-package :: empty packages that only describe dependencies. They facilitate the installation of a
+                    consistent group of programs preselected by the meta-package maintainer.
+  - recommended packages :: considerably improve the functionality offered by the package but are not
+       indispensable to its operation. ... You should always install the “recommended” packages, unless you
+       know exactly why you do not need them.
+  - suggested packages :: secondary importance, indicate that certain packages may complement and increase
+       their respective utility, but it is perfectly reasonable to install one without the others.  it is
+       not necessary to install “suggested” packages unless you know why you need them
+
+* The deb file format
+
+  [[https://www.debian.org/doc/manuals/debian-handbook/packaging-system.en.html#sect.binary-package-structure][understanding the .deb itself]]
+
+** see the metadata for a package
+
+   [[https://www.debian.org/doc/manuals/debian-handbook/sect.package-meta-information.en.html#sect.control][reference: Description: the control File]]
+
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ apt-cache show python3-venv
+     Package: python3-venv
+     Architecture: amd64
+     Version: 3.8.2-0ubuntu2
+       ...
+     Homepage: https://www.python.org/
+     Description-en: pyvenv-3 binary for python3 (default python3 version)
+      Python, the high-level, interactive object oriented language,
+      includes an extensive class library with lots of goodies for
+      network programming, system administration, sounds and graphics.
+      .
+      This package is a dependency package, which depends on Debian's default
+      Python 3 version (currently v3.8).
+     Description-md5: 2ba431bd8cbe86a20aafe2f832a01efa
+   #+end_example
+
+   eg, the suggested packages circa python 3.8 suggests docs, venv and tk
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ apt-cache show python3
+     Package: python3
+     Version: 3.8.2-0ubuntu2
+     Source: python3-defaults
+     Provides: python3-profiler
+     Pre-Depends: python3-minimal (= 3.8.2-0ubuntu2)
+     Depends: python3.8 (>= 3.8.2-1~), libpython3-stdlib (= 3.8.2-0ubuntu2)
+     Suggests: python3-doc (>= 3.8.2-0ubuntu2), python3-tk (>= 3.8.2-1~), python3-venv (>= 3.8.2-0ubuntu2)
+     Replaces: python3-minimal (<< 3.1.2-2)
+      This package is a dependency package, which depends on Debian's default
+      Python 3 version (currently v3.8).
+     Task: minimal, ubuntu-core
+   #+end_example
+
+** remove a package, including its config files
+
+   supply the =--purge= flag to apt remove or dpkg
+   #+begin_example
+     sudo apt remove --purge python3-doc
+   #+end_example
+
+* Source packages
+
+  [[https://www.debian.org/doc/manuals/debian-handbook/sect.source-package-structure.en.html][reference: Structure of a Source package]]
+
+* dpkg
+
+** see all of the packages referenced by =/etc/apt/sources.list=
+   =dpkg -l=
+
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~$ dpkg -l | grep venv
+     ii  python3-venv                   3.8.2-0ubuntu2                        amd64        pyvenv-3 binary for python3 (default python3 version)
+     ii  python3.8-venv                 3.8.2-1ubuntu1.1                      amd64        Interactive high-level object-oriented language (pyvenv binary, version 3.8)
+   #+end_example
+
+** One cycle to add/remove a package using dkpg:
+
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ apt download python3-doc
+
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ sudo dpkg --install python3-doc_3.8.2-0ubuntu2_all.deb
+       ...
+     Setting up python3-doc (3.8.2-0ubuntu2) ...
+
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ sudo dpkg --remove python3-doc
+       ...
+     Removing python3-doc (3.8.2-0ubuntu2) ...
+   #+end_example
+
+** see the files in a package
+
+   before installing it with =--contents=, aka =-c=:
+   #+BEGIN_EXAMPLE
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ dpkg --contents python3-doc_3.8.2-0ubuntu2_all.deb
+       ...
+     -rw-r--r-- root/root       462 2018-06-05 21:35 ./usr/share/doc/python3-doc/README.Debian
+     -rw-r--r-- root/root       977 2020-03-13 12:20 ./usr/share/doc/python3-doc/changelog.Debian.gz
+     -rw-r--r-- root/root     16122 2018-06-05 21:35 ./usr/share/doc/python3-doc/copyright
+     lrwxrwxrwx root/root         0 2020-03-13 12:20 ./usr/share/doc/python3/html -> ../python3.8-doc/html
+     lrwxrwxrwx root/root         0 2020-03-13 12:20 ./usr/share/doc/python3-doc/html -> ../python3.8-doc/html
+   #+END_EXAMPLE
+
+   after install with =--listfile= or =-L=
+
+   show the files in the package:
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ dpkg --listfiles python3.8-doc | grep -E 'whatsnew/3.[678]'
+     /usr/share/doc/python3.8/html/_sources/whatsnew/3.6.rst.txt
+     /usr/share/doc/python3.8/html/_sources/whatsnew/3.7.rst.txt
+     /usr/share/doc/python3.8/html/_sources/whatsnew/3.8.rst.txt
+     /usr/share/doc/python3.8/html/whatsnew/3.6.html
+     /usr/share/doc/python3.8/html/whatsnew/3.7.html
+     /usr/share/doc/python3.8/html/whatsnew/3.8.html
+   #+end_example
+
+** given a file, show the package that owns it:
+
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ dpkg --search /usr/share/doc/python3.8/html/whatsnew/3.8.html
+     python3.8-doc: /usr/share/doc/python3.8/html/whatsnew/3.8.html
+   #+end_example
+
+** given a package, show its status:
+
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ dpkg --status python3.8-doc
+     Package: python3.8-doc
+     Status: install ok installed
+     Priority: optional
+     Section: doc
+     Installed-Size: 50218
+     Maintainer: Ubuntu Core Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+     Architecture: all
+     Multi-Arch: foreign
+     Source: python3.8
+     Version: 3.8.2-1ubuntu1.1
+     Depends: libjs-jquery, libjs-underscore
+     Suggests: python3.8
+     Description: Documentation for the high-level object-oriented language Python (v3.8)
+      These is the official set of documentation for the interactive high-level
+      object-oriented language Python (v3.8). All documents are provided
+      in HTML format. The package consists of ten documents:
+      .
+        ,* What's New in Python3.8
+        ,* Tutorial
+        ,* Python Library Reference
+        ,* Macintosh Module Reference
+        ,* Python Language Reference
+        ,* Extending and Embedding Python
+        ,* Python/C API Reference
+        ,* Installing Python Modules
+        ,* Documenting Python
+        ,* Distributing Python Modules
+     Original-Maintainer: Matthias Klose <doko@debian.org>
+   #+end_example
+
+** dkpg log
+
+   [[https://www.debian.org/doc/manuals/debian-handbook/sect.manipulating-packages-with-dpkg.en.html#id-1.8.8.8][reference]]
+
+   =dpkg= logs (verbosely) every action in =/var/log/dpkg.log=
+
+   #+begin_quote
+     one can find the exact moment when each package has been installed or updated, and this information can
+     be extremely useful in understanding a recent change in behavior.
+   #+end_quote
+* apt
+  According to [[https://ubuntu.com/server/docs/package-management][ubuntu package mgmt]]:
+  - apt is meant to be interactive
+  - apt-get --quiet is meant for scripting
+
+
+  The [[https://www.debian.org/doc/manuals/debian-handbook/sect.apt-get.en.html][debian apt manual]] says it differently:
+  #+begin_quote
+    ... apt-get is the first front end — command-line based — which was developed within the project. apt is
+    a second command-line based front end provided by APT which overcomes some design mistakes of apt-get.
+  #+end_quote
+
+  multiple packages can be installed/removed in a single apt-get invocation
+
+  #+begin_example
+    jmccarrell@jeff-ubuntu-20-test:~$ sudo apt-get -q remove apt-doc python3-venv
+      ...
+    Removing apt-doc (2.0.2ubuntu0.1) ...
+    Removing python3-venv (3.8.2-0ubuntu2) ...
+  #+end_example
+
+  #+begin_example
+    jmccarrell@jeff-ubuntu-20-test:~$ sudo apt-get -q -y install apt-doc python3-venv
+      ...
+    Setting up apt-doc (2.0.2ubuntu0.1) ...
+    Setting up python3-venv (3.8.2-0ubuntu2) ...
+  #+end_example
+
+  =--purge= added to =remove= will delete config files as well, which may or may not be desired.
+  also can be invoked as =apt purge=.
+** sources.list
+   #+begin_quote
+     Note that when the desired version of a package is available on several repositories, the first one
+     listed in the sources.list file will be used. For this reason, non-official sources are usually added
+     at the end of the file.
+   #+end_quote
+
+   ie, in this case, if a package is updated in focal-security, it will be preferred over main and restricted
+   #+begin_example
+     deb http://security.ubuntu.com/ubuntu focal-security main restricted
+   #+end_example
+
+** caching proxy
+   One can configure a [[https://www.debian.org/doc/manuals/debian-handbook/apt.en.html#id-1.9.10.10][network-wide caching proxy.]]
+
+** =--reinstall=
+   [[https://www.debian.org/doc/manuals/debian-handbook/sect.apt-get.en.html#id-1.9.11.8][Installing and removing]] has an interesting tip around fixing broken dependencies.
+
+** see the packages that could be upgraded
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~$ sudo apt list --upgradable
+     Listing... Done
+     apport/focal-updates 2.20.11-0ubuntu27.2 all [upgradable from: 2.20.11-0ubuntu27]
+       ...
+   #+end_example
+
+   then install those updates, one by one:
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~$ sudo apt install apport/focal-updates
+       ...
+     Setting up apport (2.20.11-0ubuntu27.2) ...
+   #+end_example
+
+   and autoremove any stale packages:
+   #+begin_example
+     jmccarrell@jeff-ubuntu-20-test:~$ sudo apt-get -y autoremove
+   #+end_example
+
+** apt config: =/etc/apt/apt.conf.d/=
+
+** [[https://www.debian.org/doc/manuals/debian-handbook/sect.apt-get.en.html#sect.apt.priorities][package priorities]]
+   one can force apt to use pretty much any version of package(s) by specifying a priority on a
+   package-by-package basis.
+*** apt-cache policy
+    use this to see the priorities defined for apt sources (eg from a google comute engine ubuntu 20 server)
+    #+begin_example
+      jmccarrell@jeff-ubuntu-20-test:~$ sudo apt-cache policy
+      Package files:
+       100 /var/lib/dpkg/status
+           release a=now
+       500 http://archive.canonical.com/ubuntu focal/partner amd64 Packages
+           release v=20.04,o=Canonical,a=focal,n=focal,l=Partner archive,c=partner,b=amd64
+           origin archive.canonical.com
+       500 http://security.ubuntu.com/ubuntu focal-security/multiverse amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-security,n=focal,l=Ubuntu,c=multiverse,b=amd64
+           origin security.ubuntu.com
+       500 http://security.ubuntu.com/ubuntu focal-security/universe amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-security,n=focal,l=Ubuntu,c=universe,b=amd64
+           origin security.ubuntu.com
+       500 http://security.ubuntu.com/ubuntu focal-security/restricted amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-security,n=focal,l=Ubuntu,c=restricted,b=amd64
+           origin security.ubuntu.com
+       500 http://security.ubuntu.com/ubuntu focal-security/main amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-security,n=focal,l=Ubuntu,c=main,b=amd64
+           origin security.ubuntu.com
+       100 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal-backports/universe amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-backports,n=focal,l=Ubuntu,c=universe,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal-updates/multiverse amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-updates,n=focal,l=Ubuntu,c=multiverse,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal-updates/universe amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-updates,n=focal,l=Ubuntu,c=universe,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal-updates/restricted amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-updates,n=focal,l=Ubuntu,c=restricted,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal-updates/main amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal-updates,n=focal,l=Ubuntu,c=main,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal/multiverse amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal,n=focal,l=Ubuntu,c=multiverse,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal/universe amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal,n=focal,l=Ubuntu,c=universe,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal/restricted amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal,n=focal,l=Ubuntu,c=restricted,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+       500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal/main amd64 Packages
+           release v=20.04,o=Ubuntu,a=focal,n=focal,l=Ubuntu,c=main,b=amd64
+           origin us-east4-c.gce.clouds.archive.ubuntu.com
+      Pinned packages:
+    #+end_example
+
+    or by package
+    #+begin_example
+      jmccarrell@jeff-ubuntu-20-test:~$ sudo apt-cache policy python3-venv
+      python3-venv:
+        Installed: 3.8.2-0ubuntu2
+        Candidate: 3.8.2-0ubuntu2
+        Version table:
+       ,*** 3.8.2-0ubuntu2 500
+              500 http://us-east4-c.gce.clouds.archive.ubuntu.com/ubuntu focal/universe amd64 Packages
+              100 /var/lib/dpkg/status
+    #+end_example
+* apt-cache
+  useful commands:
+  - apt-cache search keyword :: uses grep; so many over matches
+  - apt-cache show package :: provides the package's description, its dependencies, the name of its maintainer, etc
+  - apt-cache policy :: documented above
+  - apt-cache dumpavail :: displays the headers of all available versions of all packages
+  - apt-cache pkgnames :: displays the list of all the packages which appear at least once in the cache.
+* [[https://www.debian.org/doc/manuals/debian-handbook/sect.regular-upgrades.en.html][Keeping a system up to date]]
+** apticron
+   runs a script to send an email about what could be upgraded
+** =/etc/cron.daily/apt=
+   - configured in =/etc/apt/apt.confd.=
+* [[https://www.debian.org/doc/manuals/debian-handbook/sect.searching-packages.en.html][Searching for packages]]
+  - details some other, more sophisticated tools that can be used to find a package to install.
+  - including a tagging scheme
+  - IDK if Ubuntu uses this tagging scheme or not.
+* unattended-upgrades
+  notes from the ubuntu 20 man page
+
+  the man page is minimal, and points to the config: =/etc/apt/apt.conf.d/50unattended-upgrades=
+
+  here is the ubuntu 20 "raw" config for a google GCE instance:
+
+  #+begin_example
+    // Automatically upgrade packages from these (origin:archive) pairs
+    //
+    // Note that in Ubuntu security updates may pull in new dependencies
+    // from non-security sources (e.g. chromium). By allowing the release
+    // pocket these get automatically pulled in.
+    Unattended-Upgrade::Allowed-Origins {
+            "${distro_id}:${distro_codename}";
+            "${distro_id}:${distro_codename}-security";
+            // Extended Security Maintenance; doesn't necessarily exist for
+            // every release and this system may not have it installed, but if
+            // available, the policy for updates is such that unattended-upgrades
+            // should also install from here by default.
+            "${distro_id}ESMApps:${distro_codename}-apps-security";
+            "${distro_id}ESM:${distro_codename}-infra-security";
+    //	"${distro_id}:${distro_codename}-updates";
+    //	"${distro_id}:${distro_codename}-proposed";
+    //	"${distro_id}:${distro_codename}-backports";
+    };
+
+    // Python regular expressions, matching packages to exclude from upgrading
+    Unattended-Upgrade::Package-Blacklist {
+        // The following matches all packages starting with linux-
+    //  "linux-";
+
+        // Use $ to explicitely define the end of a package name. Without
+        // the $, "libc6" would match all of them.
+    //  "libc6$";
+    //  "libc6-dev$";
+    //  "libc6-i686$";
+
+        // Special characters need escaping
+    //  "libstdc\+\+6$";
+
+        // The following matches packages like xen-system-amd64, xen-utils-4.1,
+        // xenstore-utils and libxenstore3.0
+    //  "(lib)?xen(store)?";
+
+        // For more information about Python regular expressions, see
+        // https://docs.python.org/3/howto/regex.html
+    };
+
+    // This option controls whether the development release of Ubuntu will be
+    // upgraded automatically. Valid values are "true", "false", and "auto".
+    Unattended-Upgrade::DevRelease "auto";
+
+    // This option allows you to control if on a unclean dpkg exit
+    // unattended-upgrades will automatically run
+    //   dpkg --force-confold --configure -a
+    // The default is true, to ensure updates keep getting installed
+    //Unattended-Upgrade::AutoFixInterruptedDpkg "true";
+
+    // Split the upgrade into the smallest possible chunks so that
+    // they can be interrupted with SIGTERM. This makes the upgrade
+    // a bit slower but it has the benefit that shutdown while a upgrade
+    // is running is possible (with a small delay)
+    //Unattended-Upgrade::MinimalSteps "true";
+
+    // Install all updates when the machine is shutting down
+    // instead of doing it in the background while the machine is running.
+    // This will (obviously) make shutdown slower.
+    // Unattended-upgrades increases logind's InhibitDelayMaxSec to 30s.
+    // This allows more time for unattended-upgrades to shut down gracefully
+    // or even install a few packages in InstallOnShutdown mode, but is still a
+    // big step back from the 30 minutes allowed for InstallOnShutdown previously.
+    // Users enabling InstallOnShutdown mode are advised to increase
+    // InhibitDelayMaxSec even further, possibly to 30 minutes.
+    //Unattended-Upgrade::InstallOnShutdown "false";
+
+    // Send email to this address for problems or packages upgrades
+    // If empty or unset then no email is sent, make sure that you
+    // have a working mail setup on your system. A package that provides
+    // 'mailx' must be installed. E.g. "user@example.com"
+    //Unattended-Upgrade::Mail "";
+
+    // Set this value to one of:
+    //    "always", "only-on-error" or "on-change"
+    // If this is not set, then any legacy MailOnlyOnError (boolean) value
+    // is used to chose between "only-on-error" and "on-change"
+    //Unattended-Upgrade::MailReport "on-change";
+
+    // Remove unused automatically installed kernel-related packages
+    // (kernel images, kernel headers and kernel version locked tools).
+    //Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+
+    // Do automatic removal of newly unused dependencies after the upgrade
+    //Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
+
+    // Do automatic removal of unused packages after the upgrade
+    // (equivalent to apt-get autoremove)
+    //Unattended-Upgrade::Remove-Unused-Dependencies "false";
+
+    // Automatically reboot *WITHOUT CONFIRMATION* if
+    //  the file /var/run/reboot-required is found after the upgrade
+    //Unattended-Upgrade::Automatic-Reboot "false";
+
+    // Automatically reboot even if there are users currently logged in
+    // when Unattended-Upgrade::Automatic-Reboot is set to true
+    //Unattended-Upgrade::Automatic-Reboot-WithUsers "true";
+
+    // If automatic reboot is enabled and needed, reboot at the specific
+    // time instead of immediately
+    //  Default: "now"
+    //Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+
+    // Use apt bandwidth limit feature, this example limits the download
+    // speed to 70kb/sec
+    //Acquire::http::Dl-Limit "70";
+
+    // Enable logging to syslog. Default is False
+    // Unattended-Upgrade::SyslogEnable "false";
+
+    // Specify syslog facility. Default is daemon
+    // Unattended-Upgrade::SyslogFacility "daemon";
+
+    // Download and install upgrades only on AC power
+    // (i.e. skip or gracefully stop updates on battery)
+    // Unattended-Upgrade::OnlyOnACPower "true";
+
+    // Download and install upgrades only on non-metered connection
+    // (i.e. skip or gracefully stop updates on a metered connection)
+    // Unattended-Upgrade::Skip-Updates-On-Metered-Connections "true";
+
+    // Verbose logging
+    // Unattended-Upgrade::Verbose "false";
+
+    // Print debugging information both in unattended-upgrades and
+    // in unattended-upgrade-shutdown
+    // Unattended-Upgrade::Debug "false";
+
+    // Allow package downgrade if Pin-Priority exceeds 1000
+    // Unattended-Upgrade::Allow-downgrade "false";
+  #+end_example
