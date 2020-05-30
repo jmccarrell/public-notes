@@ -88,7 +88,7 @@
      ii  python3.8-venv                 3.8.2-1ubuntu1.1                      amd64        Interactive high-level object-oriented language (pyvenv binary, version 3.8)
    #+end_example
 
-** One cycle to add/remove a package using dkpg:
+** One cycle to add/remove a package using dpkg:
 
    #+begin_example
      jmccarrell@jeff-ubuntu-20-test:~/tmp/deb-pkg-work$ apt download python3-doc
@@ -191,6 +191,7 @@
     a second command-line based front end provided by APT which overcomes some design mistakes of apt-get.
   #+end_quote
 
+** apt install remove cycle
   multiple packages can be installed/removed in a single apt-get invocation
 
   #+begin_example
@@ -322,6 +323,11 @@
   - apt-cache policy :: documented above
   - apt-cache dumpavail :: displays the headers of all available versions of all packages
   - apt-cache pkgnames :: displays the list of all the packages which appear at least once in the cache.
+  - apt-cache showpkg :: available versions and reverse dependencies of each package listed are listed, as
+       well as forward dependencies for each version
+  - apt-cache depends :: shows a listing of each dependency a package has and all the possible other
+       packages that can fulfill that dependency.
+  - apt-cache rdepends :: listing of each reverse dependency a package has
 * [[https://www.debian.org/doc/manuals/debian-handbook/sect.regular-upgrades.en.html][Keeping a system up to date]]
 ** apticron
    runs a script to send an email about what could be upgraded
@@ -471,3 +477,56 @@
     // Allow package downgrade if Pin-Priority exceeds 1000
     // Unattended-Upgrade::Allow-downgrade "false";
   #+end_example
+* Common tasks
+** apt update
+   refresh the local copy of the package metadata from the configured =sources.list=
+** search for a packge: apt-cache search
+   #+begin_example
+     jeff_mccarrell_org@gamma-mail:~$ apt-cache search python3-venv
+     python3-venv - pyvenv-3 binary for python3 (default python3 version)
+   #+end_example
+** [[*see the packages that could be upgraded][see packages that would be upgraded]]
+** show details of a package: apt-cache show, showpkg
+   #+begin_example
+     jeff_mccarrell_org@gamma-mail:~$ apt-cache show python3-venv
+     Package: python3-venv
+     Architecture: amd64
+     Version: 3.6.7-1~18.04
+       ...
+   #+end_example
+** show the dependencies of a package: apt-cache depends, rdepends
+   depends
+   #+begin_example
+     jeff_mccarrell_org@gamma-mail:~$ apt-cache depends python3-venv
+     python3-venv
+       Depends: python3.6-venv
+       Depends: python3
+       Depends: python3-distutils
+   #+end_example
+
+   rdepends
+   #+begin_example
+     jeff_mccarrell_org@gamma-mail:~$ apt-cache rdepends python3-venv
+     python3-venv
+     Reverse Depends:
+       python3
+       python3.7
+       python3.8
+       python3.7
+       python3.6
+       python3
+       xonsh
+       thonny
+   #+end_example
+** is a package installed? apt -qq list
+   will declare when a package is installed
+   #+begin_example
+     $ apt -qq list python3-venv
+     python3-venv/bionic-updates 3.6.7-1~18.04 amd64
+
+     $ apt -qq list python3
+     python3/bionic-updates,now 3.6.7-1~18.04 amd64 [installed,automatic]
+   #+end_example
+** apt install, remove, purge
+   - via [[*One cycle to add/remove a package using dpkg:][dpkg]]
+   - via [[*apt install remove cycle][apt]]
