@@ -1,156 +1,160 @@
 #+TITLE: Jeffs notes on terraform
 
 * important aws terraform links and resources
-[[https://www.terraform.io/docs/configuration/locals.html][terminology analogs]]:
-#+BEGIN_QUOTE
-Comparing modules to functions in a traditional programming language, if variables are analogous to function arguments and outputs are analogous to function return values then local values are comparable to a function's local variables.
-#+END_QUOTE
+[[https://www.terraform.io/docs/configuration/locals.html][  terminology analogs]]:
+  #+BEGIN_QUOTE
+    Comparing modules to functions in a traditional programming language, if variables are analogous to
+    function arguments and outputs are analogous to function return values then local values are comparable
+    to a function's local variables.
+   #+END_QUOTE
 ** terraform general links
-- [[https://www.terraform.io/docs/configuration/interpolation.html][interpolation]]
-- [[https://www.terraform.io/docs/internals/debugging.html][debugging terraform]]
+   - [[https://www.terraform.io/docs/configuration/interpolation.html][interpolation]]
+   - [[https://www.terraform.io/docs/internals/debugging.html][debugging terraform]]
 ** Provider links
-- [AWS Provider](https://www.terraform.io/docs/providers/aws/index.html)
-  - [EKS Guide](https://www.terraform.io/docs/providers/aws/guides/eks-getting-started.html)
-- [Archive Provider](https://www.terraform.io/docs/providers/archive/index.html)
-  - [data.archive_file](https://www.terraform.io/docs/providers/archive/d/archive_file.html)
-- [Chef Provider](https://www.terraform.io/docs/providers/chef/index.html)
-  - [resource.data_bag](https://www.terraform.io/docs/providers/chef/r/data_bag.html)
-  - [resource.data_bag_item](https://www.terraform.io/docs/providers/chef/r/data_bag_item.html)
-- [External Provider](https://www.terraform.io/docs/providers/external/index.html)
-  - [data.external](https://www.terraform.io/docs/providers/external/data_source.html)
-- [Github Provider](https://www.terraform.io/docs/providers/github/index.html)
-  - [data.github_ip_ranges](https://www.terraform.io/docs/providers/github/d/ip_ranges.html)
-- [HTTP Provider](https://www.terraform.io/docs/providers/http/index.html)
-  - [data.http](https://www.terraform.io/docs/providers/http/data_source.html)
-- [kubernetes Provider](https://www.terraform.io/docs/providers/kubernetes/index.html)
-  - [resource.config_map](https://www.terraform.io/docs/providers/kubernetes/r/config_map.html)
-  - [resource.service](https://www.terraform.io/docs/providers/kubernetes/r/service.html)
-  - [resource.resource_quota](https://www.terraform.io/docs/providers/kubernetes/r/resource_quota.html)
-  - [resource.limit_range](https://www.terraform.io/docs/providers/kubernetes/r/limit_range.html)
-  - [resource.namespace](https://www.terraform.io/docs/providers/kubernetes/r/namespace.html)
-  - [resource.service_account](https://www.terraform.io/docs/providers/kubernetes/r/service_account.html)
-- [Local Provider](https://www.terraform.io/docs/providers/local/index.html)
-  - [data.file](https://www.terraform.io/docs/providers/local/d/file.html)
-  - [resource.file](https://www.terraform.io/docs/providers/local/r/file.html)
-- [Null Provider](https://www.terraform.io/docs/providers/null/index.html)
-  - [data.null](https://www.terraform.io/docs/providers/null/data_source.html)
-  - [resource.null](https://www.terraform.io/docs/providers/null/resource.html)
-- [Template Provider](https://www.terraform.io/docs/providers/template/index.html)
-  - [data.template_file](https://www.terraform.io/docs/providers/template/d/file.html)
-  - [data.template_cloud_init](https://www.terraform.io/docs/providers/template/d/cloudinit_config.html)
-  - [resource.template_dir](https://www.terraform.io/docs/providers/template/r/dir.html)
+   - [AWS Provider](https://www.terraform.io/docs/providers/aws/index.html)
+     - [EKS Guide](https://www.terraform.io/docs/providers/aws/guides/eks-getting-started.html)
+   - [Archive Provider](https://www.terraform.io/docs/providers/archive/index.html)
+     - [data.archive_file](https://www.terraform.io/docs/providers/archive/d/archive_file.html)
+   - [Chef Provider](https://www.terraform.io/docs/providers/chef/index.html)
+     - [resource.data_bag](https://www.terraform.io/docs/providers/chef/r/data_bag.html)
+     - [resource.data_bag_item](https://www.terraform.io/docs/providers/chef/r/data_bag_item.html)
+   - [External Provider](https://www.terraform.io/docs/providers/external/index.html)
+     - [data.external](https://www.terraform.io/docs/providers/external/data_source.html)
+   - [Github Provider](https://www.terraform.io/docs/providers/github/index.html)
+     - [data.github_ip_ranges](https://www.terraform.io/docs/providers/github/d/ip_ranges.html)
+   - [HTTP Provider](https://www.terraform.io/docs/providers/http/index.html)
+     - [data.http](https://www.terraform.io/docs/providers/http/data_source.html)
+   - [kubernetes Provider](https://www.terraform.io/docs/providers/kubernetes/index.html)
+     - [resource.config_map](https://www.terraform.io/docs/providers/kubernetes/r/config_map.html)
+     - [resource.service](https://www.terraform.io/docs/providers/kubernetes/r/service.html)
+     - [resource.resource_quota](https://www.terraform.io/docs/providers/kubernetes/r/resource_quota.html)
+     - [resource.limit_range](https://www.terraform.io/docs/providers/kubernetes/r/limit_range.html)
+     - [resource.namespace](https://www.terraform.io/docs/providers/kubernetes/r/namespace.html)
+     - [resource.service_account](https://www.terraform.io/docs/providers/kubernetes/r/service_account.html)
+   - [Local Provider](https://www.terraform.io/docs/providers/local/index.html)
+     - [data.file](https://www.terraform.io/docs/providers/local/d/file.html)
+     - [resource.file](https://www.terraform.io/docs/providers/local/r/file.html)
+   - [Null Provider](https://www.terraform.io/docs/providers/null/index.html)
+     - [data.null](https://www.terraform.io/docs/providers/null/data_source.html)
+     - [resource.null](https://www.terraform.io/docs/providers/null/resource.html)
+   - [Template Provider](https://www.terraform.io/docs/providers/template/index.html)
+     - [data.template_file](https://www.terraform.io/docs/providers/template/d/file.html)
+     - [data.template_cloud_init](https://www.terraform.io/docs/providers/template/d/cloudinit_config.html)
+     - [resource.template_dir](https://www.terraform.io/docs/providers/template/r/dir.html)
 
 * module notes
-- the [[https://www.terraform.io/docs/modules/usage.html#configuration][args used in a module block are analogous to the variables]] defined within the module itself
-#+BEGIN_QUOTE
-Each instance of a module may optionally have different providers passed to it using the providers argument described above. This can be useful in situations where, for example, a duplicated set of resources must be created across several regions or datacenters.
-#+END_QUOTE
+  - the [[https://www.terraform.io/docs/modules/usage.html#configuration][args used in a module block are analogous to the variables]] defined within the module itself
+  #+BEGIN_QUOTE
+    Each instance of a module may optionally have different providers passed to it using the providers
+    argument described above. This can be useful in situations where, for example, a duplicated set of
+    resources must be created across several regions or datacenters.
+  #+END_QUOTE
 * ~terraform_remote_state~ only exposes the outputs of that state, not everything
 
-~terraform_remote_state~ only exposes the outputs of that state, not everything.
-ie, this declaration, which loads every output of the production us-west-2 state:
+  ~terraform_remote_state~ only exposes the outputs of that state, not everything.
+  ie, this declaration, which loads every output of the production us-west-2 state:
 
-#+BEGIN_SRC bash
-data terraform_remote_state west {
-  backend = "s3"
+  #+BEGIN_SRC bash
+    data terraform_remote_state west {
+      backend = "s3"
 
-  config {
-    bucket = "entelo-terraform"
-    key    = "production"
-    region = "us-west-2"
-  }
-}
-#+END_SRC
+      config {
+        bucket = "entelo-terraform"
+        key    = "production"
+        region = "us-west-2"
+      }
+    }
+  #+END_SRC
 
-exposes all of the outputs below:
+  exposes all of the outputs below:
 
-#+BEGIN_SRC bash
-❯ terraform output 
-databricks_cidr_block = 10.194.0.0/16
-databricks_ips = [
-    54.71.97.112/32,
-    34.212.204.229/32
-]
-dms_sg = sg-06da0b76
-entelo_base_1404_ami_id = ami-1703f36f
-entelo_base_1604_ami_id = ami-f273ba8a
-entelo_base_1604_latest_ami_id = ami-de22e9a6
-environment = production
-es_util_sg = sg-98febbe3
-internal_elb = sg-c5b7c6bf
-kops_production_1_10__pcx_id = pcx-0c16df64
-mercury_postgres_security_group = sg-2fc94751
-nat_gateway_public_ip_a = 54.245.81.2
-nat_gateway_public_ip_b = 52.26.58.200
-nat_gateway_public_ip_c = 54.245.81.16
-office_ip = 38.122.183.18/32
-private_subnet_a = subnet-36102940
-private_subnet_a_az = us-west-2a
-private_subnet_b = subnet-49c82f2e
-private_subnet_b_az = us-west-2b
-private_subnet_c = subnet-04ec865c
-private_subnet_c_az = us-west-2c
-public_subnet_a = subnet-37102941
-public_subnet_a_az = us-west-2a
-public_subnet_b = subnet-4ac82f2d
-public_subnet_b_az = us-west-2b
-public_subnet_c = subnet-03ec865b
-public_subnet_c_az = us-west-2c
-region = us-west-2
-sg_alooma_bastion = sg-d8def9a1
-sg_bastion = sg-552c102c
-sg_customer_api = sg-76d3470d
-sg_geocoder_cache_postgres = sg-0560c474
-sg_public_elb = sg-69043610
-sg_reputedly_web = sg-8b3a3ef2
-sg_reputedly_worker = sg-10383c69
-ssl_cert_arn = arn:aws:acm:us-west-2:474104203093:certificate/765c82ef-6545-44f2-a8b4-b60bbd66d00e
-ssl_cert_entelo_east = arn:aws:acm:us-east-1:474104203093:certificate/30c66456-4281-4528-9490-52aa62813122
-ssl_cert_entelo_internal_west = arn:aws:acm:us-west-2:474104203093:certificate/c280c82e-ac9e-4148-a412-dbc34314fae9
-vpc_id = vpc-ea3ffe8f
-vpce_id = vpce-1ccf2475
-zookeeper_sg = sg-89b78bf0
-#+END_SRC
+  #+BEGIN_SRC bash
+    ❯ terraform output
+    databricks_cidr_block = 10.194.0.0/16
+    databricks_ips = [
+        54.71.97.112/32,
+        34.212.204.229/32
+    ]
+    dms_sg = sg-06da0b76
+    entelo_base_1404_ami_id = ami-1703f36f
+    entelo_base_1604_ami_id = ami-f273ba8a
+    entelo_base_1604_latest_ami_id = ami-de22e9a6
+    environment = production
+    es_util_sg = sg-98febbe3
+    internal_elb = sg-c5b7c6bf
+    kops_production_1_10__pcx_id = pcx-0c16df64
+    mercury_postgres_security_group = sg-2fc94751
+    nat_gateway_public_ip_a = 54.245.81.2
+    nat_gateway_public_ip_b = 52.26.58.200
+    nat_gateway_public_ip_c = 54.245.81.16
+    office_ip = 38.122.183.18/32
+    private_subnet_a = subnet-36102940
+    private_subnet_a_az = us-west-2a
+    private_subnet_b = subnet-49c82f2e
+    private_subnet_b_az = us-west-2b
+    private_subnet_c = subnet-04ec865c
+    private_subnet_c_az = us-west-2c
+    public_subnet_a = subnet-37102941
+    public_subnet_a_az = us-west-2a
+    public_subnet_b = subnet-4ac82f2d
+    public_subnet_b_az = us-west-2b
+    public_subnet_c = subnet-03ec865b
+    public_subnet_c_az = us-west-2c
+    region = us-west-2
+    sg_alooma_bastion = sg-d8def9a1
+    sg_bastion = sg-552c102c
+    sg_customer_api = sg-76d3470d
+    sg_geocoder_cache_postgres = sg-0560c474
+    sg_public_elb = sg-69043610
+    sg_reputedly_web = sg-8b3a3ef2
+    sg_reputedly_worker = sg-10383c69
+    ssl_cert_arn = arn:aws:acm:us-west-2:474104203093:certificate/765c82ef-6545-44f2-a8b4-b60bbd66d00e
+    ssl_cert_entelo_east = arn:aws:acm:us-east-1:474104203093:certificate/30c66456-4281-4528-9490-52aa62813122
+    ssl_cert_entelo_internal_west = arn:aws:acm:us-west-2:474104203093:certificate/c280c82e-ac9e-4148-a412-dbc34314fae9
+    vpc_id = vpc-ea3ffe8f
+    vpce_id = vpce-1ccf2475
+    zookeeper_sg = sg-89b78bf0
+  #+END_SRC
 
-so in the console for a project that ~includes.tf~ the above ~terraform_remote_state~, one can see these values in the console, like this:
+  so in the console for a project that ~includes.tf~ the above ~terraform_remote_state~, one can see these values in the console, like this:
 
-#+BEGIN_SRC bash
-❯ terraform console
-> data.terraform_remote_state.west.internal_elb
-sg-c5b7c6bf
-#+END_SRC
+  #+BEGIN_SRC bash
+    ❯ terraform console
+    > data.terraform_remote_state.west.internal_elb
+    sg-c5b7c6bf
+  #+END_SRC
 
 * one can only get outputs via ~terraform_remote_state~
 * an apply is required before console will show values
-  - the edit/console or edit/show workflow fails, becuase there must be an intermediate apply:
+  - the edit/console or edit/show workflow fails, because there must be an intermediate apply:
     - edit/apply/console or edit/apply/show
 
 * an example null resource that sets up and tears down stuff
-#+BEGIN_SRC terraform
-resource null_resource subnet_tags {
-  # Add kubernetes.io/cluster/ tag needed by external/internal ELBs
-  provisioner "local-exec" {
-    command = <<EOF
-aws --region=${local.region}                                              \
-    ec2 create-tags                                                       \
-    --resources ${local.public_subnets} ${local.private_subnets}          \
-    --tags 'Key=kubernetes.io/cluster/${local.cluster_name},Value=shared'
-EOF
-  }
+  #+BEGIN_SRC terraform
+    resource null_resource subnet_tags {
+      # Add kubernetes.io/cluster/ tag needed by external/internal ELBs
+      provisioner "local-exec" {
+        command = <<EOF
+    aws --region=${local.region}                                              \
+        ec2 create-tags                                                       \
+        --resources ${local.public_subnets} ${local.private_subnets}          \
+        --tags 'Key=kubernetes.io/cluster/${local.cluster_name},Value=shared'
+    EOF
+      }
 
-  # Add this cluster to the list of tags source by the shared state
-  provisioner "local-exec" {
-    command = "echo '${local.cluster_name}' >> ../../../shared/data/clusters.txt"
-  }
+      # Add this cluster to the list of tags source by the shared state
+      provisioner "local-exec" {
+        command = "echo '${local.cluster_name}' >> ../../../shared/data/clusters.txt"
+      }
 
-  # Remove this cluster to the list of tags source by the shared state
-  provisioner "local-exec" {
-    command = "sed -i'' -e '/^${local.cluster_name}$/d' ../../../shared/data/clusters.txt"
-    when = "destroy"
-  }
-}
-#+END_SRC
+      # Remove this cluster to the list of tags source by the shared state
+      provisioner "local-exec" {
+        command = "sed -i'' -e '/^${local.cluster_name}$/d' ../../../shared/data/clusters.txt"
+        when = "destroy"
+      }
+    }
+  #+END_SRC
 ** some key points here
-- it uses the [[https://www.terraform.io/docs/providers/null/resource.html][~null_resource~]]
-- multiple ~local-exec~ blocks may exist
-- ~when = "destroy"~ takes care of the tear down step
+   - it uses the [[https://www.terraform.io/docs/providers/null/resource.html][~null_resource~]]
+   - multiple ~local-exec~ blocks may exist
+   - ~when = "destroy"~ takes care of the tear down step
