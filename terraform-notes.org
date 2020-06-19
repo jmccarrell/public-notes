@@ -1,12 +1,21 @@
 #+TITLE: Jeffs notes on terraform
 
-* important aws terraform links and resources
+* important terraform links and resources
 [[https://www.terraform.io/docs/configuration/locals.html][  terminology analogs]]:
   #+BEGIN_QUOTE
     Comparing modules to functions in a traditional programming language, if variables are analogous to
     function arguments and outputs are analogous to function return values then local values are comparable
     to a function's local variables.
    #+END_QUOTE
+** video
+   - [[https://www.youtube.com/watch?v=wgzgVm7Sqlk][Evolving Your Infrastructure with Terraform]]
+     - [[https://www.slideshare.net/opencredo/hashidays-london-2017-evolving-your-infrastructure-with-terraform-by-nicki-watt][slides]]
+     - lays out an evolutionary path many people go through in writing their terraform
+       - terralith
+       - multi-terralith
+       - ...
+       - terraservices
+
 ** terraform general links
    - [[https://www.terraform.io/docs/configuration/interpolation.html][interpolation]]
    - [[https://www.terraform.io/docs/internals/debugging.html][debugging terraform]]
@@ -158,3 +167,556 @@
    - it uses the [[https://www.terraform.io/docs/providers/null/resource.html][~null_resource~]]
    - multiple ~local-exec~ blocks may exist
    - ~when = "destroy"~ takes care of the tear down step
+* notes from reading the terraform 11 docs
+** Load order and semantics
+   - tf loads all files in a directory in alphabetical order
+   - only files ending in =.tf= or =.tf.json= are loaded; all others are ignored
+     - mixing formats works
+   - [[https://www.terraform.io/docs/configuration-0-11/override.html][override files]] are the exception; they are loaded in alpha order after normal files
+   - the configuration in normal files is /appended/ together, not merged
+     - by contrast, overrides do a merge
+     - this means that name space collisions in normal files is an error
+       - not so in overrides
+   - the order of variables, resources etc defined within the configuratio does not matter
+     - tf configs are declarative, so references to other resources and variables do not depend on the order
+       they are defined.
+
+** Config syntax
+   - single line comments: # this is a comment
+   - multi-line comments: =/* */= pairs
+
+   - values are assigned with ~key = value~
+     - whitespace is not significant
+     - the value can be any primitive:
+       - string, number, boolean
+       - or a list or a map
+   - strings are in double-quotes
+   - string interpolation uses =${}= syntax.
+     - [[https://www.terraform.io/docs/configuration-0-11/interpolation.html][full interpolation syntax documentation]]
+
+   - here docs are supported, like the shell ~<<EOF~ down to line by itself with the end marker
+     - the lines of the string and the end marker must not be indented
+
+   - numbers are base 10 unless prefixed by ~0x~ for hex
+
+   - booleans: =true=, =false=
+
+   - lists of primitives can be make with square brackets:
+     - eg: =["every", "good", "boy"]=
+
+   - maps can be made with curly braces and colons:
+     - eg: ={ "banana": "yellow", grape: "purple"}=
+     - quotes may be omitted on keys, unless the key starts with a numeral
+     - commas are required between key/value pairs for single line maps
+     - a newline is sufficient between key/value pairs in multi-line maps
+
+   Additionally, the syntax supports hierarchies of sections, such as /resource/ and /variable/.  These
+   sections are similar to maps, but visually look better.  Eg, these are nearly equivalent:
+
+   #+BEGIN_SRC terraform
+     variable "ami" {
+       description = "the AMI to use"
+     }
+   #+END_SRC
+
+   is equal to:
+
+   #+BEGIN_SRC terraform
+     variable = [{
+       "ami": {
+       description = "the AMI to use"
+       }
+     }]
+   #+END_SRC
+
+   but reads a lot easier.  Prefer the first form in general to build up lists of declarations.
+** Interpolation syntax
+
+   the [[https://www.terraform.io/docs/configuration-0-11/interpolation.html][interpolation syntax]] is powerful and allows you to reference:
+   - variables
+   - attributes of resources
+   - call functions
+   - etc
+
+   You can perform simple math in interpolations, allowing you to write expressions, eg:
+   - ~${count.index + 1}~
+   You can also use [[https://www.terraform.io/docs/configuration-0-11/interpolation.html#conditionals][conditionals]]
+
+   Escape interpolation by doubleing the =$=: ~$${foo}~ will be rendered as ~${foo}~
+
+*** [[https://www.terraform.io/docs/configuration-0-11/interpolation.html#available-variables][Available variables]]
+
+    - user string variables :: Use the ~var.~ prefix followed by the variable name.
+      - eg: ~${var.foo}~
+
+    - user map variables :: syntax: ~var.<MAP>["KEY"]~
+      - eg: ~${var.amis["us-east-1"]~
+
+    - user list variables :: syntax: ~${var.<LIST>}~
+      - eg: =${var.subnets}=
+      - you can also index into lists: =${var.subnets[idx]}=
+
+    - attributes of your own resource :: syntax: ~self.<ATTRIBUTE>~
+      - eg =${self.private_ip}=
+      - NB: the ~self.<ATTRIBUTE>~ syntax is only allowed and valid within provisioners
+
+    - attributes of other resources :: syntax: =<TYPE>.<NAME>.<ATTRIBUTE>=
+      - eg =${aws_instance.web.id}= interpolates the ID attribute from an aws_instance named =web=
+      - if the resource has a =count= attribute set, you can access individual attributes with a zero-based index
+        - =${aws_instance.web.0.id}=
+      - you can also use the splat syntax to get a list of all of the attributes
+        - =${aws_instance.web.*.id}=
+
+    - attributes of a data source :: syntax: =data.<TYPE>.<NAME>.<ATTRIBUTE>=
+      - =${data.aws_ami.ubuntu.id}= will interpolate the =id= attribute from the =aws_ami= data source named =ubuntu=
+      - if there is a count, the index and splat syntax work here as well
+
+    - outputs from a module :: syntax: =module.<NAME>.<OUTPUT>=
+      - =${module.foo.bar}= the bar output from the foo module
+
+    - count info :: syntax: =count.index=
+      - =count.index= will interpolate the current index in a multi-count resource.
+      - for more on count, see [[https://www.terraform.io/docs/configuration-0-11/resources.html][resource configuration]]
+
+    - path info :: syntax: =path.<TYPE>=
+      - type can be:
+        - cwd :: interpolate the current working directory
+        - module :: the path to the current module
+        - root :: the path of the root module
+      - in general, you probably want =path.module=
+
+    - terraform meta info :: syntax: =terraform.<FIELD>=
+      - contains metadata about the currently executing terraform run
+      - FIELD can currently only be =env= to reference the currently active [[https://www.terraform.io/docs/state/environments.html][state envionment]]
+
+*** [[https://www.terraform.io/docs/configuration-0-11/interpolation.html#conditionals][Conditionals]]
+
+    interpolations can contain conditionals, eg
+    #+BEGIN_SRC terraform
+      resource "aws_instance" "web" {
+        subnet = "${var.env == "production" ? var.prod_subnet : var.dev_subnet}"
+      }
+    #+END_SRC
+
+    this is the well-known ternary operator:
+    #+begin_example
+      condition ? true_val : false_val
+    #+end_example
+
+    the condition can be any valid interpolation syntax, eg:
+    - variable access
+    - function call
+    - another conditional
+
+    the true_val and false_val can also be any valid intepolation syntax
+
+    the types returned by true and false expressions must be the same
+
+    the supported operators are:
+    - equality :: ~==~ and ~!=~
+    - numerical comparison :: ~<~, ~<=~, ~>=~, ~>~
+    - boolean logic :: ~&&~, ~||~ and unary ~!~
+
+    a common case for conditionals is to enable / disable a resource by setting its count:
+    #+BEGIN_SRC terraform
+      resource "aws_instance" "vpn" {
+        count = "${var.something ? 1 : 0}"
+      }
+    #+END_SRC
+    the net effect here is to create or not the vpn.
+
+*** [[https://www.terraform.io/docs/configuration-0-11/interpolation.html#built-in-functions][Built in Functions]]
+
+    tf ships with built-in functions.  fucntions are called via the syntax:
+
+    #+BEGIN_SRC terraform
+      name(arg1, arg2, ...)
+
+      # for example to read a file:
+      ${file("path.txt")}
+    #+END_SRC
+
+    to escape the double quote characters in a literal variable value, use ~\\\~ in tf
+    #+BEGIN_SRC terraform
+      "value": "I \\\"love\\\" escaped quotes"
+    #+END_SRC
+
+**** supported built-ins
+
+     don't forget about =terraform console= to test out these built-ins.
+     that being said, it appears the console is only good for testing interpolations:
+     #+begin_example
+       > help
+       The Terraform console allows you to experiment with Terraform interpolations.
+       You may access resources in the state (if you have one) just as you would
+       from a configuration. For example: "aws_instance.foo.id" would evaluate
+       to the ID of "aws_instance.foo" if it exists in your state.
+
+       Type in the interpolation to test and hit <enter> to see the result.
+
+       To exit the console, type "exit" and hit <enter>, or use Control-C or
+       Control-D.
+     #+end_example
+
+     - abs(float) :: absolute value
+     - basname(path) :: returns the last element of the path
+     - base64decode(string) / base64encode(string) :: to/from base64 encoding
+     - base64gzip(string) :: compress with gzip, then base64 encode it.  This is the preferred idiom to
+          provide binary data to terraform where utf8 strings are required.
+     - base64sha256(string) :: return the base64 encoded representation of raw SHA-256 sum of the given
+          string.  Not the same as base64encode(sha256(string)).
+     - base64sha512(string) :: same as ↑
+     - bcrypt(password, cost) :: returns the blowfish encrypted hash at the given cost, default 10.
+     - ceil(float) :: return the least integer value >= to the float value
+     - chomp(string) :: removes trailing newline(s) from the string
+     - chunklist(list, size) :: returns the list items chunked by size. eg
+       #+begin_src terraform
+         chunklist(aws_subnet.foo.*.id, 1)
+         # produces:
+         [["id1"], ["id2"], ["id3"]]
+       #+end_src
+       and
+       #+BEGIN_SRC terraform
+         chunklist(var.list_of_strings, 2)
+         # returns
+         [["id1", "id2"]], [["id3", "id4"], ["id5"]]
+       #+END_SRC
+     - cidrhost(iprange, hostnum) :: takes an ip address range in CIDR notation and creates an IP address
+          with the given host number.  If host number < 0, start from the end of the range. eg:
+          #+BEGIN_SRC terraform
+            cidrhost("10.0.0.0/8", 2)
+            # returns
+            "10.0.0.2"
+            # and
+            cidrhost("10.0.0.0/8", -2)
+            # returns
+            "10.255.255.254"
+          #+END_SRC
+     - cidrnetmask(iprange) :: Takes an IP address range in CIDR notation and returns the address-formatted
+          subnet mask format that some systems expect for IPv4 interfaces.
+          #+BEGIN_SRC terraform
+            cidrnetmask("10.0.0.0/8")
+            # returns
+            255.0.0.0
+          #+END_SRC
+     - cidrsubnet(iprange, newbits, netnum) :: Takes an IP address range in CIDR notation (like 10.0.0.0/8)
+          and extends its prefix to include an additional subnet.
+          #+BEGIN_SRC terraform
+            cidrsubnet("10.0.0.0/8", 8, 2)
+            # returns
+            10.2.0.0/16
+
+            cidrsubnet("2607:f298:6051:516c::/64", 8, 2)
+            # returns
+            2607:f298:6051:516c:200::/72
+          #+END_SRC
+     - coalesce(string1, string2, ...) :: return the first non-empty value from the args
+     - coalescelist(list1, list2, ...) :: ↑ for lists
+     - compact(list) :: removes empty string elements from a list.
+       - this can be useful in some cases, eg, when passing joined lists as module variables or when parsing
+         module outputs.
+     - concat(list1, list2) :: Combines two or more lists into a single list.
+     - contains(list, element) :: returns boolean
+     - dirname(path) :: analog of basename
+     - distinct(list) :: removes dups from a list.  This is only valid for flat lists.
+     - element(list, index) :: index into list.  If index > size of list, will wrap using modulo.
+       - lists are indexed starting at zero
+       #+BEGIN_SRC terraform
+         > "${element(list("a", "b", "c", "d"), 0)}"
+         a
+
+         # negative indices don't work
+         > "${element(list("a", "b", "c", "d"), -1)}"
+         element: invalid number for index, got -1 in:
+
+         ${"${element(list("a", "b", "c", "d"), -1)}"}
+       #+END_SRC
+     - file(path) :: reads the contents of a file into a string.
+       - variables in this file are /not/ interpolated.
+       - the file contents are read as-is.
+       - =path= is interpreted relative to the working directory
+       - [[https://www.terraform.io/docs/configuration-0-11/interpolation.html#path-information][path variables]] can be used to reference paths relative to other base locations.
+       - eg, when using =file()= from inside a module, you genrally want to make the path relative to the module base, eg:
+         #+BEGIN_SRC terraform
+           file("${path.module}/file")
+         #+END_SRC
+     - floor(float) :: floor
+     - flatten(list_of_lists) :: flattens lists of lists down a flat list of primitive values, eliminating
+          any nested lists recursively.
+     - format(format, args) :: [[https://golang.org/pkg/fmt/][sprintf style]] string formatting.
+     - formatlist(format, args) :: format each element of the list and return a list
+       - non-list args are repeated for each element of the list
+       - if there are multiple lists in the args, they must agree in length
+     - indent(numspaces, string) :: Prepends the specified number of spaces to all but the first line of the
+          given multi-line string.
+     - index(list, elem) :: find the index of this elem in the list.
+       - apparently, it is an error if the elem is not in the list
+         #+BEGIN_SRC terraform
+           > "${index(list("a", "b", "c", "d"), "z")}"
+           index: Could not find 'z' in '[{Variable (TypeString): a} {Variable (TypeString): b} {Variable (TypeString): c} {Variable (TypeString): d}]' in:
+
+           ${"${index(list("a", "b", "c", "d"), "z")}"}
+         #+END_SRC
+     - join(delim, list) :: join
+       #+BEGIN_SRC terraform
+         > "${join("|", list("a", "b", "c", "d"))}"
+         a|b|c|d
+       #+END_SRC
+     - jsonencode(value) :: returns a json-encoded representation of the given value, which can contain
+          arbitrarily nested lists and maps.  NB. if the value is a string, it will be placed in quotes.
+       #+BEGIN_SRC terraform
+         > "${jsonencode("every good boy does fine")}"
+         "every good boy does fine"
+         # and
+         > "${jsonencode(join("|", list("a", "b", "c", "d")))}"
+         "a|b|c|d"
+         > "${length(jsonencode(join("|", list("a", "b", "c", "d"))))}"
+         9
+         # contrast this with
+         > "${join("|", list("a", "b", "c", "d"))}"
+         a|b|c|d
+         > "${length(join("|", list("a", "b", "c", "d")))}"
+         7
+       #+END_SRC
+     - keys(map) :: returns a lexicographically sorted list of the keys in a map
+     - length(list) :: returns the number of members in a list or map, or chars in a string
+       #+BEGIN_SRC terraform
+         > "${length(map("banana", "yellow", "apple", "red", "grape", "purple"))}"
+         3
+       #+END_SRC
+     - list(items, ...) :: a way to write list literals.  =${list()}= returns an empty list.
+     - log(x, base) :: logarithm
+     - lookup(map, key, [default]) :: perform a dynamic lookup into a map variable.
+       - map should be another variable
+       - this function only works on flat maps
+       - if key does not exist in map, the lookup will fail, unless default is specified.
+       #+BEGIN_SRC terraform
+         > "${lookup(map("banana", "yellow", "apple", "red", "grape", "purple"), "orange", "black")}"
+         black
+         > "${lookup(map("banana", "yellow", "apple", "red", "grape", "purple"), "grape", "black")}"
+         purple
+       #+END_SRC
+     - lower(string) :: return a copy of the string with all unicode letters mapped to their lower case
+       #+BEGIN_SRC terraform
+         > "${lower("ÉĞĞ")}"
+         éğğ
+       #+END_SRC
+     - map(key, value, ...) :: a way to write map literals
+       - every odd arg must be a string
+       - every value must be of the same type
+       - duplicate keys are not allowed
+       #+BEGIN_SRC terraform
+         > "${map("banana", "yellow", "apple", "red", "grape", "purple")}"
+         {
+           "apple" = "red"
+           "banana" = "yellow"
+           "grape" = "purple"
+         }
+       #+END_SRC
+
+       this fails
+       #+BEGIN_SRC terraform
+         ${map("banana", "yellow", "host", map("fqdn", "foo.example.com", "ipaddr", "127.0.0.1"))}
+       #+END_SRC
+       as the map values are not all the same type.
+       #+begin_src terraform
+         > "${map("banana", "yellow", "host", map("fqdn", "foo.example.com", "ipaddr", "127.0.0.1"))}"
+         map: all map values must have the same type, got type string then type map in:
+
+         ${"${map("banana", "yellow", "host", map("fqdn", "foo.example.com", "ipaddr", "127.0.0.1"))}"}
+       #+end_src
+     - matchkeys(values, keys, searchset) :: for two lists /values/ and /keys/ of the same length, returns
+          all elements from values where the corresponding element from keys exists in searchset.  So in
+          effect a way to filter a list of values to a subset.
+
+          No match will result in an empty list.
+
+          the order of the returned values is preserved.
+     - max(float1, float2) :: maximum
+     - merge(map1, map2) :: returns the union of 2 or more maps.
+       - the maps are consumed in the order provided, and last write wins for duplicate keys.
+       #+BEGIN_SRC terraform
+         > "${merge(map("banana", "yellow", "apple", "red", "grape", "purple"), map("fqdn", "foo.example.com", "ipaddr", "127.0.0.1"))}"
+         {
+           "apple" = "red"
+           "banana" = "yellow"
+           "fqdn" = "foo.example.com"
+           "grape" = "purple"
+           "ipaddr" = "127.0.0.1"
+         }
+       #+END_SRC
+     - min(float1, float2) :: minimum
+     - md5(string) :: returns a conventional hexadecimal representation of the MD5 hash of the string
+     - pathexpand(string) :: expand =~= to the home dir
+     - pow(x, y) :: raise x to the power of y
+     - replace(string, search, replace) :: search and replace.
+       - all instances are replaced.
+       - if search is wrapped in forward slashes, it is treated as a regex.
+         - if regex, replace can reference subcaptures using =$n=
+         - regexes follow the [[https://github.com/google/re2/wiki/Syntax][re2 regex syntax]]
+       #+BEGIN_SRC terraform
+         > "${replace(join("|", list("a", "b", "c", "d")), "|", "-")}"
+         a-b-c-d
+       #+END_SRC
+     - rsadecrypt(string, key) :: decrypts string using RSA.
+     - sha1(string) :: returns a conventional hex representation of the SHA-1 hash of the string
+     - sha256(string) :: ↑
+     - sha512(string) :: ↑
+     - signum(integer) :: return -1 for negative numbers, 0 for 0 and 1 for positive numbers.
+       - idiom: useful when you need to set a value for the first resource and a different value for the rest of the resources
+     - slice(list, from, to) :: return the portion of the list from (inclusive) to (exclusive)
+       #+BEGIN_SRC terraform
+         > "${slice(list("a", "b", "c", "d"), 1, 3)}"
+         [
+           "b",
+           "c",
+         ]
+       #+END_SRC
+     - sort(list) :: may only be used with a list of strings.
+     - split(delim, string) :: analog of join
+       - this is useful for pushing lists through module outputs since they currently only support string
+         values.
+       - depending on the use, the string this is being performed within may need to be wrapped in brackets
+         to indicate that the output is actually a list.
+         - eg
+           #+BEGIN_SRC terraform
+             a_resource = [ "${split(",", var.CSV_STRING)}" ]
+           #+END_SRC
+       #+BEGIN_SRC terraform
+         > "${split("|", join("|", list("a", "b", "c", "d")))}"
+         [
+           "a",
+           "b",
+           "c",
+           "d",
+         ]
+       #+END_SRC
+     - substr(string, offset, length) :: extracts a substring
+       - negative offsets read from the end of the string
+       - length == -1 means "until the end"
+       #+BEGIN_SRC terraform
+         > "${substr(join("|", list("a", "b", "c", "d")), -3, -1)}"
+         c|d
+       #+END_SRC
+     - timestamp ::return an RFC-3339 format time.
+       - of course, will change every time, so must be used with the =ignorechanges= lifecycle attribute.
+       #+BEGIN_SRC terraform
+         > "${timestamp()}"
+         2020-06-10T01:14:10Z
+       #+END_SRC
+     - timeadd(time, duration) :: add the duration to the timestamp as strings
+       #+BEGIN_SRC terraform
+         > "${timeadd(timestamp(), "20m")}"
+         2020-06-10T01:37:02Z
+       #+END_SRC
+     - title(string) :: title case a string
+     - transpose(map) :: swaps the keys and list values in a map of lists of strings.
+       - so this flat key/value maps fails:
+         #+BEGIN_SRC terraform
+           > "${transpose(map("banana", "yellow", "apple", "red", "grape", "purple"))}"
+           transpose: transpose requires a map of lists of strings in:
+
+           ${"${transpose(map("banana", "yellow", "apple", "red", "grape", "purple"))}"}
+         #+END_SRC
+       #+BEGIN_SRC terraform
+         > "${transpose(map("a", list("1", "2"), "b", list("2", "3")))}"
+         {
+           "1" = [
+             "a",
+           ]
+           "2" = [
+             "a",
+             "b",
+           ]
+           "3" = [
+             "b",
+           ]
+         }
+       #+END_SRC
+     - trimspace(string) :: returns a copy of the string with leading and trailing whitespace removed
+     - upper(string) :: work on unicode
+       #+BEGIN_SRC terraform
+         > "${upper("éğğ")}"
+         ÉĞĞ
+       #+END_SRC
+     - urlencode(string) :: returns a URL-safe copy of the string
+     - uuid() :: returns a random UUID string.
+       #+BEGIN_SRC terraform
+         > "${uuid()}"
+         23e79b56-446d-671f-069e-b156e7ba1177
+       #+END_SRC
+     - values(map) :: returns a list of the values of a map in the order returned by the keys function.
+       - only works on flat maps
+       #+BEGIN_SRC terraform
+         > "${values(map("banana", "yellow", "apple", "red", "grape", "purple"))}"
+         [
+           "red",
+           "yellow",
+           "purple",
+         ]
+       #+END_SRC
+     - zipmap(list, list) :: create a map from a list of keys and a list of values.
+       - keys must all be of type string
+       - the length of the lists must be the same
+       #+BEGIN_SRC terraform
+         > "${zipmap(list("banana", "apple", "grape"), list("yellow", "red", "purple"))}"
+         {
+           "apple" = "red"
+           "banana" = "yellow"
+           "grape" = "purple"
+         }
+       #+END_SRC
+
+     the hashing functions:
+     - base64sha256, 512
+     - md5
+     - sha1, 256, 512
+     all have variants with =file= prefix, which interpret their first arguemnt as a path to a file.
+     this is the preferred idiom for terraform 12 and later.
+
+*** [[https://www.terraform.io/docs/configuration-0-11/interpolation.html#templates][Templates]]
+
+    Long strings can be managed using templates.  Templates are [[https://www.terraform.io/docs/configuration-0-11/data-sources.html][data-sources]] defined by a string with
+    interpolation tokens (usually loaded from a file) and some variables to use during interpolation.
+
+    They have a computed /rendered/ attribute containing the result.
+
+    for more details, see [[https://www.terraform.io/docs/providers/template/d/file.html][template_file docs]]
+
+**** [[https://www.terraform.io/docs/providers/template/d/file.html][template_file docs]]
+     it looks like this functionality changes in terraform 0.12 to [[https://www.terraform.io/docs/configuration/functions/templatefile.html][templatefile]] with expanded functionality.
+
+     variables to be expanded must all be primitives: no maps, no lists
+** Modules
+   - a module is a container for a group of resources.
+   - every terraform configuration has at least one module, known as its /root/ module, which is defined to
+     be the set of .tf files in the project directory.
+
+   - more docs in the [[https://www.terraform.io/docs/modules/index.html][dedicated Modules section]]
+
+*** calling a child module
+
+    to call a module means to include the contents of the module into the configuration with specific values
+    for its [[https://www.terraform.io/docs/configuration-0-11/variables.html][input variables.]]
+
+    modules are called using module blocks
+    #+BEGIN_SRC terraform
+      module "servers" {
+        source = "./app-cluster"
+
+        servers = 5
+      }
+    #+END_SRC
+
+    - all modules require a =source= arg
+      - either a path to a local definition
+      - or a remote module source that TF should download and use.
+      - must be a string literal -- no interpolation allowed here.
+      - more: [[https://www.terraform.io/docs/modules/sources.html][Module Sources]]
+
+    - module calls with the same source can be repeated to define variants
+
+    - after adding, removing or modifying module blocks, you must re-run =tf init=
+      - so module references are resolved then, not at plan time.
+      - by default, =tf init= will not upgrade to the latest version of a module
+        - use the =-upgrade= option to instead upgrade to the newest available version
