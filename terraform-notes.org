@@ -447,6 +447,13 @@
      - formatlist(format, args) :: format each element of the list and return a list
        - non-list args are repeated for each element of the list
        - if there are multiple lists in the args, they must agree in length
+         #+BEGIN_SRC terraform
+           > "${formatlist("cluster.[%s].num_nodes", list("0", "1"))}"
+           [
+             "cluster.[0].num_nodes",
+             "cluster.[1].num_nodes",
+           ]
+         #+END_SRC
      - indent(numspaces, string) :: Prepends the specified number of spaces to all but the first line of the
           given multi-line string.
      - index(list, elem) :: find the index of this elem in the list.
@@ -597,6 +604,15 @@
        #+BEGIN_SRC terraform
          > "${substr(join("|", list("a", "b", "c", "d")), -3, -1)}"
          c|d
+       #+END_SRC
+       so -1, -1 gives the last character of a string:
+       #+BEGIN_SRC terraform
+         > var.zones
+         [
+           "us-east4-b",
+         ]
+         > "${substr(var.zones[0], -1, -1)}"
+         b
        #+END_SRC
      - timestamp ::return an RFC-3339 format time.
        - of course, will change every time, so must be used with the =ignorechanges= lifecycle attribute.
