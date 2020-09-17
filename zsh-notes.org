@@ -67,6 +67,26 @@
    #+RESULTS:
    : the last 3 elements of A: boy|does|fine
 
+** process substitution
+   - zshexpn talk about ~=(...)~ as a means to create seekable temp files from process output.
+     - Process Substitution in the manual
+     - here is a [[https://hamberg.no/erlend/posts/2013-11-24-temp-file-process-substitution.html][guy talking about it]]
+   - a simple example that shows the result is a temp file, not a named pipe as <(...) produces.
+     #+begin_example
+       ❯ file =(echo foo)
+       /tmp/zshufwD26: ASCII text
+     #+end_example
+
+   - here is an example that diffs the filtered and sorted csv's:
+     #+begin_example
+       ❯ git diff --exit-code \
+         =(awk -F , '/^[A-Z]/ && NR > 1 {print $1}' nasdaq-100-index-09-07-2020.csv | sort) \
+         =(awk -F , '/^[A-Z]/ && NR > 1 {print $1}' nasdaq-100-index-09-16-2020.csv | sort)
+
+       ❯ echo $?
+       0
+     #+end_example
+
 * Interesting snippets / idioms
 
   use of ? expansion (which of the many expansions is this?) to produce newline separated path:
