@@ -1,0 +1,327 @@
+* Notes on maintaining multiple postgres versions in parallel
+** DONE install postgres 10.x for sql analytics work and load the sql analytics data
+   - State "DONE"       from "TODO"       [2020-10-09 Fri 14:42]
+  <2020-10-07 Wed>
+  I am following [[https://medium.com/keeping-code/running-multiple-postgresql-versions-simultaneously-on-macos-linux-90b3d7e08ffd][this advice]]
+  which leads to this guys work: https://github.com/petere/homebrew-postgresql
+
+  so the model here is to install multiple sql versions, and use the Debian toolset to choose among them.
+
+*** uninstall the native homebrew installed postgresql
+    I don't have the server running on macos, so it seems unlikely there are any data there I care about.
+    ❯ brew uninstall postgresql
+
+*** tap the github repo with the guys builds
+
+    #+begin_example
+      ❯ brew tap petere/postgresql
+    #+end_example
+
+*** install pg 10, postgresql-common
+
+    #+begin_example
+      ❯ brew install petere/postgresql/postgresql@10
+    #+end_example
+
+    so I re-installed it as I did not have an initdb available.
+    #+begin_example
+      ❯ brew reinstall petere/postgresql/postgresql@10
+      ==> Downloading https://ftp.postgresql.org/pub/source/v10.14/postgresql-10.14.tar.bz2
+      Already downloaded: /Users/jeff/Library/Caches/Homebrew/downloads/7bddb488a763589dbf0913702aa399c71d4bb963a6fcb1182c6531fe7627e31c--postgresql-10.14.tar.bz2
+      ==> Reinstalling petere/postgresql/postgresql@10
+      ==> ./configure --prefix=/usr/local/Cellar/postgresql@10/10.14 --enable-dtrace --enable-nls --with-bonjour --with-gssapi --with-icu --with-l
+      ==> make install-world
+      ==> Caveats
+      To use this PostgreSQL installation, do one or more of the following:
+
+      - Call all programs explicitly with /usr/local/opt/postgresql@10/bin/...
+      - Add /usr/local/opt/postgresql@10/bin to your PATH
+      - brew link -f postgresql@10
+      - Install the postgresql-common package
+
+      To access the man pages, do one or more of the following:
+      - Refer to them by their full path, like `man /usr/local/opt/postgresql@10/share/man/man1/psql.1`
+      - Add /usr/local/opt/postgresql@10/share/man to your MANPATH
+      - brew link -f postgresql@10
+
+      postgresql@10 is keg-only, which means it was not symlinked into /usr/local,
+      because this is an alternate version of another formula.
+
+      If you need to have postgresql@10 first in your PATH run:
+        echo 'export PATH="/usr/local/opt/postgresql@10/bin:$PATH"' >> ~/.zshrc
+
+      For compilers to find postgresql@10 you may need to set:
+        export LDFLAGS="-L/usr/local/opt/postgresql@10/lib"
+        export CPPFLAGS="-I/usr/local/opt/postgresql@10/include"
+
+      For pkg-config to find postgresql@10 you may need to set:
+        export PKG_CONFIG_PATH="/usr/local/opt/postgresql@10/lib/pkgconfig"
+
+      ==> Summary
+      🍺  /usr/local/Cellar/postgresql@10/10.14: 3,367 files, 52.5MB, built in 2 minutes 36 seconds
+    #+end_example
+
+    install the common toolset:
+    #+begin_example
+      ❯ brew install petere/postgresql/postgresql-common
+    #+end_example
+    (re)install after uninstall results
+    #+begin_example
+      ❯ brew install petere/postgresql/postgresql-common
+      Updating Homebrew...
+      ==> Auto-updated Homebrew!
+      Updated 1 tap (homebrew/core).
+      ==> Updated Formulae
+      Updated 2 formulae.
+
+      ==> Installing postgresql-common from petere/postgresql
+      ==> Downloading https://github.com/petere/postgresql-common/archive/189+hb1.tar.gz
+      Already downloaded: /Users/jeff/Library/Caches/Homebrew/downloads/7c9b422afc0b342244ea3613acdb3b2f23aeb9f1b61dfc939f425de0f25daed0--postgresql-common-189-hb1.tar.gz
+      ==> make install GSED=sed prefix=/usr/local/Cellar/postgresql-common/189+hb1 sysconfdir=/usr/local/etc localstatedir=/usr/local/var
+      🍺  /usr/local/Cellar/postgresql-common/189+hb1: 45 files, 244.1KB, built in 3 seconds
+    #+end_example
+
+*** figure out how to use postgresql-common
+    - the readme for the package is at ~/usr/local/opt/postgresql-common/README.Debian~
+
+    - the postgres wrapper scripts will manage ssl if desired/configured.
+
+    a key concept is mapping a postgresql db user to a cluster.  From man pg_wrapper:
+    #+begin_quote
+      It determines the configured cluster and database for the user and calls the appropriate version of
+      the desired program to connect to that cluster and database
+    #+end_quote
+
+    So I guess the expected pattern here is that there is a 1:1 mapping from a postgresql user to a db instance?
+
+    To bootstrap, one has to have a running postgresql instance to create the user.
+
+
+**** file system structure of the package
+
+     #+BEGIN_SRC shell :dir /usr/local/opt/postgresql-common :results output
+       tree .
+     #+END_SRC
+
+     #+RESULTS:
+     #+begin_example
+     .
+     ├── INSTALL_RECEIPT.json
+     ├── README.Debian
+     ├── TODO
+     ├── architecture.html
+     ├── bin
+     │   ├── clusterdb -> pg_wrapper
+     │   ├── createdb -> pg_wrapper
+     │   ├── createlang -> pg_wrapper
+     │   ├── createuser -> pg_wrapper
+     │   ├── dropdb -> pg_wrapper
+     │   ├── droplang -> pg_wrapper
+     │   ├── dropuser -> pg_wrapper
+     │   ├── pg_basebackup -> pg_wrapper
+     │   ├── pg_config
+     │   ├── pg_conftool
+     │   ├── pg_createcluster
+     │   ├── pg_ctlcluster
+     │   ├── pg_dropcluster
+     │   ├── pg_dump -> pg_wrapper
+     │   ├── pg_dumpall -> pg_wrapper
+     │   ├── pg_isready -> pg_wrapper
+     │   ├── pg_lsclusters
+     │   ├── pg_receivexlog -> pg_wrapper
+     │   ├── pg_restore -> pg_wrapper
+     │   ├── pg_updatedicts
+     │   ├── pg_upgradecluster
+     │   ├── pg_wrapper
+     │   ├── pgbench -> pg_wrapper
+     │   ├── psql -> pg_wrapper
+     │   ├── reindexdb -> pg_wrapper
+     │   ├── vacuumdb -> pg_wrapper
+     │   └── vacuumlo -> pg_wrapper
+     └── share
+         ├── man
+         │   ├── man1
+         │   │   ├── pg_conftool.1
+         │   │   ├── pg_createcluster.1
+         │   │   ├── pg_ctlcluster.1
+         │   │   ├── pg_dropcluster.1
+         │   │   ├── pg_lsclusters.1
+         │   │   ├── pg_renamecluster.1
+         │   │   ├── pg_upgradecluster.1
+         │   │   └── pg_wrapper.1
+         │   ├── man5
+         │   │   ├── postgresqlrc.5
+         │   │   └── user_clusters.5
+         │   ├── man7
+         │   │   └── postgresql-common.7 -> ../man1/pg_wrapper.1
+         │   └── man8
+         │       └── pg_updatedicts.8
+         └── postgresql-common
+             └── PgCommon.pm
+
+     8 directories, 44 files
+     #+end_example
+*** get postgres 10 running, then upgrade the data to the current postgres 12
+    - use the pg_wrapper scripts
+**** DONE get the data running in 10.x
+     - State "DONE"       from              [2020-10-09 Fri 14:19]
+***** create the cluster, a superuser, and a regular user
+     - what version of 10.x is installed now?  A: 10.14
+       #+begin_example
+         ❯ brew info postgresql@10
+         postgresql@10: stable 10.14 (bottled) [keg-only]
+       #+end_example
+
+     - so create a cluster for the sqlda data set
+       - call it sqlda
+
+     #+begin_example
+       ❯ pg_createcluster --user=jeff 10 sqlda
+       Creating new PostgreSQL cluster 10/sqlda ...
+       /usr/local/opt/postgresql@10/bin/initdb -D /usr/local/var/lib/postgresql/10/sqlda --auth-local peer --auth-host md5
+       The files belonging to this database system will be owned by user "jeff".
+       This user must also own the server process.
+
+       The database cluster will be initialized with locale "en_US.UTF-8".
+       The default database encoding has accordingly been set to "UTF8".
+       The default text search configuration will be set to "english".
+
+       Data page checksums are disabled.
+
+       fixing permissions on existing directory /usr/local/var/lib/postgresql/10/sqlda ... ok
+       creating subdirectories ... ok
+       selecting default max_connections ... 100
+       selecting default shared_buffers ... 128MB
+       selecting default timezone ... America/Los_Angeles
+       selecting dynamic shared memory implementation ... posix
+       creating configuration files ... ok
+       running bootstrap script ... ok
+       performing post-bootstrap initialization ... ok
+       syncing data to disk ... ok
+
+       Success. You can now start the database server using:
+
+           '/usr/local/opt/postgresql@10/bin/pg_ctl' -D /usr/local/var/lib/postgresql/10/sqlda -l logfile start
+
+       Ver Cluster Port Status Owner Data directory                         Log file
+       10  sqlda   5432 down   jeff  /usr/local/var/lib/postgresql/10/sqlda /usr/local/var/log/postgresql/postgresql-10-sqlda.log
+     #+end_example
+
+     then start it
+     #+begin_example
+       ❯ pg_ctlcluster 10 sqlda start
+     #+end_example
+
+     so it is now running:
+     #+begin_example
+       ❯ pg_lsclusters
+       Ver Cluster Port Status Owner Data directory                         Log file
+       10  sqlda   5432 online jeff  /usr/local/var/lib/postgresql/10/sqlda /usr/local/var/log/postgresql/postgresql-10-sqlda.log
+     #+end_example
+
+     then create the db:
+     #+begin_example
+       ❯ createdb 10 sqlda
+     #+end_example
+
+     ~psql -l~ is helpful to see existing databases; this one shows I created something named =10=:
+     #+begin_example
+       ❯ psql -l
+                                     List of databases
+          Name    | Owner | Encoding |   Collate   |    Ctype    | Access privileges
+       -----------+-------+----------+-------------+-------------+-------------------
+        10        | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+        postgres  | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+        template0 | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/jeff          +
+                  |       |          |             |             | jeff=CTc/jeff
+        template1 | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/jeff          +
+                  |       |          |             |             | jeff=CTc/jeff
+       (4 rows)
+     #+end_example
+
+     make a non-privileged user:
+     #+begin_example
+       ❯ createuser --no-createdb --no-createrole --no-superuser sqlda
+     #+end_example
+
+     as a privileged user (jeff in this case), make a db assigning the non-privileged user sqlda as owner:
+     #+begin_example
+       ❯ createdb --owner sqlda sqlda
+     #+end_example
+
+     and now we see that db/owner:
+     #+begin_example
+       ❯ psql -l
+                                     List of databases
+          Name    | Owner | Encoding |   Collate   |    Ctype    | Access privileges
+       -----------+-------+----------+-------------+-------------+-------------------
+        postgres  | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+        sqlda     | sqlda | UTF8     | en_US.UTF-8 | en_US.UTF-8 |
+        template0 | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/jeff          +
+                  |       |          |             |             | jeff=CTc/jeff
+        template1 | jeff  | UTF8     | en_US.UTF-8 | en_US.UTF-8 | =c/jeff          +
+                  |       |          |             |             | jeff=CTc/jeff
+       (4 rows)
+     #+end_example
+
+     and then I set a password for the sqlda user:
+     #+begin_example
+       sqlda=# alter user sqlda with password 'dasql';
+     #+end_example
+
+     but I can't access the db as the non-privileged user:
+     #+begin_example
+       ❯ psql --user=sqlda sqlda
+       psql: FATAL:  Peer authentication failed for user "sqlda"
+     #+end_example
+
+     so then I added a row to the per-version? config file that defines that for local (on host) connnections, no authn is required
+     ~/usr/local/etc/postgresql/10/sqlda/pg_hba.conf~
+     #+begin_example
+       # jwm added
+       local	sqlda           sqlda                                   trust
+     #+end_example
+
+     with this, I can make local connections:
+     #+begin_example
+       ❯ psql --user=sqlda sqlda
+       psql (10.14 (Homebrew petere/postgresql))
+       Type "help" for help.
+
+       sqlda=>
+     #+end_example
+
+     and, as expected from the default configuration which specified md5 for localhost connections, I can get in that way as well:
+
+     #+begin_example
+       ❯ psql --user=sqlda --password --host=127.0.0.01 sqlda
+       Password for user sqlda:
+       psql (10.14 (Homebrew petere/postgresql))
+       Type "help" for help.
+
+       sqlda=>
+     #+end_example
+
+     so now I have user access configured in a relatively sane way, and I understand the mechanisms well
+     enough to predict how they will behave.
+***** DONE load the data
+      - State "DONE"       from              [2020-10-09 Fri 14:19]
+      that seems to have worked; although there are many errors reported.
+      mostly to do with other users/roles, like rdsadmin and sqladmin
+      #+begin_example
+        ❯ psql --user=jeff sqlda < data.dump
+      #+end_example
+
+      and now we have data in postgres 10:
+      #+begin_example
+        ❯ psql --user=sqlda sqlda
+        psql (10.14 (Homebrew petere/postgresql))
+        Type "help" for help.
+
+        sqlda=> select count(*) from customers;
+         count
+        --------
+         100000
+        (1 row)
+      #+end_example
+**** upgrade the DB to 12?
