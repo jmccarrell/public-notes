@@ -549,6 +549,7 @@
     : vry gd by ds fn
 
 ** associative arrays
+*** mapping perl idioms onto zsh idioms
    Here is a table mapping hash idioms from perl onto zsh.
 
    From the [[http://zsh.sourceforge.net/Guide/zshguide05.html#l122][zsh user guide: Using associative arrays]].
@@ -563,6 +564,7 @@
    | unset %hash;                   | unset hash                               |
    | if (exists $hash{key}) { ... } | if (( ${+hash[key]} )); then ... fi      |
 
+*** sort keys of an assoicative array
    According to [[https://unix.stackexchange.com/a/52065/138583][this stackexchange]], zsh can sort the keys of an associative array.
 
    declare the data to operate on:
@@ -629,6 +631,78 @@
    : every X Evan
    : does X Darren
    : boy X Ben
+
+*** use associative arrays to filter duplicates
+
+    declare the data to operate on
+    #+name: list-with-dups
+    #+BEGIN_SRC text
+      declare -a dups=(smash foo bar baz bar foo grep hack foo smash falco)
+      readonly dups
+    #+END_SRC
+
+**** don't preserve the order of the input; random output order
+     #+BEGIN_SRC shell :results output :noweb yes
+       <<list-with-dups>>
+
+       declare -A no_dups;
+       for d in $dups; do
+           no_dups[$d]=t
+       done
+
+       print -l ${(k)no_dups}
+     #+END_SRC
+
+     #+RESULTS:
+     : foo
+     : hack
+     : baz
+     : grep
+     : falco
+     : smash
+     : bar
+
+**** preserve input order
+     #+BEGIN_SRC shell :results output :noweb yes
+       <<list-with-dups>>
+
+       declare -A seen;
+       for d in $dups; do
+           if (( ${+seen[$d]} )); then
+               continue
+           fi
+           seen[$d]=t
+           print $d
+       done
+     #+END_SRC
+
+     #+RESULTS:
+     : smash
+     : foo
+     : bar
+     : baz
+     : grep
+     : hack
+     : falco
+
+*** use unique arrays to filter duplicates
+    which also preserves input order
+
+    #+BEGIN_SRC shell :results output :noweb yes
+      <<list-with-dups>>
+
+      declare -a -U unique_array=($dups)
+      print -l $unique_array
+    #+END_SRC
+
+    #+RESULTS:
+    : smash
+    : foo
+    : bar
+    : baz
+    : grep
+    : hack
+    : falco
 
 ** anonymous functions
    See also: section [[info:zsh#Functions][9.2 Anonymous Functions]] in the zsh manual
