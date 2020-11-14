@@ -79,3 +79,6 @@ The summary:
     - this just deletes the branch pointer from the remote.  it will typically live
       until a garbage collection run, so it is often easy to recover if accidentally
       deleted.
+
+## Michael Parkin recommended git practice site
+   I can't remember if this is what I did, but https://github.com/eficode-academy/git-katas
